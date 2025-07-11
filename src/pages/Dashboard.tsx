@@ -151,87 +151,91 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid sm:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <Button
             onClick={() => navigate("/recording")}
             variant="cardiac"
             size="lg"
-            className="h-16 gap-3"
+            className="h-16 gap-3 text-base"
           >
             <Mic className="h-6 w-6" />
-            Record Heart Sounds
+            <span>Record Heart Sounds</span>
           </Button>
           <Button
             onClick={() => navigate("/camera-monitoring")}
             variant="medical"
             size="lg"
-            className="h-16 gap-3"
+            className="h-16 gap-3 text-base"
           >
             <Camera className="h-6 w-6" />
-            Camera BPM Monitor
+            <span>Camera BPM Monitor</span>
           </Button>
         </div>
 
         {/* Health Metrics Overview */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
           <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-success/5">
-            <CardContent className="p-6">
+            <CardContent className="p-4 lg:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Average Heart Rate</p>
-                  <p className="text-2xl font-bold text-foreground">{avgHeartRate} BPM</p>
+                  <p className="text-sm text-muted-foreground mb-1">Avg Heart Rate</p>
+                  <p className="text-xl lg:text-2xl font-bold text-foreground">{avgHeartRate}</p>
+                  <p className="text-xs text-muted-foreground">BPM</p>
                 </div>
-                <div className="p-3 rounded-full bg-success/10">
-                  <Heart className="h-6 w-6 text-success" />
+                <div className="p-2 lg:p-3 rounded-full bg-success/10">
+                  <Heart className="h-5 w-5 lg:h-6 lg:w-6 text-success" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-primary/5">
-            <CardContent className="p-6">
+            <CardContent className="p-4 lg:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Risk Level</p>
                   <div className="flex items-center gap-2">
-                    <p className="text-2xl font-bold text-foreground">{avgRisk}%</p>
-                    <Badge variant="outline" className={`text-${riskInfo.color}`}>
+                    <p className="text-xl lg:text-2xl font-bold text-foreground">{avgRisk}%</p>
+                    <Badge 
+                      variant="outline" 
+                      className={`text-${riskInfo.color} text-xs`}
+                    >
                       {riskInfo.level}
                     </Badge>
                   </div>
                 </div>
-                <div className="p-3 rounded-full bg-primary/10">
-                  <Shield className="h-6 w-6 text-primary" />
+                <div className="p-2 lg:p-3 rounded-full bg-primary/10">
+                  <Shield className="h-5 w-5 lg:h-6 lg:w-6 text-primary" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-warning/5">
-            <CardContent className="p-6">
+            <CardContent className="p-4 lg:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Stress Level</p>
-                  <p className="text-2xl font-bold text-foreground">
+                  <p className="text-lg lg:text-2xl font-bold text-foreground">
                     {recentRecording?.stress_level || "N/A"}
                   </p>
                 </div>
-                <div className="p-3 rounded-full bg-warning/10">
-                  <Brain className="h-6 w-6 text-warning" />
+                <div className="p-2 lg:p-3 rounded-full bg-warning/10">
+                  <Brain className="h-5 w-5 lg:h-6 lg:w-6 text-warning" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-accent/5">
-            <CardContent className="p-6">
+            <CardContent className="p-4 lg:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Total Recordings</p>
-                  <p className="text-2xl font-bold text-foreground">{recordings.length}</p>
+                  <p className="text-sm text-muted-foreground mb-1">Total Records</p>
+                  <p className="text-xl lg:text-2xl font-bold text-foreground">{recordings.length}</p>
                 </div>
-                <div className="p-3 rounded-full bg-accent/50">
-                  <Activity className="h-6 w-6 text-accent-foreground" />
+                <div className="p-2 lg:p-3 rounded-full bg-accent/50">
+                  <Activity className="h-5 w-5 lg:h-6 lg:w-6 text-accent-foreground" />
                 </div>
               </div>
             </CardContent>
@@ -240,24 +244,26 @@ const Dashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview" className="gap-2">
-              <Heart className="h-4 w-4" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="recordings" className="gap-2">
-              <Activity className="h-4 w-4" />
-              Recordings
-            </TabsTrigger>
-            <TabsTrigger value="analysis" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              7-Day Analysis
-            </TabsTrigger>
-            <TabsTrigger value="chatbot" className="gap-2">
-              <MessageCircle className="h-4 w-4" />
-              Health Assistant
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 min-w-fit">
+              <TabsTrigger value="overview" className="gap-2 text-sm">
+                <Heart className="h-4 w-4" />
+                <span className="hidden sm:inline">Overview</span>
+              </TabsTrigger>
+              <TabsTrigger value="recordings" className="gap-2 text-sm">
+                <Activity className="h-4 w-4" />
+                <span className="hidden sm:inline">Recordings</span>
+              </TabsTrigger>
+              <TabsTrigger value="analysis" className="gap-2 text-sm">
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden sm:inline">7-Day Analysis</span>
+              </TabsTrigger>
+              <TabsTrigger value="chatbot" className="gap-2 text-sm">
+                <MessageCircle className="h-4 w-4" />
+                <span className="hidden sm:inline">Health Assistant</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
@@ -291,25 +297,25 @@ const Dashboard = () => {
                     {recordings.slice(0, 3).map((recording) => (
                       <div
                         key={recording.id}
-                        className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors gap-4"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="p-2 rounded-full bg-primary/10">
+                          <div className="p-2 rounded-full bg-primary/10 shrink-0">
                             <Calendar className="h-4 w-4 text-primary" />
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <p className="font-medium text-foreground">
                               {new Date(recording.recorded_at).toLocaleDateString()}
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground truncate">
                               {recording.condition} • {recording.heart_rate_avg} BPM
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 sm:shrink-0">
                           <Badge 
                             variant="outline" 
-                            className={`text-${getRiskLevel(recording.attack_risk).color}`}
+                            className={`text-${getRiskLevel(recording.attack_risk).color} text-xs`}
                           >
                             {recording.attack_risk}% Risk
                           </Badge>
@@ -317,9 +323,10 @@ const Dashboard = () => {
                             onClick={() => handleViewRecording(recording)}
                             variant="outline"
                             size="sm"
+                            className="shrink-0"
                           >
                             <Eye className="h-4 w-4 mr-1" />
-                            View
+                            <span className="hidden sm:inline">View</span>
                           </Button>
                         </div>
                       </div>

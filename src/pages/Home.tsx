@@ -66,38 +66,38 @@ const Home = () => {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/10" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className="space-y-8 order-2 lg:order-1">
               <div className="space-y-4">
                 <Badge variant="secondary" className="text-primary">
                   AI-Powered Heart Monitoring
                 </Badge>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground leading-tight">
                   Cardia Sentinel
                   <span className="text-primary block">AI Platform</span>
                 </h1>
-                <p className="text-xl text-muted-foreground leading-relaxed">
+                <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed">
                   Advanced heart attack risk prediction using AI analysis of heart sounds, 
                   camera-based BPM monitoring, and stress level assessment through HRV analysis.
                 </p>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/auth">
-                  <Button variant="cardiac" size="lg" className="gap-2 h-14 px-8">
+                <Link to="/auth" className="flex-1 sm:flex-none">
+                  <Button variant="cardiac" size="lg" className="gap-2 h-12 lg:h-14 px-6 lg:px-8 w-full sm:w-auto">
                     Start Monitoring
                     <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
-                <Link to="/recording">
-                  <Button variant="medical" size="lg" className="gap-2 h-14 px-8">
+                <Link to="/recording" className="flex-1 sm:flex-none">
+                  <Button variant="medical" size="lg" className="gap-2 h-12 lg:h-14 px-6 lg:px-8 w-full sm:w-auto">
                     <Heart className="h-5 w-5" />
                     Try Recording
                   </Button>
                 </Link>
               </div>
               
-              <div className="flex items-center gap-8 text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Shield className="h-4 w-4 text-success" />
                   HIPAA Compliant
@@ -113,7 +113,7 @@ const Home = () => {
               </div>
             </div>
             
-            <div className="relative">
+            <div className="relative order-1 lg:order-2">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary-glow/20 rounded-3xl blur-3xl" />
               <img 
                 src={heroImage} 
@@ -138,23 +138,23 @@ const Home = () => {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {features.map((feature, index) => (
               <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-6">
+                <CardContent className="p-4 lg:p-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                      <div className="p-2 lg:p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
                         {feature.icon}
                       </div>
                       <Badge variant="outline" className="text-xs">
                         {feature.status}
                       </Badge>
                     </div>
-                    <h3 className="text-xl font-semibold text-foreground">
+                    <h3 className="text-lg lg:text-xl font-semibold text-foreground">
                       {feature.title}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-sm lg:text-base text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
                   </div>
@@ -178,27 +178,27 @@ const Home = () => {
           </div>
           
           <Card className="border-0 shadow-2xl bg-gradient-to-br from-card to-secondary/30">
-            <CardContent className="p-8 sm:p-12">
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="relative">
+            <CardContent className="p-6 sm:p-8 lg:p-12">
+              <div className="flex flex-col md:flex-row items-center gap-6 lg:gap-8">
+                <div className="relative shrink-0">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-glow rounded-full blur-xl opacity-30" />
                   <img 
                     src={developerPhoto}
                     alt="Developer Profile"
-                    className="relative w-32 h-32 rounded-full object-cover ring-4 ring-primary/20"
+                    className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-full object-cover ring-4 ring-primary/20"
                   />
                 </div>
                 
                 <div className="flex-1 text-center md:text-left space-y-4">
-                  <h3 className="text-2xl font-bold text-foreground">
+                  <h3 className="text-xl lg:text-2xl font-bold text-foreground">
                     Healthcare Innovation Developer
                   </h3>
-                  <p className="text-muted-foreground text-lg leading-relaxed">
+                  <p className="text-muted-foreground text-base lg:text-lg leading-relaxed">
                     Dedicated to revolutionizing healthcare through AI-powered solutions. 
                     Combining expertise in machine learning, mobile health technology, and 
                     cardiovascular medicine to create tools that save lives.
                   </p>
-                  <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4">
+                  <div className="flex flex-wrap justify-center md:justify-start gap-3 lg:gap-4 pt-4">
                     <Button variant="outline" size="sm" className="gap-2">
                       <Github className="h-4 w-4" />
                       GitHub
@@ -220,17 +220,17 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary/10 via-primary-glow/10 to-primary/10">
+      <section className="py-16 lg:py-20 bg-gradient-to-r from-primary/10 via-primary-glow/10 to-primary/10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="space-y-6">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
               Start Monitoring Your Heart Health Today
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-lg lg:text-xl text-muted-foreground">
               Join thousands of users who trust Cardia Sentinel AI for their cardiovascular health monitoring.
             </p>
             <Link to="/auth">
-              <Button variant="cardiac" size="lg" className="gap-2 h-14 px-8">
+              <Button variant="cardiac" size="lg" className="gap-2 h-12 lg:h-14 px-6 lg:px-8">
                 Get Started Free
                 <Heart className="h-5 w-5" />
               </Button>

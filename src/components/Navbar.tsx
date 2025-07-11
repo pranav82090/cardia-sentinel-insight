@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, X, User, LogOut } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Heart, Menu, X, User, LogOut, Home, Activity, Mic } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Navbar = () => {
@@ -42,131 +44,70 @@ const Navbar = () => {
       });
       navigate("/");
     }
+    setIsOpen(false);
   };
 
+  const navigationItems = [
+    { to: "/", label: "Home", icon: Home },
+    ...(user ? [
+      { to: "/dashboard", label: "Dashboard", icon: Activity },
+      { to: "/recording", label: "Recording", icon: Mic },
+    ] : [])
+  ];
+
   return (
-    <nav className="bg-card/80 backdrop-blur-sm border-b border-border sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gradient-to-r from-primary to-primary-glow">
-              <Heart className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground">
-              Cardia Sentinel AI
-            </span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            <Link 
-              to="/" 
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Home
-            </Link>
-            {user && (
-              <>
-                <Link 
-                  to="/dashboard" 
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <Link 
-                  to="/recording" 
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Recording
-                </Link>
-              </>
-            )}
-            
-            {user ? (
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground">
-                  {user.email}
-                </span>
-                <Button
-                  onClick={handleSignOut}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign Out
-                </Button>
+    <>
+      <nav className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-r from-primary to-primary-glow shadow-lg">
+                <Heart className="h-6 w-6 text-primary-foreground" />
               </div>
-            ) : (
-              <Link to="/auth">
-                <Button variant="cardiac" size="sm" className="gap-2">
-                  <User className="h-4 w-4" />
-                  Sign In
-                </Button>
-              </Link>
-            )}
-          </div>
+              <span className="text-xl font-bold text-foreground hidden sm:block">
+                Cardia Sentinel AI
+              </span>
+              <span className="text-lg font-bold text-foreground sm:hidden">
+                Cardia
+              </span>
+            </Link>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(!isOpen)}
-            >
-              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden py-4 border-t border-border">
-            <div className="flex flex-col gap-4">
-              <Link 
-                to="/" 
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Home
-              </Link>
-              {user && (
-                <>
-                  <Link 
-                    to="/dashboard" 
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link 
-                    to="/recording" 
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Recording
-                  </Link>
-                </>
-              )}
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center gap-6">
+              {navigationItems.map((item) => (
+                <Link 
+                  key={item.to}
+                  to={item.to} 
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-secondary/50"
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              ))}
               
               {user ? (
-                <div className="flex flex-col gap-3 pt-2 border-t border-border">
-                  <span className="text-sm text-muted-foreground">
-                    {user.email}
-                  </span>
+                <div className="flex items-center gap-3 pl-3 border-l border-border">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                      {user.email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden xl:block">
+                    <p className="text-sm font-medium text-foreground">{user.email}</p>
+                  </div>
                   <Button
                     onClick={handleSignOut}
                     variant="outline"
                     size="sm"
-                    className="gap-2 self-start"
+                    className="gap-2"
                   >
                     <LogOut className="h-4 w-4" />
                     Sign Out
                   </Button>
                 </div>
               ) : (
-                <Link to="/auth" onClick={() => setIsOpen(false)}>
+                <Link to="/auth">
                   <Button variant="cardiac" size="sm" className="gap-2">
                     <User className="h-4 w-4" />
                     Sign In
@@ -174,10 +115,93 @@ const Navbar = () => {
                 </Link>
               )}
             </div>
+
+            {/* Mobile Menu Button */}
+            <div className="lg:hidden">
+              <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative"
+                  >
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-80 sm:w-96">
+                  <div className="flex flex-col h-full">
+                    {/* Header */}
+                    <div className="flex items-center gap-3 pb-6 border-b border-border">
+                      <div className="p-2 rounded-lg bg-gradient-to-r from-primary to-primary-glow">
+                        <Heart className="h-6 w-6 text-primary-foreground" />
+                      </div>
+                      <span className="text-lg font-bold text-foreground">
+                        Cardia Sentinel AI
+                      </span>
+                    </div>
+
+                    {/* User Info */}
+                    {user && (
+                      <div className="py-6 border-b border-border">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-12 w-12">
+                            <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+                              {user.email?.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-foreground">Welcome back!</p>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Navigation Items */}
+                    <div className="flex-1 py-6">
+                      <nav className="space-y-2">
+                        {navigationItems.map((item) => (
+                          <Link
+                            key={item.to}
+                            to={item.to}
+                            onClick={() => setIsOpen(false)}
+                            className="flex items-center gap-3 p-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                          >
+                            <item.icon className="h-5 w-5" />
+                            <span className="font-medium">{item.label}</span>
+                          </Link>
+                        ))}
+                      </nav>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="pt-6 border-t border-border space-y-3">
+                      {user ? (
+                        <Button
+                          onClick={handleSignOut}
+                          variant="outline"
+                          className="w-full gap-2"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Sign Out
+                        </Button>
+                      ) : (
+                        <Link to="/auth" onClick={() => setIsOpen(false)}>
+                          <Button variant="cardiac" className="w-full gap-2">
+                            <User className="h-4 w-4" />
+                            Sign In
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
-        )}
-      </div>
-    </nav>
+        </div>
+      </nav>
+    </>
   );
 };
 

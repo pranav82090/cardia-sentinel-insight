@@ -444,9 +444,9 @@ const Recording = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        <div className="mb-6 lg:mb-8">
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
             Heart Health Recording
           </h1>
           <p className="text-muted-foreground">
@@ -454,7 +454,7 @@ const Recording = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Audio Recording Section */}
           <Card className="border-0 shadow-lg">
             <CardHeader>
@@ -644,30 +644,30 @@ const Recording = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                 <div className="text-center p-4 rounded-lg bg-success/10">
-                  <Heart className="h-8 w-8 text-success mx-auto mb-2" />
+                  <Heart className="h-6 lg:h-8 w-6 lg:w-8 text-success mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">Heart Rate (BPM)</p>
-                  <p className="text-2xl font-bold text-foreground">{analysisResults.heart_rate_avg}</p>
+                  <p className="text-xl lg:text-2xl font-bold text-foreground">{analysisResults.heart_rate_avg}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Range: {analysisResults.heart_rate_min}-{analysisResults.heart_rate_max}
                   </p>
                 </div>
                 <div className="text-center p-4 rounded-lg bg-primary/10">
-                  <Activity className="h-8 w-8 text-primary mx-auto mb-2" />
+                  <Activity className="h-6 lg:h-8 w-6 lg:w-8 text-primary mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">Condition</p>
-                  <p className="text-lg font-semibold text-foreground">{analysisResults.condition}</p>
+                  <p className="text-base lg:text-lg font-semibold text-foreground">{analysisResults.condition}</p>
                   <Badge 
                     variant={analysisResults.condition === "Normal" ? "default" : "outline"}
-                    className="mt-2"
+                    className="mt-2 text-xs"
                   >
                     96% Accurate
                   </Badge>
                 </div>
                 <div className="text-center p-4 rounded-lg bg-warning/10">
-                  <Brain className="h-8 w-8 text-warning mx-auto mb-2" />
+                  <Brain className="h-6 lg:h-8 w-6 lg:w-8 text-warning mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">Stress Level</p>
-                  <p className="text-lg font-semibold text-foreground">{analysisResults.stress_level}</p>
+                  <p className="text-base lg:text-lg font-semibold text-foreground">{analysisResults.stress_level}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Score: {analysisResults.stress_score}/100
                   </p>
@@ -679,12 +679,12 @@ const Recording = () => {
                   >
                     RISK ASSESSMENT
                   </Badge>
-                  <p className="text-2xl font-bold text-critical">{analysisResults.attack_risk}%</p>
+                  <p className="text-xl lg:text-2xl font-bold text-critical">{analysisResults.attack_risk}%</p>
                   <p className="text-xs text-muted-foreground mt-1">Attack Risk</p>
                 </div>
               </div>
               
-              <div className="mt-6 flex gap-3 justify-center">
+              <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
                   onClick={() => {
                     setAudioBlob(null);
@@ -693,7 +693,7 @@ const Recording = () => {
                     setRecordingTime(0);
                   }}
                   variant="outline"
-                  className="gap-2"
+                  className="gap-2 w-full sm:w-auto"
                 >
                   <Mic className="h-4 w-4" />
                   New Recording
@@ -701,7 +701,7 @@ const Recording = () => {
                 <Button
                   onClick={() => navigate("/dashboard")}
                   variant="cardiac"
-                  className="gap-2"
+                  className="gap-2 w-full sm:w-auto"
                 >
                   <User className="h-4 w-4" />
                   View Dashboard
