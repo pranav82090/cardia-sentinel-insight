@@ -69,7 +69,7 @@ const Navbar = () => {
                 Cardia Sentinel AI
               </span>
               <span className="text-lg font-bold text-foreground sm:hidden">
-                Cardia
+                Cardia Sentinel AI
               </span>
             </Link>
 
