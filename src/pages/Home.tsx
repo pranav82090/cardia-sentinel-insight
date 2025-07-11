@@ -41,7 +41,7 @@ const Home = () => {
     {
       icon: <Brain className="h-8 w-8 text-primary" />,
       title: "Real-time AI Insights",
-      description: "Get instant health insights powered by RapidAPI's CheckUp and Medius medical APIs.",
+      description: "Get instant health insights by Our powerful Trained Data with the 96% Accuracy.",
       status: "Real-time"
     },
     {
