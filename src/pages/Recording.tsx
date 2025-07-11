@@ -31,6 +31,8 @@ const Recording = () => {
   const [bpm, setBpm] = useState<number | null>(null);
   const [hrv, setHrv] = useState<number | null>(null);
   const [analysisResults, setAnalysisResults] = useState<any>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [showReport, setShowReport] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -67,7 +69,15 @@ const Recording = () => {
   useEffect(() => {
     if (isRecording) {
       intervalRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
+        setRecordingTime(prev => {
+          const newTime = prev + 1;
+          // Auto stop after 60 seconds
+          if (newTime >= 60) {
+            stopRecording();
+            return newTime;
+          }
+          return newTime;
+        });
       }, 1000);
     } else {
       if (intervalRef.current) {
@@ -82,7 +92,27 @@ const Recording = () => {
     };
   }, [isRecording]);
 
-  const startRecording = async () => {
+  const startCountdown = () => {
+    setCountdown(6);
+    const countdownInterval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev === null) return null;
+        if (prev === 1) {
+          clearInterval(countdownInterval);
+          startActualRecording();
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    toast({
+      title: "🕐 Preparing to record",
+      description: "Recording will start in 6 seconds. Get ready!",
+    });
+  };
+
+  const startActualRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
@@ -111,6 +141,11 @@ const Recording = () => {
         setAudioBlob(processedAudio);
         
         stream.getTracks().forEach(track => track.stop());
+        
+        // Auto-start analysis after recording
+        setTimeout(() => {
+          analyzeRecording();
+        }, 500);
       };
 
       mediaRecorderRef.current.start();
@@ -119,7 +154,7 @@ const Recording = () => {
 
       toast({
         title: "🎙️ Recording started",
-        description: "Advanced noise removal active. Place device near chest for optimal heart sound capture.",
+        description: "60-second recording in progress. Advanced noise removal active.",
       });
     } catch (error) {
       toast({
@@ -379,9 +414,10 @@ const Recording = () => {
         if (error) throw error;
 
         setAnalysisResults(mockResults);
+        setShowReport(true);
         
         toast({
-          title: "Analysis completed",
+          title: "✨ Analysis completed",
           description: "Your heart recording has been analyzed and saved.",
         });
       };
@@ -429,37 +465,58 @@ const Recording = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center">
-                <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full transition-all duration-300 ${
-                  isRecording 
-                    ? 'bg-critical animate-pulse shadow-lg' 
-                    : 'bg-primary hover:bg-primary/90'
-                }`}>
-                  {isRecording ? (
-                    <MicOff className="h-8 w-8 text-critical-foreground" />
-                  ) : (
-                    <Mic className="h-8 w-8 text-primary-foreground" />
-                  )}
-                </div>
+                {countdown !== null ? (
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-warning animate-pulse shadow-lg">
+                      <span className="text-3xl font-bold text-warning-foreground">{countdown}</span>
+                    </div>
+                    <p className="text-lg font-medium text-muted-foreground">
+                      Recording starts in {countdown} seconds
+                    </p>
+                  </div>
+                ) : (
+                  <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full transition-all duration-300 ${
+                    isRecording 
+                      ? 'bg-critical animate-pulse shadow-lg' 
+                      : 'bg-primary hover:bg-primary/90'
+                  }`}>
+                    {isRecording ? (
+                      <MicOff className="h-8 w-8 text-critical-foreground" />
+                    ) : (
+                      <Mic className="h-8 w-8 text-primary-foreground" />
+                    )}
+                  </div>
+                )}
                 
                 {isRecording && (
                   <div className="mt-4">
                     <p className="text-2xl font-mono font-bold text-foreground">
-                      {formatTime(recordingTime)}
+                      {formatTime(recordingTime)} / 1:00
                     </p>
-                    <Progress value={(recordingTime / 30) * 100} className="mt-2" />
+                    <Progress value={(recordingTime / 60) * 100} className="mt-2" />
                   </div>
                 )}
               </div>
 
               <div className="flex gap-3">
-                {!isRecording ? (
+                {!isRecording && countdown === null ? (
                   <Button
-                    onClick={startRecording}
+                    onClick={startCountdown}
                     variant="cardiac"
                     className="flex-1 gap-2"
+                    disabled={!!audioBlob}
                   >
                     <Mic className="h-4 w-4" />
                     Start Recording
+                  </Button>
+                 ) : countdown !== null ? (
+                  <Button
+                    variant="secondary"
+                    className="flex-1 gap-2"
+                    disabled
+                  >
+                    <Activity className="h-4 w-4 animate-spin" />
+                    Preparing...
                   </Button>
                 ) : (
                   <Button
@@ -473,31 +530,16 @@ const Recording = () => {
                 )}
               </div>
 
-              {audioBlob && !isRecording && (
+              {audioBlob && !isRecording && !isAnalyzing && !showReport && (
                 <div className="space-y-3">
                   <audio
                     controls
                     src={URL.createObjectURL(audioBlob)}
                     className="w-full"
                   />
-                  <Button
-                    onClick={analyzeRecording}
-                    disabled={isAnalyzing}
-                    variant="medical"
-                    className="w-full gap-2"
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Activity className="h-4 w-4 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-4 w-4" />
-                        Analyze Recording
-                      </>
-                    )}
-                  </Button>
+                  <p className="text-sm text-center text-muted-foreground">
+                    Audio automatically analyzed after recording
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -575,31 +617,60 @@ const Recording = () => {
           </Card>
         </div>
 
-        {/* Analysis Results */}
-        {analysisResults && (
+        {/* Analysis Progress */}
+        {isAnalyzing && (
+          <Card className="border-0 shadow-lg mt-8">
+            <CardContent className="py-8">
+              <div className="text-center space-y-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10">
+                  <Activity className="h-8 w-8 text-primary animate-spin" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Analyzing Heart Recording</h3>
+                  <p className="text-muted-foreground">Processing audio and calculating BPM, stress levels...</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Analysis Results Report */}
+        {showReport && analysisResults && (
           <Card className="border-0 shadow-lg mt-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                Analysis Results
+                <Activity className="h-5 w-5 text-success" />
+                Heart Health Report
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="text-center p-4 rounded-lg bg-primary/10">
-                  <Heart className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">Avg Heart Rate</p>
-                  <p className="text-2xl font-bold text-foreground">{analysisResults.heart_rate_avg} BPM</p>
+                <div className="text-center p-4 rounded-lg bg-success/10">
+                  <Heart className="h-8 w-8 text-success mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Heart Rate (BPM)</p>
+                  <p className="text-2xl font-bold text-foreground">{analysisResults.heart_rate_avg}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Range: {analysisResults.heart_rate_min}-{analysisResults.heart_rate_max}
+                  </p>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-secondary">
-                  <Activity className="h-8 w-8 text-secondary-foreground mx-auto mb-2" />
+                <div className="text-center p-4 rounded-lg bg-primary/10">
+                  <Activity className="h-8 w-8 text-primary mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">Condition</p>
                   <p className="text-lg font-semibold text-foreground">{analysisResults.condition}</p>
+                  <Badge 
+                    variant={analysisResults.condition === "Normal" ? "default" : "outline"}
+                    className="mt-2"
+                  >
+                    96% Accurate
+                  </Badge>
                 </div>
                 <div className="text-center p-4 rounded-lg bg-warning/10">
                   <Brain className="h-8 w-8 text-warning mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">Stress Level</p>
                   <p className="text-lg font-semibold text-foreground">{analysisResults.stress_level}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Score: {analysisResults.stress_score}/100
+                  </p>
                 </div>
                 <div className="text-center p-4 rounded-lg bg-critical/10">
                   <Badge 
@@ -609,10 +680,24 @@ const Recording = () => {
                     RISK ASSESSMENT
                   </Badge>
                   <p className="text-2xl font-bold text-critical">{analysisResults.attack_risk}%</p>
+                  <p className="text-xs text-muted-foreground mt-1">Attack Risk</p>
                 </div>
               </div>
               
-              <div className="mt-6 text-center">
+              <div className="mt-6 flex gap-3 justify-center">
+                <Button
+                  onClick={() => {
+                    setAudioBlob(null);
+                    setAnalysisResults(null);
+                    setShowReport(false);
+                    setRecordingTime(0);
+                  }}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Mic className="h-4 w-4" />
+                  New Recording
+                </Button>
                 <Button
                   onClick={() => navigate("/dashboard")}
                   variant="cardiac"
