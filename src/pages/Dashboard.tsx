@@ -243,24 +243,28 @@ const Dashboard = () => {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <div className="overflow-x-auto">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 min-w-fit">
-              <TabsTrigger value="overview" className="gap-2 text-sm">
-                <Heart className="h-4 w-4" />
-                <span className="hidden sm:inline">Overview</span>
+        <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
+          <div className="w-full overflow-x-auto pb-2">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 min-w-[320px] h-auto">
+              <TabsTrigger value="overview" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3">
+                <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden lg:inline">Overview</span>
+                <span className="xs:hidden sm:inline lg:hidden">Over</span>
               </TabsTrigger>
-              <TabsTrigger value="recordings" className="gap-2 text-sm">
-                <Activity className="h-4 w-4" />
-                <span className="hidden sm:inline">Recordings</span>
+              <TabsTrigger value="recordings" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3">
+                <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden lg:inline">Recordings</span>
+                <span className="xs:hidden sm:inline lg:hidden">Rec</span>
               </TabsTrigger>
-              <TabsTrigger value="analysis" className="gap-2 text-sm">
-                <BarChart3 className="h-4 w-4" />
-                <span className="hidden sm:inline">7-Day Analysis</span>
+              <TabsTrigger value="analysis" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3">
+                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden lg:inline">7-Day Analysis</span>
+                <span className="xs:hidden sm:inline lg:hidden">Analysis</span>
               </TabsTrigger>
-              <TabsTrigger value="chatbot" className="gap-2 text-sm">
-                <MessageCircle className="h-4 w-4" />
-                <span className="hidden sm:inline">Health Assistant</span>
+              <TabsTrigger value="chatbot" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3">
+                <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden lg:inline">Health Assistant</span>
+                <span className="xs:hidden sm:inline lg:hidden">Assistant</span>
               </TabsTrigger>
             </TabsList>
           </div>
