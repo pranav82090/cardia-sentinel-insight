@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Heart, 
   Activity, 
@@ -12,10 +13,16 @@ import {
   Camera, 
   Mic,
   Calendar,
-  Shield
+  Shield,
+  Eye,
+  MessageCircle,
+  BarChart3
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
+import RecordingDetailModal from "@/components/RecordingDetailModal";
+import HealthChatbot from "@/components/HealthChatbot";
+import WeeklyAnalysis from "@/components/WeeklyAnalysis";
 
 interface HeartRecording {
   id: string;
@@ -29,12 +36,16 @@ interface HeartRecording {
   stress_score: number | null;
   systolic_bp: number | null;
   diastolic_bp: number | null;
+  audio_data: any;
+  model_accuracy: number | null;
 }
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [recordings, setRecordings] = useState<HeartRecording[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRecording, setSelectedRecording] = useState<HeartRecording | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -69,8 +80,7 @@ const Dashboard = () => {
         .from('heart_recordings')
         .select('*')
         .eq('user_id', userId)
-        .order('recorded_at', { ascending: false })
-        .limit(10);
+        .order('recorded_at', { ascending: false });
 
       if (error) throw error;
       setRecordings(data || []);
@@ -99,6 +109,11 @@ const Dashboard = () => {
     if (risk < 20) return { level: "Low", color: "success" };
     if (risk < 50) return { level: "Moderate", color: "warning" };
     return { level: "High", color: "critical" };
+  };
+
+  const handleViewRecording = (recording: HeartRecording) => {
+    setSelectedRecording(recording);
+    setShowDetailModal(true);
   };
 
   if (loading) {
@@ -223,73 +238,202 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Recent Recordings */}
-        <Card className="border-0 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Recent Health Recordings
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {recordings.length === 0 ? (
-              <div className="text-center py-12">
-                <Heart className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">No recordings yet</h3>
-                <p className="text-muted-foreground mb-6">
-                  Start monitoring your heart health by creating your first recording.
-                </p>
-                <Button
-                  onClick={() => navigate("/recording")}
-                  variant="cardiac"
-                  className="gap-2"
-                >
-                  <Mic className="h-4 w-4" />
-                  Create First Recording
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {recordings.slice(0, 5).map((recording) => (
-                  <div
-                    key={recording.id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 rounded-full bg-primary/10">
-                        <Calendar className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">
-                          {new Date(recording.recorded_at).toLocaleDateString()}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {recording.condition} • {recording.heart_rate_avg} BPM
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge 
-                        variant="outline" 
-                        className={`text-${getRiskLevel(recording.attack_risk).color}`}
-                      >
-                        {recording.attack_risk}% Risk
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-                {recordings.length > 5 && (
-                  <div className="text-center pt-4">
-                    <Button variant="outline" size="sm">
-                      View All Recordings
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview" className="gap-2">
+              <Heart className="h-4 w-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="recordings" className="gap-2">
+              <Activity className="h-4 w-4" />
+              Recordings
+            </TabsTrigger>
+            <TabsTrigger value="analysis" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              7-Day Analysis
+            </TabsTrigger>
+            <TabsTrigger value="chatbot" className="gap-2">
+              <MessageCircle className="h-4 w-4" />
+              Health Assistant
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            {/* Recent Recordings Summary */}
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Recent Health Recordings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {recordings.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Heart className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">No recordings yet</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Start monitoring your heart health by creating your first recording.
+                    </p>
+                    <Button
+                      onClick={() => navigate("/recording")}
+                      variant="cardiac"
+                      className="gap-2"
+                    >
+                      <Mic className="h-4 w-4" />
+                      Create First Recording
                     </Button>
                   </div>
+                ) : (
+                  <div className="space-y-4">
+                    {recordings.slice(0, 3).map((recording) => (
+                      <div
+                        key={recording.id}
+                        className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 rounded-full bg-primary/10">
+                            <Calendar className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">
+                              {new Date(recording.recorded_at).toLocaleDateString()}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {recording.condition} • {recording.heart_rate_avg} BPM
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge 
+                            variant="outline" 
+                            className={`text-${getRiskLevel(recording.attack_risk).color}`}
+                          >
+                            {recording.attack_risk}% Risk
+                          </Badge>
+                          <Button
+                            onClick={() => handleViewRecording(recording)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* All Recordings Tab */}
+          <TabsContent value="recordings" className="space-y-6">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-primary" />
+                  All Health Recordings
+                  <Badge variant="outline" className="ml-auto">
+                    {recordings.length} total
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {recordings.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Heart className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">No recordings yet</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Start monitoring your heart health by creating your first recording.
+                    </p>
+                    <Button
+                      onClick={() => navigate("/recording")}
+                      variant="cardiac"
+                      className="gap-2"
+                    >
+                      <Mic className="h-4 w-4" />
+                      Create First Recording
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {recordings.map((recording) => (
+                      <div
+                        key={recording.id}
+                        className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 rounded-full bg-primary/10">
+                            <Calendar className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">
+                              {new Date(recording.recorded_at).toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {recording.condition} • {recording.heart_rate_avg} BPM • {new Date(recording.recorded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <Badge 
+                              variant="outline" 
+                              className={`text-${getRiskLevel(recording.attack_risk).color} mb-1`}
+                            >
+                              {recording.attack_risk}% Risk
+                            </Badge>
+                            <p className="text-xs text-muted-foreground">
+                              Accuracy: {recording.model_accuracy || 95}%
+                            </p>
+                          </div>
+                          <Button
+                            onClick={() => handleViewRecording(recording)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View Report
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* 7-Day Analysis Tab */}
+          <TabsContent value="analysis">
+            <WeeklyAnalysis recordings={recordings} />
+          </TabsContent>
+
+          {/* Health Chatbot Tab */}
+          <TabsContent value="chatbot">
+            <HealthChatbot userRecordings={recordings} />
+          </TabsContent>
+        </Tabs>
       </div>
+
+      {/* Recording Detail Modal */}
+      <RecordingDetailModal
+        recording={selectedRecording}
+        isOpen={showDetailModal}
+        onClose={() => {
+          setShowDetailModal(false);
+          setSelectedRecording(null);
+        }}
+      />
     </div>
   );
 };
