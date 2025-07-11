@@ -128,6 +128,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      reset_user_account: {
+        Args: { user_email: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
