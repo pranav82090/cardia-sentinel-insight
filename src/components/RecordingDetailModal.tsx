@@ -310,26 +310,26 @@ const RecordingDetailModal = ({ recording, isOpen, onClose }: RecordingDetailMod
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-background via-background to-primary/5">
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-2xl md:max-w-4xl lg:max-w-5xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-background via-background to-primary/5">
         <DialogHeader className="pb-2">
-          <DialogTitle className="flex items-center gap-3 text-2xl">
-            <div className="p-3 rounded-full bg-gradient-to-br from-primary to-primary/70 shadow-lg">
-              <Heart className="h-6 w-6 text-primary-foreground" />
+          <DialogTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-3 text-xl sm:text-2xl">
+            <div className="p-2 sm:p-3 rounded-full bg-gradient-to-br from-primary to-primary/70 shadow-lg shrink-0">
+              <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
             </div>
-            <div>
-              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <div className="min-w-0 flex-1">
+              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent block truncate">
                 Health Report Analysis
               </span>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex flex-wrap items-center gap-2 mt-1">
                 <Badge 
                   variant="outline" 
-                  className="text-success border-success shadow-sm"
+                  className="text-success border-success shadow-sm text-xs"
                 >
                   <Sparkles className="h-3 w-3 mr-1" />
                   96% Accuracy
                 </Badge>
                 {isTraining && (
-                  <Badge variant="outline" className="text-primary border-primary animate-pulse">
+                  <Badge variant="outline" className="text-primary border-primary animate-pulse text-xs">
                     <Zap className="h-3 w-3 mr-1" />
                     Training AI...
                   </Badge>
@@ -339,23 +339,23 @@ const RecordingDetailModal = ({ recording, isOpen, onClose }: RecordingDetailMod
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 p-1">
+        <div className="space-y-4 sm:space-y-6 p-1">
           {/* Recording Info Header - Bubble Style */}
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-3xl blur-xl"></div>
-            <Card className="relative border-0 shadow-2xl bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-2xl sm:rounded-3xl blur-xl"></div>
+            <Card className="relative border-0 shadow-2xl bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-success/5"></div>
-              <CardContent className="pt-8 pb-6 relative">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/70 rounded-2xl blur-md opacity-30"></div>
-                      <div className="relative p-4 rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-xl">
-                        <Calendar className="h-8 w-8 text-primary-foreground" />
+              <CardContent className="pt-4 sm:pt-8 pb-4 sm:pb-6 relative">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                    <div className="relative shrink-0">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/70 rounded-xl sm:rounded-2xl blur-md opacity-30"></div>
+                      <div className="relative p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-xl">
+                        <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
                       </div>
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-foreground mb-1">
+                    <div className="min-w-0">
+                      <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground mb-1 break-words">
                         {new Date(recording.recorded_at).toLocaleDateString('en-US', {
                           weekday: 'long',
                           year: 'numeric',
@@ -363,29 +363,27 @@ const RecordingDetailModal = ({ recording, isOpen, onClose }: RecordingDetailMod
                           day: 'numeric'
                         })}
                       </h3>
-                      <p className="text-muted-foreground flex items-center gap-2 text-lg">
-                        <Clock className="h-5 w-5" />
-                        {new Date(recording.recorded_at).toLocaleTimeString()}
+                      <p className="text-muted-foreground flex items-center gap-2 text-sm sm:text-base lg:text-lg">
+                        <Clock className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                        <span className="truncate">{new Date(recording.recorded_at).toLocaleTimeString()}</span>
                       </p>
                     </div>
                   </div>
-                  <div className="text-right space-y-2">
-                    <Badge variant="outline" className={`text-lg px-4 py-2 text-success border-success shadow-lg`}>
-                      <CheckCircle className="h-4 w-4 mr-2" />
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:text-right">
+                    <Badge variant="outline" className="text-sm sm:text-base lg:text-lg px-2 sm:px-4 py-1 sm:py-2 text-success border-success shadow-lg">
+                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                       96% Accurate
                     </Badge>
                     {currentAccuracy < 95 && !isTraining && (
-                      <div>
-                        <Button
-                          onClick={trainModel}
-                          size="sm"
-                          variant="outline"
-                          className="bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10"
-                        >
-                          <TrendingUp className="h-4 w-4 mr-2" />
-                          Improve Accuracy
-                        </Button>
-                      </div>
+                      <Button
+                        onClick={trainModel}
+                        size="sm"
+                        variant="outline"
+                        className="bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 w-full sm:w-auto"
+                      >
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        Improve Accuracy
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -395,48 +393,50 @@ const RecordingDetailModal = ({ recording, isOpen, onClose }: RecordingDetailMod
 
           {/* Audio Player - Bubble Style */}
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-secondary/20 via-accent/10 to-secondary/20 rounded-3xl blur-xl"></div>
-            <Card className="relative border-0 shadow-2xl bg-white/90 backdrop-blur-sm rounded-3xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-secondary/20 via-accent/10 to-secondary/20 rounded-2xl sm:rounded-3xl blur-xl"></div>
+            <Card className="relative border-0 shadow-2xl bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-accent/5"></div>
-              <CardHeader className="relative pb-3">
-                <CardTitle className="flex items-center gap-3 text-xl">
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-secondary to-secondary/80 shadow-lg">
-                    <Volume2 className="h-6 w-6 text-secondary-foreground" />
+              <CardHeader className="relative pb-3 p-4 sm:p-6">
+                <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-3 text-lg sm:text-xl">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-secondary to-secondary/80 shadow-lg shrink-0">
+                      <Volume2 className="h-5 w-5 sm:h-6 sm:w-6 text-secondary-foreground" />
+                    </div>
+                    <span className="bg-gradient-to-r from-secondary-foreground to-secondary-foreground/80 bg-clip-text text-transparent truncate">
+                      Heart Sound Recording
+                    </span>
                   </div>
-                  <span className="bg-gradient-to-r from-secondary-foreground to-secondary-foreground/80 bg-clip-text text-transparent">
-                    Heart Sound Recording
-                  </span>
-                  <Badge variant="outline" className="ml-auto text-xs text-success border-success">
+                  <Badge variant="outline" className="text-xs text-success border-success shrink-0">
                     <Sparkles className="h-3 w-3 mr-1" />
                     Noise Filtered
                   </Badge>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6 relative">
-                <div className="flex items-center gap-6 p-6 bg-gradient-to-r from-white/50 to-white/30 rounded-2xl backdrop-blur-sm">
-                  <div className="relative">
+              <CardContent className="space-y-4 sm:space-y-6 relative p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 sm:p-6 bg-gradient-to-r from-white/50 to-white/30 rounded-xl sm:rounded-2xl backdrop-blur-sm">
+                  <div className="relative shrink-0">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/70 rounded-full blur-lg opacity-30 animate-pulse"></div>
                     <Button
                       onClick={togglePlayPause}
                       variant="outline"
                       size="lg"
-                      className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 border-0 shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
+                      className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 border-0 shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
                     >
                       {isPlaying ? (
-                        <Pause className="h-8 w-8 text-primary-foreground" />
+                        <Pause className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
                       ) : (
-                        <Play className="h-8 w-8 text-primary-foreground ml-1" />
+                        <Play className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground ml-0.5 sm:ml-1" />
                       )}
                     </Button>
                   </div>
                   
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex-1 w-full space-y-2 sm:space-y-3">
+                    <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
                       <span className="font-medium">{formatTime(currentTime)}</span>
                       <span className="font-medium">{formatTime(duration)}</span>
                     </div>
                     <div className="relative">
-                      <Progress value={(currentTime / duration) * 100} className="h-3 bg-gradient-to-r from-primary/20 to-primary/30 rounded-full" />
+                      <Progress value={(currentTime / duration) * 100} className="h-2 sm:h-3 bg-gradient-to-r from-primary/20 to-primary/30 rounded-full" />
                       <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-primary/20 rounded-full blur-sm"></div>
                     </div>
                   </div>
@@ -478,23 +478,23 @@ const RecordingDetailModal = ({ recording, isOpen, onClose }: RecordingDetailMod
                   </span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="relative">
-                <div className="grid md:grid-cols-3 gap-6">
+              <CardContent className="relative p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {/* Heart Rate Bubble */}
                   <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-success/30 to-success/10 rounded-3xl blur-lg group-hover:blur-xl transition-all duration-300"></div>
-                    <div className="relative p-6 rounded-3xl bg-gradient-to-br from-white via-white to-success/5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                      <div className="text-center space-y-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-success/30 to-success/10 rounded-2xl sm:rounded-3xl blur-lg group-hover:blur-xl transition-all duration-300"></div>
+                    <div className="relative p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-white via-white to-success/5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                      <div className="text-center space-y-3 sm:space-y-4">
                         <div className="relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-success to-success/70 rounded-2xl blur-md opacity-20 animate-pulse"></div>
-                          <div className="relative p-3 rounded-2xl bg-gradient-to-br from-success to-success/80 shadow-lg">
-                            <Heart className="h-8 w-8 text-success-foreground mx-auto" />
+                          <div className="absolute inset-0 bg-gradient-to-br from-success to-success/70 rounded-xl sm:rounded-2xl blur-md opacity-20 animate-pulse"></div>
+                          <div className="relative p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-success to-success/80 shadow-lg">
+                            <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-success-foreground mx-auto" />
                           </div>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground mb-2 font-medium">Heart Rate</p>
-                          <p className="text-3xl font-bold text-foreground mb-2">{recording.heart_rate_avg} BPM</p>
-                          <div className="text-xs text-muted-foreground bg-success/10 rounded-full px-3 py-1 inline-block">
+                          <p className="text-xs sm:text-sm text-muted-foreground mb-2 font-medium">Heart Rate</p>
+                          <p className="text-2xl sm:text-3xl font-bold text-foreground mb-2">{recording.heart_rate_avg} BPM</p>
+                          <div className="text-xs text-muted-foreground bg-success/10 rounded-full px-2 sm:px-3 py-1 inline-block">
                             Range: {recording.heart_rate_min}-{recording.heart_rate_max} BPM
                           </div>
                         </div>
@@ -504,19 +504,19 @@ const RecordingDetailModal = ({ recording, isOpen, onClose }: RecordingDetailMod
 
                   {/* Condition Bubble */}
                   <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-primary/10 rounded-3xl blur-lg group-hover:blur-xl transition-all duration-300"></div>
-                    <div className="relative p-6 rounded-3xl bg-gradient-to-br from-white via-white to-primary/5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                      <div className="text-center space-y-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-primary/10 rounded-2xl sm:rounded-3xl blur-lg group-hover:blur-xl transition-all duration-300"></div>
+                    <div className="relative p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-white via-white to-primary/5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                      <div className="text-center space-y-3 sm:space-y-4">
                         <div className="relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/70 rounded-2xl blur-md opacity-20 animate-pulse"></div>
-                          <div className="relative p-3 rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
-                            <Shield className="h-8 w-8 text-primary-foreground mx-auto" />
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/70 rounded-xl sm:rounded-2xl blur-md opacity-20 animate-pulse"></div>
+                          <div className="relative p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
+                            <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground mx-auto" />
                           </div>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground mb-2 font-medium">Condition</p>
-                          <p className="text-xl font-semibold text-foreground mb-3">{recording.condition}</p>
-                          <Badge variant="outline" className={`text-${riskInfo.color} border-${riskInfo.color} shadow-sm px-3 py-1`}>
+                          <p className="text-xs sm:text-sm text-muted-foreground mb-2 font-medium">Condition</p>
+                          <p className="text-lg sm:text-xl font-semibold text-foreground mb-3 break-words">{recording.condition}</p>
+                          <Badge variant="outline" className={`text-${riskInfo.color} border-${riskInfo.color} shadow-sm px-2 sm:px-3 py-1 text-xs`}>
                             {riskInfo.level} Risk
                           </Badge>
                         </div>
@@ -525,23 +525,23 @@ const RecordingDetailModal = ({ recording, isOpen, onClose }: RecordingDetailMod
                   </div>
 
                   {/* Stress Level Bubble */}
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-warning/30 to-warning/10 rounded-3xl blur-lg group-hover:blur-xl transition-all duration-300"></div>
-                    <div className="relative p-6 rounded-3xl bg-gradient-to-br from-white via-white to-warning/5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                      <div className="text-center space-y-4">
+                  <div className="relative group sm:col-span-2 lg:col-span-1">
+                    <div className="absolute inset-0 bg-gradient-to-br from-warning/30 to-warning/10 rounded-2xl sm:rounded-3xl blur-lg group-hover:blur-xl transition-all duration-300"></div>
+                    <div className="relative p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-white via-white to-warning/5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                      <div className="text-center space-y-3 sm:space-y-4">
                         <div className="relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-warning to-warning/70 rounded-2xl blur-md opacity-20 animate-pulse"></div>
-                          <div className="relative p-3 rounded-2xl bg-gradient-to-br from-warning to-warning/80 shadow-lg">
-                            <Brain className="h-8 w-8 text-warning-foreground mx-auto" />
+                          <div className="absolute inset-0 bg-gradient-to-br from-warning to-warning/70 rounded-xl sm:rounded-2xl blur-md opacity-20 animate-pulse"></div>
+                          <div className="relative p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-warning to-warning/80 shadow-lg">
+                            <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-warning-foreground mx-auto" />
                           </div>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground mb-2 font-medium">Stress Level</p>
-                          <p className="text-xl font-semibold text-foreground mb-2">
+                          <p className="text-xs sm:text-sm text-muted-foreground mb-2 font-medium">Stress Level</p>
+                          <p className="text-lg sm:text-xl font-semibold text-foreground mb-2">
                             {recording.stress_level || "Normal"}
                           </p>
                           {recording.stress_score && (
-                            <div className="text-xs text-muted-foreground bg-warning/10 rounded-full px-3 py-1 inline-block">
+                            <div className="text-xs text-muted-foreground bg-warning/10 rounded-full px-2 sm:px-3 py-1 inline-block">
                               Score: {recording.stress_score}/100
                             </div>
                           )}
@@ -569,24 +569,24 @@ const RecordingDetailModal = ({ recording, isOpen, onClose }: RecordingDetailMod
                   </span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="relative">
-                <div className="flex items-center justify-between mb-6 p-6 bg-gradient-to-r from-white/60 to-white/40 rounded-2xl backdrop-blur-sm">
-                  <div className="space-y-3">
-                    <p className="text-4xl font-bold text-foreground">{recording.attack_risk}%</p>
-                    <Badge variant="outline" className={`text-${riskInfo.color} border-${riskInfo.color} shadow-lg px-4 py-2`}>
-                      <AlertTriangle className="h-4 w-4 mr-2" />
+              <CardContent className="relative p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between mb-6 p-4 sm:p-6 bg-gradient-to-r from-white/60 to-white/40 rounded-xl sm:rounded-2xl backdrop-blur-sm gap-4">
+                  <div className="space-y-2 sm:space-y-3 text-center sm:text-left">
+                    <p className="text-3xl sm:text-4xl font-bold text-foreground">{recording.attack_risk}%</p>
+                    <Badge variant="outline" className={`text-${riskInfo.color} border-${riskInfo.color} shadow-lg px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm`}>
+                      <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                       {riskInfo.level} Risk Level
                     </Badge>
                   </div>
-                  <div className="text-right space-y-3">
+                  <div className="w-full sm:w-auto text-center sm:text-right space-y-2 sm:space-y-3">
                     <div className="relative">
                       <Progress 
                         value={recording.attack_risk} 
-                        className="w-40 h-4 bg-white/50 rounded-full shadow-inner" 
+                        className="w-full sm:w-40 h-3 sm:h-4 bg-white/50 rounded-full shadow-inner" 
                       />
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full blur-sm"></div>
                     </div>
-                    <p className="text-sm text-muted-foreground font-medium">Risk Percentage</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground font-medium">Risk Percentage</p>
                   </div>
                 </div>
                 
@@ -628,15 +628,15 @@ const RecordingDetailModal = ({ recording, isOpen, onClose }: RecordingDetailMod
                     </span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="relative">
-                  <div className="text-center p-8 bg-gradient-to-r from-white/60 to-white/40 rounded-2xl backdrop-blur-sm">
+                <CardContent className="relative p-4 sm:p-6">
+                  <div className="text-center p-6 sm:p-8 bg-gradient-to-r from-white/60 to-white/40 rounded-xl sm:rounded-2xl backdrop-blur-sm">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl blur-lg"></div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/10 rounded-xl sm:rounded-2xl blur-lg"></div>
                       <div className="relative space-y-2">
-                        <p className="text-5xl font-bold text-foreground">
+                        <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground break-all">
                           {recording.systolic_bp || "--"}/{recording.diastolic_bp || "--"}
                         </p>
-                        <p className="text-lg text-muted-foreground font-medium">mmHg</p>
+                        <p className="text-base sm:text-lg text-muted-foreground font-medium">mmHg</p>
                       </div>
                     </div>
                   </div>
