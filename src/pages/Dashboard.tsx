@@ -173,69 +173,69 @@ const Dashboard = () => {
         </div>
 
         {/* Health Metrics Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
           <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-success/5">
-            <CardContent className="p-4 lg:p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Avg Heart Rate</p>
-                  <p className="text-xl lg:text-2xl font-bold text-foreground">{avgHeartRate}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Avg Heart Rate</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground truncate">{avgHeartRate}</p>
                   <p className="text-xs text-muted-foreground">BPM</p>
                 </div>
-                <div className="p-2 lg:p-3 rounded-full bg-success/10">
-                  <Heart className="h-5 w-5 lg:h-6 lg:w-6 text-success" />
+                <div className="p-2 sm:p-3 rounded-full bg-success/10 shrink-0">
+                  <Heart className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-success" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-primary/5">
-            <CardContent className="p-4 lg:p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Risk Level</p>
-                  <div className="flex items-center gap-2">
-                    <p className="text-xl lg:text-2xl font-bold text-foreground">{avgRisk}%</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Risk Level</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">{avgRisk}%</p>
                     <Badge 
                       variant="outline" 
-                      className={`text-${riskInfo.color} text-xs`}
+                      className={`text-${riskInfo.color} text-xs shrink-0`}
                     >
                       {riskInfo.level}
                     </Badge>
                   </div>
                 </div>
-                <div className="p-2 lg:p-3 rounded-full bg-primary/10">
-                  <Shield className="h-5 w-5 lg:h-6 lg:w-6 text-primary" />
+                <div className="p-2 sm:p-3 rounded-full bg-primary/10 shrink-0">
+                  <Shield className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-primary" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-warning/5">
-            <CardContent className="p-4 lg:p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Stress Level</p>
-                  <p className="text-lg lg:text-2xl font-bold text-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Stress Level</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground truncate">
                     {recentRecording?.stress_level || "N/A"}
                   </p>
                 </div>
-                <div className="p-2 lg:p-3 rounded-full bg-warning/10">
-                  <Brain className="h-5 w-5 lg:h-6 lg:w-6 text-warning" />
+                <div className="p-2 sm:p-3 rounded-full bg-warning/10 shrink-0">
+                  <Brain className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-warning" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-accent/5">
-            <CardContent className="p-4 lg:p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Total Records</p>
-                  <p className="text-xl lg:text-2xl font-bold text-foreground">{recordings.length}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Records</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">{recordings.length}</p>
                 </div>
-                <div className="p-2 lg:p-3 rounded-full bg-accent/50">
-                  <Activity className="h-5 w-5 lg:h-6 lg:w-6 text-accent-foreground" />
+                <div className="p-2 sm:p-3 rounded-full bg-accent/50 shrink-0">
+                  <Activity className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-accent-foreground" />
                 </div>
               </div>
             </CardContent>
@@ -367,18 +367,18 @@ const Dashboard = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {recordings.map((recording) => (
                       <div
                         key={recording.id}
-                        className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors gap-3 sm:gap-4"
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="p-2 rounded-full bg-primary/10">
+                        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                          <div className="p-2 rounded-full bg-primary/10 shrink-0">
                             <Calendar className="h-4 w-4 text-primary" />
                           </div>
-                          <div>
-                            <p className="font-medium text-foreground">
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-foreground text-sm sm:text-base">
                               {new Date(recording.recorded_at).toLocaleDateString('en-US', {
                                 weekday: 'short',
                                 year: 'numeric',
@@ -386,16 +386,16 @@ const Dashboard = () => {
                                 day: 'numeric'
                               })}
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs sm:text-sm text-muted-foreground truncate">
                               {recording.condition} • {recording.heart_rate_avg} BPM • {new Date(recording.recorded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <div className="text-right">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 shrink-0">
+                          <div className="flex flex-col sm:text-right">
                             <Badge 
                               variant="outline" 
-                              className={`text-${getRiskLevel(recording.attack_risk).color} mb-1`}
+                              className={`text-${getRiskLevel(recording.attack_risk).color} mb-1 text-xs w-fit`}
                             >
                               {recording.attack_risk}% Risk
                             </Badge>
@@ -407,9 +407,11 @@ const Dashboard = () => {
                             onClick={() => handleViewRecording(recording)}
                             variant="outline"
                             size="sm"
+                            className="w-full sm:w-auto"
                           >
                             <Eye className="h-4 w-4 mr-1" />
-                            View Report
+                            <span className="sm:hidden">View</span>
+                            <span className="hidden sm:inline">View Report</span>
                           </Button>
                         </div>
                       </div>
