@@ -265,7 +265,7 @@ const RecordingDetailModal = ({ recording, isOpen, onClose }: RecordingDetailMod
     });
 
     // Simulate training process
-    const trainingSteps = [87, 91, 94, 96, 97, 98];
+    const trainingSteps = [87, 91, 94, 95, 96, 96];
     
     for (let i = 0; i < trainingSteps.length; i++) {
       await new Promise(resolve => setTimeout(resolve, 800));

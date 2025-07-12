@@ -6,52 +6,57 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 210 20% 10%;
+    /* Clean Medical Background */
+    --background: 248 250 252;
+    --foreground: 15 23 42;
 
-    --card: 0 0% 100%;
-    --card-foreground: 210 20% 10%;
+    /* Medical Card System */
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 20% 10%;
+    --popover: 255 255 255;
+    --popover-foreground: 15 23 42;
 
-    /* Cardiac Red - Primary medical brand color */
-    --primary: 0 85% 55%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 0 85% 65%;
+    /* Cardiac Red - Professional medical brand */
+    --primary: 220 38% 50%;
+    --primary-foreground: 255 255 255;
+    --primary-glow: 220 38% 60%;
 
-    /* Medical Blue - Secondary calming color */
-    --secondary: 210 50% 96%;
-    --secondary-foreground: 210 20% 15%;
+    /* Clean Medical Blue - Professional secondary */
+    --secondary: 215 28% 96%;
+    --secondary-foreground: 51 65% 9%;
 
-    --muted: 210 30% 96%;
-    --muted-foreground: 210 15% 45%;
+    /* Neutral Medical Tones */
+    --muted: 210 40% 98%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 210 50% 94%;
-    --accent-foreground: 210 20% 15%;
+    --accent: 210 40% 98%;
+    --accent-foreground: 222 84% 5%;
 
-    --destructive: 0 85% 55%;
-    --destructive-foreground: 0 0% 100%;
+    /* Medical Alert Colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 210 20% 88%;
-    --input: 210 20% 94%;
-    --ring: 0 85% 55%;
+    /* Medical Border System */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 220 38% 50%;
 
-    /* Medical gradients and effects */
-    --gradient-cardiac: linear-gradient(135deg, hsl(0 85% 55%), hsl(0 85% 65%));
-    --gradient-medical: linear-gradient(180deg, hsl(210 50% 96%), hsl(210 30% 92%));
-    --shadow-medical: 0 4px 20px -4px hsl(0 85% 55% / 0.15);
-    --shadow-cardiac: 0 0 30px hsl(0 85% 55% / 0.3);
+    /* Medical gradients and effects - Clean & Professional */
+    --gradient-cardiac: linear-gradient(135deg, hsl(220 38% 50%), hsl(220 38% 60%));
+    --gradient-medical: linear-gradient(180deg, hsl(215 28% 98%), hsl(215 28% 96%));
+    --shadow-medical: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-cardiac: 0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
     
-    /* Health status colors */
-    --success: 120 70% 45%;
-    --success-foreground: 0 0% 100%;
-    --warning: 35 90% 55%;
-    --warning-foreground: 0 0% 100%;
-    --critical: 0 85% 60%;
-    --critical-foreground: 0 0% 100%;
+    /* Professional Health Status Colors */
+    --success: 34 79% 34%;
+    --success-foreground: 255 255 255;
+    --warning: 45 93% 47%;
+    --warning-foreground: 255 255 255;
+    --critical: 0 72% 51%;
+    --critical-foreground: 255 255 255;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
 
