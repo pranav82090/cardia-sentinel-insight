@@ -141,132 +141,140 @@ const Dashboard = () => {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-foreground mb-4 tracking-tight">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Health Dashboard
           </h1>
-          <p className="text-muted-foreground text-lg">
-            Professional cardiovascular health monitoring.
+          <p className="text-muted-foreground">
+            Welcome back! Here's your latest cardiovascular health overview.
           </p>
         </div>
 
-        {/* Quick Actions - Glassmorphism Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-          <button
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          <Button
             onClick={() => navigate("/recording")}
-            className="glass-card glass-hover h-20 rounded-2xl flex items-center justify-center gap-4 text-foreground font-medium text-lg group"
+            variant="cardiac"
+            size="lg"
+            className="h-16 gap-3 text-base"
           >
-            <div className="p-3 rounded-xl bg-primary/20 group-hover:bg-primary/30 transition-colors">
-              <Mic className="h-6 w-6 text-primary" />
-            </div>
+            <Mic className="h-6 w-6" />
             <span>Record Heart Sounds</span>
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => navigate("/camera-monitoring")}
-            className="glass-card glass-hover h-20 rounded-2xl flex items-center justify-center gap-4 text-foreground font-medium text-lg group"
+            variant="medical"
+            size="lg"
+            className="h-16 gap-3 text-base"
           >
-            <div className="p-3 rounded-xl bg-primary/20 group-hover:bg-primary/30 transition-colors">
-              <Camera className="h-6 w-6 text-primary" />
-            </div>
+            <Camera className="h-6 w-6" />
             <span>Camera BPM Monitor</span>
-          </button>
+          </Button>
         </div>
 
-        {/* Health Metrics Overview - Glassmorphism Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-          <div className="glass-card glass-hover rounded-2xl p-4 sm:p-6">
-            <div className="text-center space-y-2">
-              <div className="p-3 rounded-xl bg-success/20 w-fit mx-auto">
-                <Heart className="h-6 w-6 text-success" />
+        {/* Health Metrics Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-success/5">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Avg Heart Rate</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground truncate">{avgHeartRate}</p>
+                  <p className="text-xs text-muted-foreground">BPM</p>
+                </div>
+                <div className="p-2 sm:p-3 rounded-full bg-success/10 shrink-0">
+                  <Heart className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-success" />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground font-medium">Avg Heart Rate</p>
-              <p className="text-2xl font-bold text-foreground">{avgHeartRate}</p>
-              <p className="text-xs text-muted-foreground">BPM</p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="glass-card glass-hover rounded-2xl p-4 sm:p-6">
-            <div className="text-center space-y-2">
-              <div className="p-3 rounded-xl bg-primary/20 w-fit mx-auto">
-                <Shield className="h-6 w-6 text-primary" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-primary/5">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Risk Level</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">{avgRisk}%</p>
+                    <Badge 
+                      variant="outline" 
+                      className={`text-${riskInfo.color} text-xs shrink-0`}
+                    >
+                      {riskInfo.level}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="p-2 sm:p-3 rounded-full bg-primary/10 shrink-0">
+                  <Shield className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-primary" />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground font-medium">Risk Level</p>
-              <p className="text-2xl font-bold text-foreground">{avgRisk}%</p>
-              <Badge 
-                variant="outline" 
-                className={`text-${riskInfo.color} border-${riskInfo.color}/30 bg-${riskInfo.color}/10 text-xs mt-1`}
-              >
-                {riskInfo.level}
-              </Badge>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="glass-card glass-hover rounded-2xl p-4 sm:p-6">
-            <div className="text-center space-y-2">
-              <div className="p-3 rounded-xl bg-warning/20 w-fit mx-auto">
-                <Brain className="h-6 w-6 text-warning" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-warning/5">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Stress Level</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground truncate">
+                    {recentRecording?.stress_level || "N/A"}
+                  </p>
+                </div>
+                <div className="p-2 sm:p-3 rounded-full bg-warning/10 shrink-0">
+                  <Brain className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-warning" />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground font-medium">Stress Level</p>
-              <p className="text-xl font-bold text-foreground truncate">
-                {recentRecording?.stress_level || "Normal"}
-              </p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="glass-card glass-hover rounded-2xl p-4 sm:p-6">
-            <div className="text-center space-y-2">
-              <div className="p-3 rounded-xl bg-accent/20 w-fit mx-auto">
-                <Activity className="h-6 w-6 text-accent-foreground" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-accent/5">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Records</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">{recordings.length}</p>
+                </div>
+                <div className="p-2 sm:p-3 rounded-full bg-accent/50 shrink-0">
+                  <Activity className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-accent-foreground" />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground font-medium">Records</p>
-              <p className="text-2xl font-bold text-foreground">{recordings.length}</p>
-              <p className="text-xs text-muted-foreground">96% Accuracy</p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content Tabs - Glassmorphism */}
-        <Tabs defaultValue="overview" className="space-y-6">
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
           <div className="w-full overflow-x-auto pb-2">
-            <div className="glass-card rounded-2xl p-2 min-w-[320px]">
-              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-transparent h-auto gap-2">
-                <TabsTrigger 
-                  value="overview" 
-                  className="gap-2 text-sm px-4 py-3 bg-transparent data-[state=active]:bg-primary/20 data-[state=active]:text-foreground text-muted-foreground rounded-xl transition-all"
-                >
-                  <Heart className="h-4 w-4" />
-                  <span className="hidden sm:inline">Overview</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="recordings" 
-                  className="gap-2 text-sm px-4 py-3 bg-transparent data-[state=active]:bg-primary/20 data-[state=active]:text-foreground text-muted-foreground rounded-xl transition-all"
-                >
-                  <Activity className="h-4 w-4" />
-                  <span className="hidden sm:inline">Recordings</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="analysis" 
-                  className="gap-2 text-sm px-4 py-3 bg-transparent data-[state=active]:bg-primary/20 data-[state=active]:text-foreground text-muted-foreground rounded-xl transition-all"
-                >
-                  <BarChart3 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Analysis</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="chatbot" 
-                  className="gap-2 text-sm px-4 py-3 bg-transparent data-[state=active]:bg-primary/20 data-[state=active]:text-foreground text-muted-foreground rounded-xl transition-all"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  <span className="hidden sm:inline">Assistant</span>
-                </TabsTrigger>
-              </TabsList>
-            </div>
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 min-w-[320px] h-auto">
+              <TabsTrigger value="overview" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3">
+                <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden lg:inline">Overview</span>
+                <span className="xs:hidden sm:inline lg:hidden">Over</span>
+              </TabsTrigger>
+              <TabsTrigger value="recordings" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3">
+                <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden lg:inline">Recordings</span>
+                <span className="xs:hidden sm:inline lg:hidden">Rec</span>
+              </TabsTrigger>
+              <TabsTrigger value="analysis" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3">
+                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden lg:inline">7-Day Analysis</span>
+                <span className="xs:hidden sm:inline lg:hidden">Analysis</span>
+              </TabsTrigger>
+              <TabsTrigger value="chatbot" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3">
+                <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden lg:inline">Health Assistant</span>
+                <span className="xs:hidden sm:inline lg:hidden">Assistant</span>
+              </TabsTrigger>
+            </TabsList>
           </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="glass-card rounded-2xl">
+            {/* Recent Recordings Summary */}
+            <Card className="border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
+                <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
                   Recent Health Recordings
                 </CardTitle>
@@ -274,72 +282,73 @@ const Dashboard = () => {
               <CardContent>
                 {recordings.length === 0 ? (
                   <div className="text-center py-12">
-                    <div className="p-4 rounded-2xl bg-primary/10 w-fit mx-auto mb-4">
-                      <Heart className="h-16 w-16 text-primary/50" />
-                    </div>
+                    <Heart className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-foreground mb-2">No recordings yet</h3>
                     <p className="text-muted-foreground mb-6">
                       Start monitoring your heart health by creating your first recording.
                     </p>
-                    <button
+                    <Button
                       onClick={() => navigate("/recording")}
-                      className="glass-card glass-hover px-6 py-3 rounded-xl flex items-center gap-2 mx-auto text-foreground font-medium"
+                      variant="cardiac"
+                      className="gap-2"
                     >
-                      <Mic className="h-4 w-4 text-primary" />
+                      <Mic className="h-4 w-4" />
                       Create First Recording
-                    </button>
+                    </Button>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {recordings.slice(0, 3).map((recording) => (
                       <div
                         key={recording.id}
-                        className="glass-card glass-hover rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors gap-4"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="p-2 rounded-xl bg-primary/20">
+                          <div className="p-2 rounded-full bg-primary/10 shrink-0">
                             <Calendar className="h-4 w-4 text-primary" />
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <p className="font-medium text-foreground">
                               {new Date(recording.recorded_at).toLocaleDateString()}
                             </p>
-                            <p className="text-sm text-muted-foreground">
-                              {recording.condition} • {recording.heart_rate_avg} BPM • 96% Accuracy
+                            <p className="text-sm text-muted-foreground truncate">
+                              {recording.condition} • {recording.heart_rate_avg} BPM
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 sm:shrink-0">
                           <Badge 
                             variant="outline" 
-                            className={`text-${getRiskLevel(recording.attack_risk).color} border-${getRiskLevel(recording.attack_risk).color}/30 bg-${getRiskLevel(recording.attack_risk).color}/10 text-xs`}
+                            className={`text-${getRiskLevel(recording.attack_risk).color} text-xs`}
                           >
                             {recording.attack_risk}% Risk
                           </Badge>
-                          <button
+                          <Button
                             onClick={() => handleViewRecording(recording)}
-                            className="glass-card glass-hover px-4 py-2 rounded-lg flex items-center gap-2 text-foreground text-sm"
+                            variant="outline"
+                            size="sm"
+                            className="shrink-0"
                           >
-                            <Eye className="h-4 w-4" />
-                            View
-                          </button>
+                            <Eye className="h-4 w-4 mr-1" />
+                            <span className="hidden sm:inline">View</span>
+                          </Button>
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
               </CardContent>
-            </div>
+            </Card>
           </TabsContent>
 
           {/* All Recordings Tab */}
           <TabsContent value="recordings" className="space-y-6">
-            <Card className="border border-border shadow-medical bg-card">
+            <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Activity className="h-5 w-5 text-primary" />
                   All Health Recordings
-                  <Badge variant="outline" className="ml-auto border-primary/20">
+                  <Badge variant="outline" className="ml-auto">
                     {recordings.length} total
                   </Badge>
                 </CardTitle>
@@ -355,7 +364,7 @@ const Dashboard = () => {
                     <Button
                       onClick={() => navigate("/recording")}
                       variant="cardiac"
-                      className="gap-2 shadow-medical"
+                      className="gap-2"
                     >
                       <Mic className="h-4 w-4" />
                       Create First Recording
@@ -366,10 +375,10 @@ const Dashboard = () => {
                     {recordings.map((recording) => (
                       <div
                         key={recording.id}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors gap-3 sm:gap-4 border border-border/50"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors gap-3 sm:gap-4"
                       >
                         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                          <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                          <div className="p-2 rounded-full bg-primary/10 shrink-0">
                             <Calendar className="h-4 w-4 text-primary" />
                           </div>
                           <div className="min-w-0 flex-1">
@@ -382,7 +391,7 @@ const Dashboard = () => {
                               })}
                             </p>
                             <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                              {recording.condition} • {recording.heart_rate_avg} BPM • {new Date(recording.recorded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • 96% Accuracy
+                              {recording.condition} • {recording.heart_rate_avg} BPM • {new Date(recording.recorded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
                           </div>
                         </div>
@@ -390,16 +399,19 @@ const Dashboard = () => {
                           <div className="flex flex-col sm:text-right">
                             <Badge 
                               variant="outline" 
-                              className={`text-${getRiskLevel(recording.attack_risk).color} border-${getRiskLevel(recording.attack_risk).color} mb-1 text-xs w-fit`}
+                              className={`text-${getRiskLevel(recording.attack_risk).color} mb-1 text-xs w-fit`}
                             >
                               {recording.attack_risk}% Risk
                             </Badge>
+                             <p className="text-xs text-muted-foreground">
+                               Accuracy: {recording.model_accuracy || 96}%
+                             </p>
                           </div>
                           <Button
                             onClick={() => handleViewRecording(recording)}
                             variant="outline"
                             size="sm"
-                            className="w-full sm:w-auto shadow-sm"
+                            className="w-full sm:w-auto"
                           >
                             <Eye className="h-4 w-4 mr-1" />
                             <span className="sm:hidden">View</span>
