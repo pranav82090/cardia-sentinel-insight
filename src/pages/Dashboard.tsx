@@ -136,27 +136,27 @@ const Dashboard = () => {
   const riskInfo = getRiskLevel(avgRisk);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/30">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header - Clean Medical Style */}
+        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Health Dashboard
           </h1>
           <p className="text-muted-foreground">
-            Professional cardiovascular health monitoring and analysis.
+            Professional cardiovascular health monitoring.
           </p>
         </div>
 
-        {/* Quick Actions - Clean Medical Cards */}
+        {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <Button
             onClick={() => navigate("/recording")}
             variant="cardiac"
             size="lg"
-            className="h-16 gap-3 text-base shadow-medical bg-gradient-to-r from-card to-card hover:shadow-cardiac transition-all duration-300"
+            className="h-16 gap-3 text-base"
           >
             <Mic className="h-6 w-6" />
             <span>Record Heart Sounds</span>
@@ -165,7 +165,7 @@ const Dashboard = () => {
             onClick={() => navigate("/camera-monitoring")}
             variant="medical"
             size="lg"
-            className="h-16 gap-3 text-base shadow-medical bg-gradient-to-r from-card to-card hover:shadow-cardiac transition-all duration-300"
+            className="h-16 gap-3 text-base"
           >
             <Camera className="h-6 w-6" />
             <span>Camera BPM Monitor</span>

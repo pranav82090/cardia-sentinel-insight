@@ -17,10 +17,10 @@
     --popover: 255 255 255;
     --popover-foreground: 15 23 42;
 
-    /* Cardiac Red - Professional medical brand */
-    --primary: 220 38% 50%;
-    --primary-foreground: 255 255 255;
-    --primary-glow: 220 38% 60%;
+    /* Cardiac Red - Primary medical brand */
+    --primary: 0 84% 60%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 0 84% 70%;
 
     /* Clean Medical Blue - Professional secondary */
     --secondary: 215 28% 96%;
@@ -40,13 +40,13 @@
     /* Medical Border System */
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 220 38% 50%;
+    --ring: 0 84% 60%;
 
-    /* Medical gradients and effects - Clean & Professional */
-    --gradient-cardiac: linear-gradient(135deg, hsl(220 38% 50%), hsl(220 38% 60%));
+    /* Medical gradients and effects - Red Theme */
+    --gradient-cardiac: linear-gradient(135deg, hsl(0 84% 60%), hsl(0 84% 70%));
     --gradient-medical: linear-gradient(180deg, hsl(215 28% 98%), hsl(215 28% 96%));
-    --shadow-medical: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    --shadow-cardiac: 0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
+    --shadow-medical: 0 1px 3px 0 rgba(239, 68, 68, 0.1), 0 1px 2px 0 rgba(239, 68, 68, 0.06);
+    --shadow-cardiac: 0 4px 6px -1px rgba(239, 68, 68, 0.1), 0 2px 4px -1px rgba(239, 68, 68, 0.06);
     
     /* Professional Health Status Colors */
     --success: 34 79% 34%;
