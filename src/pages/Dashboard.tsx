@@ -403,9 +403,9 @@ const Dashboard = () => {
                             >
                               {recording.attack_risk}% Risk
                             </Badge>
-                            <p className="text-xs text-muted-foreground">
-                              Accuracy: {recording.model_accuracy || 95}%
-                            </p>
+                             <p className="text-xs text-muted-foreground">
+                               Accuracy: {recording.model_accuracy || 96}%
+                             </p>
                           </div>
                           <Button
                             onClick={() => handleViewRecording(recording)}
