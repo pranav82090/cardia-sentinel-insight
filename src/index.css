@@ -6,57 +6,58 @@
 
 @layer base {
   :root {
-    /* Clean Medical Background */
-    --background: 248 250 252;
-    --foreground: 15 23 42;
+    /* Glassmorphism Dark Theme - Inspired by modern mobile UI */
+    --background: 220 30% 8%;
+    --foreground: 0 0% 98%;
 
-    /* Medical Card System */
-    --card: 255 255 255;
-    --card-foreground: 15 23 42;
+    /* Glassmorphism Cards */
+    --card: 0 0% 100% / 0.1;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
+    --popover: 220 30% 12%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Cardiac Red - Primary medical brand */
+    /* Cardiac Red Accent */
     --primary: 0 84% 60%;
     --primary-foreground: 0 0% 98%;
     --primary-glow: 0 84% 70%;
 
-    /* Clean Medical Blue - Professional secondary */
-    --secondary: 215 28% 96%;
-    --secondary-foreground: 51 65% 9%;
+    /* Glassmorphism Secondary */
+    --secondary: 0 0% 100% / 0.05;
+    --secondary-foreground: 0 0% 90%;
 
-    /* Neutral Medical Tones */
-    --muted: 210 40% 98%;
-    --muted-foreground: 215 16% 47%;
+    /* Muted Glassmorphism */
+    --muted: 0 0% 100% / 0.08;
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 210 40% 98%;
-    --accent-foreground: 222 84% 5%;
+    --accent: 0 0% 100% / 0.1;
+    --accent-foreground: 0 0% 98%;
 
     /* Medical Alert Colors */
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    /* Medical Border System */
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
+    /* Glassmorphism Borders */
+    --border: 0 0% 100% / 0.1;
+    --input: 0 0% 100% / 0.05;
     --ring: 0 84% 60%;
 
-    /* Medical gradients and effects - Red Theme */
-    --gradient-cardiac: linear-gradient(135deg, hsl(0 84% 60%), hsl(0 84% 70%));
-    --gradient-medical: linear-gradient(180deg, hsl(215 28% 98%), hsl(215 28% 96%));
-    --shadow-medical: 0 1px 3px 0 rgba(239, 68, 68, 0.1), 0 1px 2px 0 rgba(239, 68, 68, 0.06);
-    --shadow-cardiac: 0 4px 6px -1px rgba(239, 68, 68, 0.1), 0 2px 4px -1px rgba(239, 68, 68, 0.06);
+    /* Glassmorphism Effects */
+    --gradient-bg: linear-gradient(135deg, hsl(220 30% 8%), hsl(240 25% 12%));
+    --gradient-card: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --shadow-glow: 0 0 20px rgba(239, 68, 68, 0.2);
+    --backdrop-blur: blur(20px);
     
     /* Professional Health Status Colors */
-    --success: 34 79% 34%;
-    --success-foreground: 255 255 255;
-    --warning: 45 93% 47%;
-    --warning-foreground: 255 255 255;
+    --success: 120 60% 50%;
+    --success-foreground: 0 0% 98%;
+    --warning: 45 90% 60%;
+    --warning-foreground: 0 0% 98%;
     --critical: 0 72% 51%;
-    --critical-foreground: 255 255 255;
+    --critical-foreground: 0 0% 98%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -121,5 +122,27 @@
 
   body {
     @apply bg-background text-foreground;
+    background: var(--gradient-bg);
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    background: var(--gradient-card);
+    backdrop-filter: var(--backdrop-blur);
+    -webkit-backdrop-filter: var(--backdrop-blur);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-glass);
+  }
+  
+  .glass-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .glass-hover:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
+    box-shadow: var(--shadow-glass), var(--shadow-glow);
+    transform: translateY(-2px);
   }
 }
