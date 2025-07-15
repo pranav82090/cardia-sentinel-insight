@@ -191,13 +191,18 @@ const Home = () => {
                 
                 <div className="flex-1 text-center md:text-left space-y-4">
                   <h3 className="text-xl lg:text-2xl font-bold text-foreground">
-                    Healthcare Innovation Developer
+                    Personal Information
                   </h3>
                   <p className="text-muted-foreground text-base lg:text-lg leading-relaxed">
-                    Dedicated to revolutionizing healthcare through AI-powered solutions. 
-                    Combining expertise in machine learning, mobile health technology, and 
-                    cardiovascular medicine to create tools that save lives.
+                    I was born in Tirupur on August 14, 2012, and I'm currently studying in 8th grade at A.V.P Trust Public Senior Secondary School (CBSE) in 2025, Gandhi Nagar, Tirupur.
                   </p>
+                  <p className="text-muted-foreground text-base lg:text-lg leading-relaxed">
+                    I have a passion for software engineering, and I was inspired to create the CardiacSentinel application after learning that heart attacks are increasingly affecting people at younger ages. This concerning trend motivated me to develop an AI-powered solution that could help detect heart conditions early and potentially save lives.
+                  </p>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p><strong>Born:</strong> August 14, 2012</p>
+                    <p><strong>Location:</strong> Tirupur</p>
+                  </div>
                   <div className="flex flex-wrap justify-center md:justify-start gap-3 lg:gap-4 pt-4">
                     <Button variant="outline" size="sm" className="gap-2">
                       <Github className="h-4 w-4" />
