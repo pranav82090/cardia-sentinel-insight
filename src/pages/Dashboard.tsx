@@ -5,25 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Heart, 
-  Activity, 
-  Brain, 
-  TrendingUp, 
-  Camera, 
-  Mic,
-  Calendar,
-  Shield,
-  Eye,
-  MessageCircle,
-  BarChart3
-} from "lucide-react";
+import { Heart, Activity, Brain, TrendingUp, Camera, Mic, Calendar, Shield, Eye, MessageCircle, BarChart3 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 import RecordingDetailModal from "@/components/RecordingDetailModal";
 import HealthChatbot from "@/components/HealthChatbot";
 import WeeklyAnalysis from "@/components/WeeklyAnalysis";
-
 interface HeartRecording {
   id: string;
   recorded_at: string;
@@ -39,7 +26,6 @@ interface HeartRecording {
   audio_data: any;
   model_accuracy: number | null;
 }
-
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [recordings, setRecordings] = useState<HeartRecording[]>([]);
@@ -47,11 +33,16 @@ const Dashboard = () => {
   const [selectedRecording, setSelectedRecording] = useState<HeartRecording | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
@@ -59,10 +50,12 @@ const Dashboard = () => {
       setUser(session.user);
       await fetchRecordings(session.user.id);
     };
-
     checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: {
+        subscription
+      }
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session) {
         navigate("/auth");
       } else {
@@ -70,31 +63,28 @@ const Dashboard = () => {
         fetchRecordings(session.user.id);
       }
     });
-
     return () => subscription.unsubscribe();
   }, [navigate]);
-
   const fetchRecordings = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('heart_recordings')
-        .select('*')
-        .eq('user_id', userId)
-        .order('recorded_at', { ascending: false });
-
+      const {
+        data,
+        error
+      } = await supabase.from('heart_recordings').select('*').eq('user_id', userId).order('recorded_at', {
+        ascending: false
+      });
       if (error) throw error;
       setRecordings(data || []);
     } catch (error: any) {
       toast({
         title: "Error fetching recordings",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const getRecentRecording = () => recordings[0];
   const getAverageHeartRate = () => {
     if (recordings.length === 0) return 0;
@@ -104,21 +94,29 @@ const Dashboard = () => {
     if (recordings.length === 0) return 0;
     return Math.round(recordings.reduce((sum, r) => sum + r.attack_risk, 0) / recordings.length);
   };
-
   const getRiskLevel = (risk: number) => {
-    if (risk <= 10) return { level: "Low", color: "success", description: "Minimal cardiovascular risk" };
-    if (risk <= 19) return { level: "Moderate", color: "warning", description: "Moderate cardiovascular risk" };
-    return { level: "Danger", color: "critical", description: "High cardiovascular risk" };
+    if (risk <= 10) return {
+      level: "Low",
+      color: "success",
+      description: "Minimal cardiovascular risk"
+    };
+    if (risk <= 19) return {
+      level: "Moderate",
+      color: "warning",
+      description: "Moderate cardiovascular risk"
+    };
+    return {
+      level: "Danger",
+      color: "critical",
+      description: "High cardiovascular risk"
+    };
   };
-
   const handleViewRecording = (recording: HeartRecording) => {
     setSelectedRecording(recording);
     setShowDetailModal(true);
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
+    return <div className="min-h-screen bg-background">
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
@@ -126,17 +124,13 @@ const Dashboard = () => {
             <p className="text-muted-foreground">Loading your health dashboard...</p>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   const recentRecording = getRecentRecording();
   const avgHeartRate = getAverageHeartRate();
   const avgRisk = getAverageRisk();
   const riskInfo = getRiskLevel(avgRisk);
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -151,25 +145,12 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          <Button
-            onClick={() => navigate("/recording")}
-            variant="cardiac"
-            size="lg"
-            className="h-16 gap-3 text-base"
-          >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 mx-[12px]">
+          <Button onClick={() => navigate("/recording")} variant="cardiac" size="lg" className="h-16 gap-3 text-base text-center mx-0 px-[93px]">
             <Mic className="h-6 w-6" />
             <span>Record Heart Sounds</span>
           </Button>
-          <Button
-            onClick={() => navigate("/camera-monitoring")}
-            variant="medical"
-            size="lg"
-            className="h-16 gap-3 text-base"
-          >
-            <Camera className="h-6 w-6" />
-            <span>Camera BPM Monitor</span>
-          </Button>
+          
         </div>
 
         {/* Health Metrics Overview */}
@@ -196,10 +177,7 @@ const Dashboard = () => {
                   <p className="text-xs sm:text-sm text-muted-foreground mb-1">Risk Level</p>
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">{avgRisk}%</p>
-                    <Badge 
-                      variant="outline" 
-                      className={`text-${riskInfo.color} text-xs shrink-0`}
-                    >
+                    <Badge variant="outline" className={`text-${riskInfo.color} text-xs shrink-0`}>
                       {riskInfo.level}
                     </Badge>
                   </div>
@@ -280,29 +258,18 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {recordings.length === 0 ? (
-                  <div className="text-center py-12">
+                {recordings.length === 0 ? <div className="text-center py-12">
                     <Heart className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-foreground mb-2">No recordings yet</h3>
                     <p className="text-muted-foreground mb-6">
                       Start monitoring your heart health by creating your first recording.
                     </p>
-                    <Button
-                      onClick={() => navigate("/recording")}
-                      variant="cardiac"
-                      className="gap-2"
-                    >
+                    <Button onClick={() => navigate("/recording")} variant="cardiac" className="gap-2">
                       <Mic className="h-4 w-4" />
                       Create First Recording
                     </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {recordings.slice(0, 3).map((recording) => (
-                      <div
-                        key={recording.id}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors gap-4"
-                      >
+                  </div> : <div className="space-y-4">
+                    {recordings.slice(0, 3).map(recording => <div key={recording.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors gap-4">
                         <div className="flex items-center gap-4">
                           <div className="p-2 rounded-full bg-primary/10 shrink-0">
                             <Calendar className="h-4 w-4 text-primary" />
@@ -317,26 +284,16 @@ const Dashboard = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-3 sm:shrink-0">
-                          <Badge 
-                            variant="outline" 
-                            className={`text-${getRiskLevel(recording.attack_risk).color} text-xs`}
-                          >
+                          <Badge variant="outline" className={`text-${getRiskLevel(recording.attack_risk).color} text-xs`}>
                             {recording.attack_risk}% Risk
                           </Badge>
-                          <Button
-                            onClick={() => handleViewRecording(recording)}
-                            variant="outline"
-                            size="sm"
-                            className="shrink-0"
-                          >
+                          <Button onClick={() => handleViewRecording(recording)} variant="outline" size="sm" className="shrink-0">
                             <Eye className="h-4 w-4 mr-1" />
                             <span className="hidden sm:inline">View</span>
                           </Button>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      </div>)}
+                  </div>}
               </CardContent>
             </Card>
           </TabsContent>
@@ -354,29 +311,18 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {recordings.length === 0 ? (
-                  <div className="text-center py-12">
+                {recordings.length === 0 ? <div className="text-center py-12">
                     <Heart className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-foreground mb-2">No recordings yet</h3>
                     <p className="text-muted-foreground mb-6">
                       Start monitoring your heart health by creating your first recording.
                     </p>
-                    <Button
-                      onClick={() => navigate("/recording")}
-                      variant="cardiac"
-                      className="gap-2"
-                    >
+                    <Button onClick={() => navigate("/recording")} variant="cardiac" className="gap-2">
                       <Mic className="h-4 w-4" />
                       Create First Recording
                     </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3 sm:space-y-4">
-                    {recordings.map((recording) => (
-                      <div
-                        key={recording.id}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors gap-3 sm:gap-4"
-                      >
+                  </div> : <div className="space-y-3 sm:space-y-4">
+                    {recordings.map(recording => <div key={recording.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors gap-3 sm:gap-4">
                         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                           <div className="p-2 rounded-full bg-primary/10 shrink-0">
                             <Calendar className="h-4 w-4 text-primary" />
@@ -384,44 +330,37 @@ const Dashboard = () => {
                           <div className="min-w-0 flex-1">
                             <p className="font-medium text-foreground text-sm sm:text-base">
                               {new Date(recording.recorded_at).toLocaleDateString('en-US', {
-                                weekday: 'short',
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                              })}
+                          weekday: 'short',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
                             </p>
                             <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                              {recording.condition} • {recording.heart_rate_avg} BPM • {new Date(recording.recorded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              {recording.condition} • {recording.heart_rate_avg} BPM • {new Date(recording.recorded_at).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                             </p>
                           </div>
                         </div>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 shrink-0">
                           <div className="flex flex-col sm:text-right">
-                            <Badge 
-                              variant="outline" 
-                              className={`text-${getRiskLevel(recording.attack_risk).color} mb-1 text-xs w-fit`}
-                            >
+                            <Badge variant="outline" className={`text-${getRiskLevel(recording.attack_risk).color} mb-1 text-xs w-fit`}>
                               {recording.attack_risk}% Risk
                             </Badge>
                              <p className="text-xs text-muted-foreground">
                                Accuracy: {recording.model_accuracy || 96}%
                              </p>
                           </div>
-                          <Button
-                            onClick={() => handleViewRecording(recording)}
-                            variant="outline"
-                            size="sm"
-                            className="w-full sm:w-auto"
-                          >
+                          <Button onClick={() => handleViewRecording(recording)} variant="outline" size="sm" className="w-full sm:w-auto">
                             <Eye className="h-4 w-4 mr-1" />
                             <span className="sm:hidden">View</span>
                             <span className="hidden sm:inline">View Report</span>
                           </Button>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      </div>)}
+                  </div>}
               </CardContent>
             </Card>
           </TabsContent>
@@ -439,16 +378,10 @@ const Dashboard = () => {
       </div>
 
       {/* Recording Detail Modal */}
-      <RecordingDetailModal
-        recording={selectedRecording}
-        isOpen={showDetailModal}
-        onClose={() => {
-          setShowDetailModal(false);
-          setSelectedRecording(null);
-        }}
-      />
-    </div>
-  );
+      <RecordingDetailModal recording={selectedRecording} isOpen={showDetailModal} onClose={() => {
+      setShowDetailModal(false);
+      setSelectedRecording(null);
+    }} />
+    </div>;
 };
-
 export default Dashboard;
