@@ -106,9 +106,9 @@ const Dashboard = () => {
   };
 
   const getRiskLevel = (risk: number) => {
-    if (risk < 20) return { level: "Low", color: "success" };
-    if (risk < 50) return { level: "Moderate", color: "warning" };
-    return { level: "High", color: "critical" };
+    if (risk <= 10) return { level: "Low", color: "success", description: "Minimal cardiovascular risk" };
+    if (risk <= 19) return { level: "Moderate", color: "warning", description: "Moderate cardiovascular risk" };
+    return { level: "Danger", color: "critical", description: "High cardiovascular risk" };
   };
 
   const handleViewRecording = (recording: HeartRecording) => {

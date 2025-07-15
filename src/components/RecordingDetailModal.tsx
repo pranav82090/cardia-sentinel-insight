@@ -298,9 +298,9 @@ const RecordingDetailModal = ({ recording, isOpen, onClose }: RecordingDetailMod
   };
 
   const getRiskLevel = (risk: number) => {
-    if (risk < 20) return { level: "Low", color: "success", bgColor: "bg-success/10" };
-    if (risk < 50) return { level: "Moderate", color: "warning", bgColor: "bg-warning/10" };
-    return { level: "High", color: "critical", bgColor: "bg-critical/10" };
+    if (risk <= 10) return { level: "Low Risk", color: "success", bgColor: "bg-success/10", description: "Minimal cardiovascular risk" };
+    if (risk <= 19) return { level: "Moderate Risk", color: "warning", bgColor: "bg-warning/10", description: "Moderate cardiovascular risk" };
+    return { level: "High Risk", color: "critical", bgColor: "bg-critical/10", description: "High cardiovascular risk - seek medical attention" };
   };
 
   if (!recording) return null;
