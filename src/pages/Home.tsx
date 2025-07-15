@@ -154,8 +154,10 @@ const Home = () => {
             <CardContent className="p-6 sm:p-8 lg:p-12">
               <div className="flex flex-col md:flex-row items-center gap-6 lg:gap-8">
                 <div className="relative shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-glow rounded-full blur-xl opacity-30" />
-                  <img src={developerPhoto} alt="Developer Profile" className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-full object-cover ring-4 ring-primary/20" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-glow rounded-full blur-xl opacity-30 animate-pulse" />
+                  <div className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-full p-1 bg-gradient-to-r from-primary via-primary-glow to-primary animate-spin-slow">
+                    <img src="/lovable-uploads/d0e4ce90-8164-47f5-99dc-0893a3ada412.png" alt="Developer Profile" className="w-full h-full rounded-full object-cover bg-background p-0.5" />
+                  </div>
                 </div>
                 
                 <div className="flex-1 text-center md:text-left space-y-4">
