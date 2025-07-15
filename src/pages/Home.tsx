@@ -2,43 +2,64 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Camera, Activity, Brain, Shield, Smartphone, ArrowRight, Github, Linkedin, Mail } from "lucide-react";
+import { 
+  Heart, 
+  Camera, 
+  Activity, 
+  Brain, 
+  Shield, 
+  Smartphone, 
+  ArrowRight,
+  Github,
+  Linkedin,
+  Mail
+} from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import developerPhoto from "@/assets/developer-photo.jpg";
 import Navbar from "@/components/Navbar";
+
 const Home = () => {
-  const features = [{
-    icon: <Heart className="h-8 w-8 text-primary" />,
-    title: "Heart Attack Risk Prediction",
-    description: "AI-powered analysis of heart sounds to predict cardiovascular risks using advanced machine learning algorithms.",
-    status: "Advanced AI"
-  }, {
-    icon: <Camera className="h-8 w-8 text-primary" />,
-    title: "Camera-Based BPM Monitoring",
-    description: "Measure your heart rate using your phone's camera and flashlight with photoplethysmography (PPG) technology.",
-    status: "PPG Technology"
-  }, {
-    icon: <Activity className="h-8 w-8 text-primary" />,
-    title: "HRV Stress Analysis",
-    description: "Monitor stress levels through Heart Rate Variability analysis for comprehensive wellness assessment.",
-    status: "Medical Grade"
-  }, {
-    icon: <Brain className="h-8 w-8 text-primary" />,
-    title: "Real-time AI Insights",
-    description: "Get instant health insights by Our powerful Trained Data with the 96% Accuracy.",
-    status: "Real-time"
-  }, {
-    icon: <Shield className="h-8 w-8 text-primary" />,
-    title: "Secure Health Data",
-    description: "Your health data is encrypted and securely stored with enterprise-grade protection.",
-    status: "HIPAA Compliant"
-  }, {
-    icon: <Smartphone className="h-8 w-8 text-primary" />,
-    title: "Mobile Health Platform",
-    description: "Access your health monitoring tools anywhere with our responsive web application.",
-    status: "Cross-Platform"
-  }];
-  return <div className="min-h-screen bg-background">
+  const features = [
+    {
+      icon: <Heart className="h-8 w-8 text-primary" />,
+      title: "Heart Attack Risk Prediction",
+      description: "AI-powered analysis of heart sounds to predict cardiovascular risks using advanced machine learning algorithms.",
+      status: "Advanced AI"
+    },
+    {
+      icon: <Camera className="h-8 w-8 text-primary" />,
+      title: "Camera-Based BPM Monitoring",
+      description: "Measure your heart rate using your phone's camera and flashlight with photoplethysmography (PPG) technology.",
+      status: "PPG Technology"
+    },
+    {
+      icon: <Activity className="h-8 w-8 text-primary" />,
+      title: "HRV Stress Analysis",
+      description: "Monitor stress levels through Heart Rate Variability analysis for comprehensive wellness assessment.",
+      status: "Medical Grade"
+    },
+    {
+      icon: <Brain className="h-8 w-8 text-primary" />,
+      title: "Real-time AI Insights",
+      description: "Get instant health insights by Our powerful Trained Data with the 96% Accuracy.",
+      status: "Real-time"
+    },
+    {
+      icon: <Shield className="h-8 w-8 text-primary" />,
+      title: "Secure Health Data",
+      description: "Your health data is encrypted and securely stored with enterprise-grade protection.",
+      status: "HIPAA Compliant"
+    },
+    {
+      icon: <Smartphone className="h-8 w-8 text-primary" />,
+      title: "Mobile Health Platform",
+      description: "Access your health monitoring tools anywhere with our responsive web application.",
+      status: "Cross-Platform"
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       {/* Hero Section */}
@@ -94,7 +115,11 @@ const Home = () => {
             
             <div className="relative order-1 lg:order-2">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary-glow/20 rounded-3xl blur-3xl" />
-              <img src={heroImage} alt="Cardia Sentinel AI Heart Monitoring Interface" className="relative w-full rounded-2xl shadow-2xl" />
+              <img 
+                src={heroImage} 
+                alt="Cardia Sentinel AI Heart Monitoring Interface"
+                className="relative w-full rounded-2xl shadow-2xl"
+              />
             </div>
           </div>
         </div>
@@ -114,7 +139,8 @@ const Home = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {features.map((feature, index) => <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm">
+            {features.map((feature, index) => (
+              <Card key={index} className="group hover:shadow-xl transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm">
                 <CardContent className="p-4 lg:p-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -133,7 +159,8 @@ const Home = () => {
                     </p>
                   </div>
                 </CardContent>
-              </Card>)}
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -155,7 +182,11 @@ const Home = () => {
               <div className="flex flex-col md:flex-row items-center gap-6 lg:gap-8">
                 <div className="relative shrink-0">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-glow rounded-full blur-xl opacity-30" />
-                  <img src={developerPhoto} alt="Developer Profile" className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-full object-cover ring-4 ring-primary/20" />
+                  <img 
+                    src="/lovable-uploads/7d93a617-6ad3-4793-b2ed-0a7ba1501ec9.png"
+                    alt="Developer Profile"
+                    className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-full object-cover ring-4 ring-primary/20"
+                  />
                 </div>
                 
                 <div className="flex-1 text-center md:text-left space-y-4">
@@ -172,7 +203,20 @@ const Home = () => {
                     <p><strong>Born:</strong> August 14, 2012</p>
                     <p><strong>Location:</strong> Tirupur</p>
                   </div>
-                  
+                  <div className="flex flex-wrap justify-center md:justify-start gap-3 lg:gap-4 pt-4">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Github className="h-4 w-4" />
+                      GitHub
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Linkedin className="h-4 w-4" />
+                      LinkedIn
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Mail className="h-4 w-4" />
+                      Contact
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -199,6 +243,8 @@ const Home = () => {
           </div>
         </div>
       </section>
-    </div>;
+    </div>
+  );
 };
+
 export default Home;
