@@ -183,7 +183,7 @@ const Home = () => {
                 <div className="relative shrink-0">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-glow rounded-full blur-xl opacity-30" />
                   <img 
-                    src={developerPhoto}
+                    src="/lovable-uploads/7d93a617-6ad3-4793-b2ed-0a7ba1501ec9.png"
                     alt="Developer Profile"
                     className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-full object-cover ring-4 ring-primary/20"
                   />
