@@ -33,7 +33,7 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hello! I'm your Health AI Assistant. I can help you with:\n\n• Understanding your heart recordings\n• Interpreting your health metrics\n• General cardiovascular health advice\n• App features and functionality\n\nHow can I assist you today?",
+      content: "Hello! I'm your Health AI Assistant. I can help you with:\n\n• Analyzing your specific heart recordings and metrics\n• Interpreting your personalized health data\n• Providing insights based on your recording history\n• Comprehensive cardiovascular health guidance\n• App features and advanced analytics\n\nI have access to your recording data and can provide personalized insights. How can I assist you today?",
       sender: 'bot',
       timestamp: new Date(),
       type: 'info'
@@ -74,51 +74,89 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
     let response = "";
     let type: 'text' | 'info' | 'warning' = 'text';
 
-    // App-specific responses
-    if (message.includes('recording') || message.includes('how to record')) {
-      response = "To record your heart sounds:\n\n1. Go to the Recording page\n2. Click 'Start Recording'\n3. Place your phone near your chest or use a stethoscope\n4. Record for 15-30 seconds\n5. Click 'Analyze Recording' to get AI insights\n\nThe app uses advanced noise removal and aims for 95%+ accuracy!";
-      type = 'info';
-    }
-    else if (message.includes('accuracy') || message.includes('noise')) {
-      response = "Our app features:\n\n• Advanced noise removal algorithms\n• 95%+ accuracy in heart sound analysis\n• Self-learning AI that improves over time\n• Real-time PPG monitoring\n• Comprehensive risk assessment\n\nThe accuracy improves with each recording as our AI learns from your specific heart patterns.";
-      type = 'info';
-    }
-    else if (message.includes('risk') || message.includes('heart attack')) {
+    // Enhanced personalized responses with user data analysis
+    if (message.includes('my report') || message.includes('my recording') || message.includes('analyze') || message.includes('my data')) {
       if (userRecordings.length > 0) {
-        const avgRisk = userRecordings.reduce((sum, r) => sum + r.attack_risk, 0) / userRecordings.length;
-        response = `Based on your ${userRecordings.length} recordings, your average heart attack risk is ${Math.round(avgRisk)}%.\n\n${healthKnowledgeBase.riskFactors.high}\n\nFor personalized advice, consult with a healthcare provider.`;
-        type = avgRisk > 50 ? 'warning' : 'info';
+        const latest = userRecordings[0];
+        const avgHR = userRecordings.reduce((sum, r) => sum + (r.heart_rate_avg || 0), 0) / userRecordings.length;
+        const avgRisk = userRecordings.reduce((sum, r) => sum + (r.attack_risk || 0), 0) / userRecordings.length;
+        const avgStress = userRecordings.reduce((sum, r) => sum + (r.stress_level || 0), 0) / userRecordings.length;
+        
+        response = `📊 **Your Heart Health Analysis:**\n\n**Latest Recording:**\n• Heart Rate: ${latest.heart_rate_avg || 'N/A'} BPM\n• Attack Risk: ${latest.attack_risk || 'N/A'}%\n• Condition: ${latest.condition || 'Normal'}\n• Stress Level: ${latest.stress_level || 'Low'}\n\n**Overall Trends (${userRecordings.length} recordings):**\n• Average HR: ${Math.round(avgHR)} BPM\n• Average Risk: ${Math.round(avgRisk)}%\n• Average Stress: ${avgStress.toFixed(1)}\n\n**Clinical Insights:**\n${avgRisk > 30 ? '⚠️ Elevated risk detected - consider lifestyle modifications' : '✅ Risk levels appear manageable'}\n${avgHR > 100 ? '⚠️ High resting heart rate pattern' : avgHR < 60 ? 'ℹ️ Lower heart rate - common in athletes' : '✅ Normal heart rate range'}`;
+        type = avgRisk > 30 ? 'warning' : 'info';
       } else {
-        response = `${healthKnowledgeBase.riskFactors.high}\n\n${healthKnowledgeBase.riskFactors.prevention}`;
+        response = "I don't see any recordings in your profile yet. Please record your heart sounds first:\n\n1. Go to Recording page\n2. Follow the guided recording process\n3. Get instant AI analysis\n4. Return here for personalized insights!";
         type = 'info';
       }
     }
-    else if (message.includes('heart rate') || message.includes('bpm')) {
-      response = `${healthKnowledgeBase.heartRate.normal}\n\n${healthKnowledgeBase.heartRate.high}\n\n${healthKnowledgeBase.heartRate.low}`;
+    else if (message.includes('recording') || message.includes('how to record')) {
+      response = "🎙️ **Recording Your Heart Sounds:**\n\n**Step-by-Step Guide:**\n1. Navigate to Recording page\n2. Ensure quiet environment\n3. Place phone on chest (left side)\n4. Click 'Start Recording'\n5. Breathe normally for 15-30 seconds\n6. Click 'Stop' and wait for AI analysis\n\n**Pro Tips:**\n• Use in quiet room for best results\n• Phone positioning is crucial\n• Multiple recordings improve accuracy\n• Best times: morning/evening when relaxed";
       type = 'info';
     }
-    else if (message.includes('symptoms') || message.includes('chest pain') || message.includes('emergency')) {
-      response = `⚠️ ${healthKnowledgeBase.symptoms.warning}\n\nThis app is for monitoring purposes only and should not replace professional medical care.`;
+    else if (message.includes('accuracy') || message.includes('noise') || message.includes('ai')) {
+      response = "🤖 **Advanced AI Technology:**\n\n**Core Features:**\n• 95%+ accuracy in heart sound detection\n• Advanced noise filtering algorithms\n• Real-time signal processing\n• Machine learning pattern recognition\n• Continuous improvement through usage\n\n**Analysis Capabilities:**\n• S1, S2, S3, S4 heart sound detection\n• Murmur identification\n• Rhythm irregularity detection\n• Risk assessment algorithms\n• Stress level evaluation";
+      type = 'info';
+    }
+    else if (message.includes('risk') || message.includes('heart attack') || message.includes('cardiovascular')) {
+      if (userRecordings.length > 0) {
+        const avgRisk = userRecordings.reduce((sum, r) => sum + (r.attack_risk || 0), 0) / userRecordings.length;
+        const riskTrend = userRecordings.length > 1 ? 
+          (userRecordings[0].attack_risk || 0) - (userRecordings[userRecordings.length - 1].attack_risk || 0) : 0;
+        
+        response = `🫀 **Your Cardiovascular Risk Assessment:**\n\n**Current Status:**\n• Average Risk: ${Math.round(avgRisk)}%\n• Risk Category: ${avgRisk < 20 ? 'Low' : avgRisk < 40 ? 'Moderate' : 'High'}\n• Trend: ${riskTrend > 0 ? '📈 Increasing' : riskTrend < 0 ? '📉 Decreasing' : '➡️ Stable'}\n\n**Risk Factors to Monitor:**\n${healthKnowledgeBase.riskFactors.high}\n\n**Prevention Strategy:**\n${healthKnowledgeBase.riskFactors.prevention}\n\n${avgRisk > 40 ? '⚠️ **Important:** High risk detected. Please consult healthcare provider.' : '✅ Keep monitoring and maintain healthy habits.'}`;
+        type = avgRisk > 40 ? 'warning' : 'info';
+      } else {
+        response = `🫀 **Cardiovascular Risk Information:**\n\n**Common Risk Factors:**\n${healthKnowledgeBase.riskFactors.high}\n\n**Prevention Methods:**\n${healthKnowledgeBase.riskFactors.prevention}\n\nRecord your heart sounds to get personalized risk assessment!`;
+        type = 'info';
+      }
+    }
+    else if (message.includes('heart rate') || message.includes('bpm') || message.includes('pulse')) {
+      if (userRecordings.length > 0) {
+        const hrData = userRecordings.map(r => r.heart_rate_avg || 0).filter(hr => hr > 0);
+        const avgHR = hrData.reduce((sum, hr) => sum + hr, 0) / hrData.length;
+        const minHR = Math.min(...hrData);
+        const maxHR = Math.max(...hrData);
+        
+        response = `💓 **Your Heart Rate Analysis:**\n\n**Personal Data:**\n• Average: ${Math.round(avgHR)} BPM\n• Range: ${minHR} - ${maxHR} BPM\n• Recordings: ${hrData.length}\n\n**Clinical Reference:**\n${healthKnowledgeBase.heartRate.normal}\n\n**Your Status:**\n${avgHR > 100 ? '⚠️ Above normal range - consider medical consultation' : avgHR < 60 ? 'ℹ️ Below normal - common in athletes or may need evaluation' : '✅ Within normal range'}\n\n**Recommendations:**\n• Monitor trends over time\n• Note any symptoms during high/low readings\n• Record at consistent times for better tracking`;
+        type = avgHR > 100 || avgHR < 50 ? 'warning' : 'info';
+      } else {
+        response = `💓 **Heart Rate Information:**\n\n${healthKnowledgeBase.heartRate.normal}\n\n${healthKnowledgeBase.heartRate.high}\n\n${healthKnowledgeBase.heartRate.low}\n\nRecord your heart sounds to get personalized heart rate analysis!`;
+        type = 'info';
+      }
+    }
+    else if (message.includes('symptoms') || message.includes('chest pain') || message.includes('emergency') || message.includes('urgent')) {
+      response = `🚨 **Emergency Warning:**\n\n${healthKnowledgeBase.symptoms.warning}\n\n**When to Call 911:**\n• Severe chest pain or pressure\n• Difficulty breathing\n• Loss of consciousness\n• Severe dizziness\n• Irregular heartbeat with symptoms\n\n**Important:** This app is for monitoring only and should never replace emergency medical care or professional diagnosis.`;
       type = 'warning';
     }
-    else if (message.includes('diet') || message.includes('food') || message.includes('nutrition')) {
-      response = `${healthKnowledgeBase.lifestyle.diet}\n\nConsider consulting with a nutritionist for personalized dietary advice.`;
+    else if (message.includes('diet') || message.includes('food') || message.includes('nutrition') || message.includes('eat')) {
+      response = `🥗 **Heart-Healthy Nutrition:**\n\n**Recommended Foods:**\n${healthKnowledgeBase.lifestyle.diet}\n\n**Daily Guidelines:**\n• 5-9 servings fruits/vegetables\n• 2-3 servings fish per week\n• Limit sodium to 2,300mg daily\n• Choose whole grains over refined\n• Stay hydrated (8 glasses water)\n\n**Foods to Limit:**\n• Processed meats\n• Trans fats\n• Excess alcohol\n• High-sodium foods\n• Sugary beverages`;
       type = 'info';
     }
-    else if (message.includes('exercise') || message.includes('workout') || message.includes('fitness')) {
-      response = `${healthKnowledgeBase.lifestyle.exercise}\n\nAlways consult your doctor before starting a new exercise program.`;
+    else if (message.includes('exercise') || message.includes('workout') || message.includes('fitness') || message.includes('activity')) {
+      response = `🏃‍♂️ **Exercise for Heart Health:**\n\n**Weekly Goals:**\n${healthKnowledgeBase.lifestyle.exercise}\n\n**Recommended Activities:**\n• Brisk walking\n• Swimming\n• Cycling\n• Dancing\n• Strength training 2x/week\n\n**Getting Started:**\n• Start slowly if inactive\n• Warm up and cool down\n• Monitor heart rate during exercise\n• Listen to your body\n• Stay consistent\n\n⚠️ Always consult your doctor before starting new exercise programs.`;
       type = 'info';
     }
-    else if (message.includes('7 day') || message.includes('week') || message.includes('trend')) {
-      response = "The 7-day analysis feature tracks your heart health trends over a week, including:\n\n• Average heart rate patterns\n• Risk level changes\n• Stress level variations\n• Recovery trends\n• Recommendations based on patterns\n\nRecord daily for the most accurate weekly insights!";
+    else if (message.includes('stress') || message.includes('anxiety') || message.includes('mental')) {
+      if (userRecordings.length > 0) {
+        const avgStress = userRecordings.reduce((sum, r) => sum + (r.stress_level || 0), 0) / userRecordings.length;
+        response = `🧘‍♀️ **Your Stress Analysis:**\n\n**Current Status:**\n• Average Stress Level: ${avgStress.toFixed(1)}/10\n• Category: ${avgStress < 3 ? 'Low' : avgStress < 6 ? 'Moderate' : 'High'}\n\n**Stress Management:**\n• Deep breathing exercises\n• Regular meditation\n• Adequate sleep (7-9 hours)\n• Regular physical activity\n• Social connections\n• Professional support if needed\n\n${avgStress > 6 ? '⚠️ High stress levels detected. Consider stress management techniques.' : '✅ Stress levels appear manageable.'}`;
+        type = avgStress > 6 ? 'warning' : 'info';
+      } else {
+        response = "🧘‍♀️ **Stress & Heart Health:**\n\nChronic stress can impact cardiovascular health. Effective management includes:\n\n• Regular exercise\n• Meditation/mindfulness\n• Adequate sleep\n• Social support\n• Professional counseling\n• Relaxation techniques\n\nRecord your heart sounds to track how stress affects your cardiovascular metrics!";
+        type = 'info';
+      }
+    }
+    else if (message.includes('7 day') || message.includes('week') || message.includes('trend') || message.includes('analysis')) {
+      response = "📈 **7-Day Heart Health Analysis:**\n\n**Comprehensive Tracking:**\n• Heart rate variability trends\n• Risk assessment patterns\n• Stress level monitoring\n• Recovery indicators\n• Rhythm analysis\n• Progressive health scoring\n\n**Advanced Features:**\n• AI-powered pattern recognition\n• Predictive health insights\n• Personalized recommendations\n• Clinical-grade reporting\n• Trend visualization\n\n**Best Practices:**\n• Record daily at same time\n• Note activities/symptoms\n• Consistent environment\n• Track lifestyle factors";
       type = 'info';
     }
-    else if (message.includes('hello') || message.includes('hi') || message.includes('help')) {
-      response = "Hello! I'm here to help with your cardiovascular health questions. I can explain your recordings, provide general heart health advice, or guide you through app features. What would you like to know?";
+    else if (message.includes('hello') || message.includes('hi') || message.includes('help') || message.includes('start')) {
+      const recordingCount = userRecordings.length;
+      response = `👋 **Hello! Welcome to your Health AI Assistant**\n\n**I can help you with:**\n• Analyzing your ${recordingCount} heart recordings\n• Explaining your personalized health metrics\n• Providing evidence-based health guidance\n• Understanding app features and analytics\n• Answering cardiovascular health questions\n\n**Quick Actions:**\n${recordingCount > 0 ? '• "Analyze my report" - Get detailed insights\n• "Show my trends" - View health patterns' : '• "How to record" - Get started with recordings'}\n• "Heart rate info" - Learn about BPM\n• "Risk factors" - Understand cardiovascular risks\n\nWhat would you like to explore?`;
       type = 'info';
     }
     else {
-      response = "I'm here to help with cardiovascular health and app-related questions. You can ask me about:\n\n• Your heart recordings and results\n• General heart health information\n• App features and how to use them\n• Risk factors and prevention\n• When to seek medical care\n\nWhat specific topic interests you?";
+      response = "🤖 **I'm your personalized Health AI Assistant!**\n\n**I can analyze:**\n• Your specific heart recordings and data\n• Personal health trends and patterns\n• Risk assessments and recommendations\n• Cardiovascular health guidance\n\n**Try asking:**\n• \"Analyze my latest report\"\n• \"What's my heart rate trend?\"\n• \"Explain my risk level\"\n• \"Show me my stress patterns\"\n• \"How to improve my heart health?\"\n\n**General Topics:**\n• Symptoms and when to seek care\n• Diet and exercise recommendations\n• App features and functionality\n\nWhat specific aspect of your heart health interests you?";
       type = 'info';
     }
 
@@ -154,24 +192,28 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
   };
 
   const quickActions = [
-    { text: "How to record heart sounds?", icon: Stethoscope },
+    { text: "Analyze my report", icon: Activity },
     { text: "Explain my risk level", icon: Shield },
-    { text: "Heart rate information", icon: Heart },
-    { text: "7-day analysis", icon: Clock },
+    { text: "Show my heart rate trends", icon: Heart },
+    { text: "7-day analysis insights", icon: Clock },
+    { text: "How to record", icon: Stethoscope },
+    { text: "Stress analysis", icon: Brain },
   ];
 
   return (
-    <Card className="border-0 shadow-lg h-[600px] flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <Bot className="h-5 w-5 text-primary" />
+    <Card className="border-0 shadow-lg h-[600px] md:h-[700px] flex flex-col">
+      <CardHeader className="pb-3 px-4 md:px-6">
+        <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+          <Bot className="h-4 w-4 md:h-5 md:w-5 text-primary" />
           Health AI Assistant
-          <Badge variant="outline" className="ml-auto">24/7 Available</Badge>
+          <Badge variant="outline" className="ml-auto text-xs">
+            {userRecordings.length > 0 ? `${userRecordings.length} Records` : '24/7 Available'}
+          </Badge>
         </CardTitle>
       </CardHeader>
       
       <CardContent className="flex-1 flex flex-col p-0">
-        <ScrollArea className="flex-1 px-6" ref={scrollRef}>
+        <ScrollArea className="flex-1 px-4 md:px-6" ref={scrollRef}>
           <div className="space-y-4 pb-4">
             {messages.map((message) => (
               <div
@@ -184,17 +226,17 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
                   </div>
                 )}
                 
-                <div className={`max-w-[80%] space-y-1`}>
-                  <div className={`rounded-lg p-3 ${
+                <div className={`max-w-[85%] md:max-w-[80%] space-y-1`}>
+                  <div className={`rounded-lg p-2 md:p-3 ${
                     message.sender === 'user' 
                       ? 'bg-primary text-primary-foreground ml-auto' 
                       : message.type === 'warning'
-                      ? 'bg-critical/10 text-foreground border border-critical/20'
+                      ? 'bg-destructive/10 text-foreground border border-destructive/20'
                       : message.type === 'info'
-                      ? 'bg-primary/5 text-foreground'
+                      ? 'bg-primary/5 text-foreground border border-primary/10'
                       : 'bg-secondary text-secondary-foreground'
                   }`}>
-                    <p className="text-sm whitespace-pre-line">{message.content}</p>
+                    <p className="text-xs md:text-sm whitespace-pre-line leading-relaxed">{message.content}</p>
                   </div>
                   <p className="text-xs text-muted-foreground px-2">
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -227,8 +269,8 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
         </ScrollArea>
 
         {/* Quick Actions */}
-        <div className="px-6 py-3 border-t">
-          <div className="flex flex-wrap gap-2 mb-3">
+        <div className="px-4 md:px-6 py-3 border-t bg-secondary/20">
+          <div className="grid grid-cols-2 md:flex md:flex-wrap gap-1 md:gap-2 mb-3">
             {quickActions.map((action, index) => (
               <Button
                 key={index}
@@ -238,10 +280,10 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
                   setInputMessage(action.text);
                   setTimeout(sendMessage, 100);
                 }}
-                className="text-xs"
+                className="text-xs justify-start md:justify-center h-8 md:h-9 px-2 md:px-3"
               >
-                <action.icon className="h-3 w-3 mr-1" />
-                {action.text}
+                <action.icon className="h-3 w-3 mr-1 flex-shrink-0" />
+                <span className="truncate">{action.text}</span>
               </Button>
             ))}
           </div>
@@ -249,13 +291,18 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
           {/* Message Input */}
           <div className="flex gap-2">
             <Input
-              placeholder="Ask about your heart health..."
+              placeholder="Ask about your heart health or reports..."
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              className="flex-1"
+              className="flex-1 text-sm"
             />
-            <Button onClick={sendMessage} disabled={!inputMessage.trim() || isTyping}>
+            <Button 
+              onClick={sendMessage} 
+              disabled={!inputMessage.trim() || isTyping}
+              size="sm"
+              className="px-3"
+            >
               <Send className="h-4 w-4" />
             </Button>
           </div>
