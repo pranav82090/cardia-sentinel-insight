@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Heart, Menu, X, User, LogOut, Home, Activity, Mic } from "lucide-react";
+import { Heart, Menu, X, User, LogOut, Home, Activity, Mic, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Navbar = () => {
@@ -96,6 +96,16 @@ const Navbar = () => {
                   <div className="hidden xl:block">
                     <p className="text-sm font-medium text-foreground">{user.email}</p>
                   </div>
+                  <Link to="/settings">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Settings
+                    </Button>
+                  </Link>
                   <Button
                     onClick={handleSignOut}
                     variant="outline"
@@ -177,14 +187,25 @@ const Navbar = () => {
                     {/* Footer Actions */}
                     <div className="pt-6 border-t border-border space-y-3">
                       {user ? (
-                        <Button
-                          onClick={handleSignOut}
-                          variant="outline"
-                          className="w-full gap-2"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          Sign Out
-                        </Button>
+                        <>
+                          <Link to="/settings" onClick={() => setIsOpen(false)}>
+                            <Button
+                              variant="ghost"
+                              className="w-full gap-2 justify-start"
+                            >
+                              <Settings className="h-4 w-4" />
+                              Settings
+                            </Button>
+                          </Link>
+                          <Button
+                            onClick={handleSignOut}
+                            variant="outline"
+                            className="w-full gap-2"
+                          >
+                            <LogOut className="h-4 w-4" />
+                            Sign Out
+                          </Button>
+                        </>
                       ) : (
                         <Link to="/auth" onClick={() => setIsOpen(false)}>
                           <Button variant="cardiac" className="w-full gap-2">
