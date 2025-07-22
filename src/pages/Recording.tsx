@@ -741,8 +741,8 @@ const Recording = () => {
                     </div>
                   </div>
                   
-                  <div className="p-3 rounded-lg border border-warning/20 bg-gray-950">
-                    <p className="text-sm text-warning-foreground">
+                  <div className="p-3 rounded-lg border border-warning/20 bg-gray-50">
+                    <p className="text-sm text-gray-950">
                       <strong>Note:</strong> Advanced noise cancellation removes environment sounds and enhances S1/S2 heart sounds for medical-grade analysis.
                     </p>
                   </div>
