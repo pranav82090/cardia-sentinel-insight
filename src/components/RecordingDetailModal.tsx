@@ -437,7 +437,7 @@ const RecordingDetailModal = ({
       doc.text('Please consult with a healthcare provider for proper medical evaluation.', 20, 285);
       
       // Save the PDF
-      doc.save(`cardiac-report-${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`cardia-sentinel-report-${new Date().toISOString().split('T')[0]}.pdf`);
       
       toast({
         title: "Report Downloaded",
