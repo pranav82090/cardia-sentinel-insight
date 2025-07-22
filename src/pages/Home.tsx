@@ -168,7 +168,7 @@ const Home = () => {
                     I was born in Tirupur on August 14, 2012, and I'm currently studying in 8th grade at A.V.P Trust Public Senior Secondary School (CBSE) in 2025, Gandhi Nagar, Tirupur.
                   </p>
                   <p className="text-muted-foreground text-base lg:text-lg leading-relaxed">
-                    I have a passion for software engineering, and I was inspired to create the CardiacSentinel application after learning that heart attacks are increasingly affecting people at younger ages. This concerning trend motivated me to develop an AI-powered solution that could help detect heart conditions early and potentially save lives.
+                    I have a passion for software engineering, and I was inspired to create the Cardia Sentinel application after learning that heart attacks are increasingly affecting people at younger ages. This concerning trend motivated me to develop an AI-powered solution that could help detect heart conditions early and potentially save lives.
                   </p>
                   <div className="space-y-2 text-sm text-muted-foreground">
                     <p><strong>Born:</strong> August 14, 2012</p>
