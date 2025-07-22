@@ -287,53 +287,170 @@ const RecordingDetailModal = ({
     if (recording.stress_level === 'High') score -= 10;
     return Math.max(20, score);
   };
-  const downloadReport = () => {
+  const downloadReport = async () => {
     if (!recording || !analysisData) return;
-    const report = {
-      patientReport: {
-        analysisDate: new Date().toISOString(),
-        recordingDate: recording.recorded_at,
-        basicMetrics: {
-          heartRate: {
-            average: recording.heart_rate_avg,
-            minimum: recording.heart_rate_min,
-            maximum: recording.heart_rate_max,
-            variability: analysisData.heartRateVariability
-          },
-          riskAssessment: {
-            attackRisk: recording.attack_risk,
-            riskLevel: getRiskLevel(recording.attack_risk).level,
-            confidence: analysisData.confidence
-          },
-          condition: recording.condition,
-          stressAnalysis: {
-            level: recording.stress_level,
-            score: recording.stress_score
-          }
-        },
-        heartSoundAnalysis: analysisData.soundAnalysis,
-        rhythmAnalysis: analysisData.rhythmAnalysis,
-        recommendations: generateRecommendations(),
-        technicalDetails: {
-          modelAccuracy: recording.model_accuracy || 96,
-          noiseReduction: analysisData.noiseReduction,
-          signalQuality: analysisData.signalQuality
+    
+    try {
+      // Import jsPDF dynamically
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      
+      // PDF styling
+      const primaryColor = [68, 85, 162]; // Primary blue
+      const textColor = [33, 37, 41]; // Dark text
+      const lightGray = [248, 249, 250]; // Light background
+      
+      // Header
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.rect(0, 0, 210, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Cardiac Analysis Report', 20, 25);
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated on ${new Date().toLocaleDateString()}`, 20, 35);
+      
+      // Reset text color for body
+      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+      let yPos = 60;
+      
+      // Patient Information
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Patient Information', 20, yPos);
+      yPos += 10;
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Analysis Date: ${new Date(recording.recorded_at).toLocaleDateString()}`, 20, yPos);
+      yPos += 6;
+      doc.text(`Recording Time: ${new Date(recording.recorded_at).toLocaleTimeString()}`, 20, yPos);
+      yPos += 6;
+      doc.text(`Report ID: ${recording.id.slice(0, 8)}`, 20, yPos);
+      yPos += 6;
+      doc.text(`Analysis Accuracy: ${recording.model_accuracy || 96}%`, 20, yPos);
+      yPos += 15;
+      
+      // Heart Rate Analysis
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Heart Rate Analysis', 20, yPos);
+      yPos += 10;
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Average Heart Rate: ${recording.heart_rate_avg} BPM`, 20, yPos);
+      yPos += 6;
+      doc.text(`Heart Rate Range: ${recording.heart_rate_min} - ${recording.heart_rate_max} BPM`, 20, yPos);
+      yPos += 6;
+      doc.text(`Heart Rate Variability: ${analysisData.heartRateVariability} ms`, 20, yPos);
+      yPos += 6;
+      doc.text(`Rhythm: ${analysisData.rhythmAnalysis.rhythm}`, 20, yPos);
+      yPos += 15;
+      
+      // Risk Assessment
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Risk Assessment', 20, yPos);
+      yPos += 10;
+      
+      const riskInfo = getRiskLevel(recording.attack_risk);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Heart Attack Risk: ${recording.attack_risk}% (${riskInfo.level})`, 20, yPos);
+      yPos += 6;
+      doc.text(`Heart Health Score: ${getHealthPercentage(recording)}%`, 20, yPos);
+      yPos += 6;
+      doc.text(`Detected Condition: ${recording.condition}`, 20, yPos);
+      yPos += 15;
+      
+      // Stress Analysis
+      if (recording.stress_level) {
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Stress Analysis', 20, yPos);
+        yPos += 10;
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Stress Level: ${recording.stress_level}`, 20, yPos);
+        yPos += 6;
+        if (recording.stress_score) {
+          doc.text(`Stress Score: ${recording.stress_score}/100`, 20, yPos);
+          yPos += 6;
         }
+        yPos += 10;
       }
-    };
-    const blob = new Blob([JSON.stringify(report, null, 2)], {
-      type: 'application/json'
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `cardiac-report-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast({
-      title: "Report Downloaded",
-      description: "Medical report has been saved to your device"
-    });
+      
+      // Sound Analysis
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Heart Sound Analysis', 20, yPos);
+      yPos += 10;
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`S1 Heart Sound: ${analysisData.soundAnalysis.s1.detected ? 'Detected' : 'Not Detected'}`, 20, yPos);
+      yPos += 6;
+      doc.text(`S2 Heart Sound: ${analysisData.soundAnalysis.s2.detected ? 'Detected' : 'Not Detected'}`, 20, yPos);
+      yPos += 6;
+      if (analysisData.soundAnalysis.s3.detected) {
+        doc.text(`S3 Heart Sound: Detected - ${analysisData.soundAnalysis.s3.significance}`, 20, yPos);
+        yPos += 6;
+      }
+      if (analysisData.soundAnalysis.s4.detected) {
+        doc.text(`S4 Heart Sound: Detected - ${analysisData.soundAnalysis.s4.significance}`, 20, yPos);
+        yPos += 6;
+      }
+      if (analysisData.soundAnalysis.murmur.detected) {
+        doc.text(`Heart Murmur: Grade ${analysisData.soundAnalysis.murmur.grade} ${analysisData.soundAnalysis.murmur.timing}`, 20, yPos);
+        yPos += 6;
+      }
+      yPos += 10;
+      
+      // Recommendations
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Medical Recommendations', 20, yPos);
+      yPos += 10;
+      
+      const recommendations = generateRecommendations();
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      
+      recommendations.forEach((recommendation, index) => {
+        const lines = doc.splitTextToSize(`${index + 1}. ${recommendation}`, 170);
+        lines.forEach(line => {
+          doc.text(line, 20, yPos);
+          yPos += 6;
+        });
+        yPos += 2;
+      });
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text('This report is generated by AI analysis and should not replace professional medical advice.', 20, 280);
+      doc.text('Please consult with a healthcare provider for proper medical evaluation.', 20, 285);
+      
+      // Save the PDF
+      doc.save(`cardiac-report-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      toast({
+        title: "Report Downloaded",
+        description: "Medical report PDF has been saved to your device"
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Download Failed",
+        description: "Unable to generate PDF report",
+        variant: "destructive"
+      });
+    }
   };
   const generateRecommendations = () => {
     const recommendations = ["Continue regular heart monitoring to track changes over time", "Maintain a heart-healthy diet with reduced sodium and saturated fats", "Aim for at least 150 minutes of moderate aerobic exercise weekly", "Manage stress through relaxation techniques or mindfulness practice"];

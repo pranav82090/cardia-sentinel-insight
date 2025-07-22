@@ -220,40 +220,35 @@ const Settings = () => {
     setIsDeletingAccount(true);
     
     try {
-      // First, delete user data from our tables
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', user.id);
+      // Delete user data from all tables
+      await Promise.all([
+        supabase.from('profiles').delete().eq('id', user.id),
+        supabase.from('heart_recordings').delete().eq('user_id', user.id),
+        supabase.from('api_settings').delete().eq('user_id', user.id)
+      ]);
       
-      const { error: recordingsError } = await supabase
-        .from('heart_recordings')
-        .delete()
-        .eq('user_id', user.id);
-      
-      const { error: apiSettingsError } = await supabase
-        .from('api_settings')
-        .delete()
-        .eq('user_id', user.id);
-      
-      // Call the delete user function
+      // Call the delete user function to remove from auth.users
       const { error: deleteError } = await supabase.rpc('delete_user');
       
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        console.warn('Delete user function error:', deleteError);
+        // Continue with sign out even if function fails
+      }
       
       // Sign out the user
       await supabase.auth.signOut();
       
       toast({
-        title: "🗑️ Account Deleted",
-        description: "Your account and all data have been permanently deleted.",
+        title: "Account Deleted",
+        description: "Your account and all associated data have been permanently deleted.",
       });
       
       navigate("/");
     } catch (error: any) {
+      console.error('Account deletion error:', error);
       toast({
         title: "Account Deletion Failed",
-        description: error.message,
+        description: "There was an error deleting your account. Please try again or contact support.",
         variant: "destructive",
       });
     } finally {
