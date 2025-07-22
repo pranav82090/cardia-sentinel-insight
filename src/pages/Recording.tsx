@@ -5,69 +5,48 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Mic, 
-  MicOff, 
-  Play, 
-  Square, 
-  Check,
-  ArrowRight,
-  Heart,
-  Activity,
-  Brain,
-  Camera,
-  Flashlight,
-  FlashlightOff,
-  User,
-  Zap,
-  ChevronRight,
-  Volume2
-} from "lucide-react";
+import { Mic, MicOff, Play, Square, Check, ArrowRight, Heart, Activity, Brain, Camera, Flashlight, FlashlightOff, User, Zap, ChevronRight, Volume2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
-
 interface PPGData {
   bpm: number;
   quality: number;
   timestamp: number;
 }
-
 interface HRVData {
   rmssd: number;
   stressLevel: "Low" | "Moderate" | "High";
   stressScore: number;
 }
-
 const Recording = () => {
   const [user, setUser] = useState<any>(null);
-  
+
   // Step tracking
   const [currentStep, setCurrentStep] = useState(1);
   const [stepsCompleted, setStepsCompleted] = useState<boolean[]>([false, false, false]);
-  
+
   // Step 1: Heart Sound Recording
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [heartSoundAnalysis, setHeartSoundAnalysis] = useState<any>(null);
   const [isAnalyzingAudio, setIsAnalyzingAudio] = useState(false);
-  
+
   // Step 2: PPG BPM Monitoring
   const [cameraActive, setCameraActive] = useState(false);
   const [flashlightOn, setFlashlightOn] = useState(false);
   const [ppgData, setPpgData] = useState<PPGData | null>(null);
   const [ppgHistory, setPpgHistory] = useState<PPGData[]>([]);
   const [ppgProgress, setPpgProgress] = useState(0);
-  
+
   // Step 3: HRV Stress Analysis
   const [hrvData, setHrvData] = useState<HRVData | null>(null);
   const [hrvProgress, setHrvProgress] = useState(0);
   const [isAnalyzingHRV, setIsAnalyzingHRV] = useState(false);
-  
+
   // Final results
   const [finalResults, setFinalResults] = useState<any>(null);
   const [showFinalReport, setShowFinalReport] = useState(false);
-  
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -75,30 +54,35 @@ const Recording = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const ppgIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const hrvIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  
   const navigate = useNavigate();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
         return;
       }
       setUser(session.user);
     };
-
     checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: {
+        subscription
+      }
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session) {
         navigate("/auth");
       } else {
         setUser(session.user);
       }
     });
-
     return () => subscription.unsubscribe();
   }, [navigate]);
 
@@ -108,7 +92,8 @@ const Recording = () => {
       intervalRef.current = setInterval(() => {
         setRecordingTime(prev => {
           const newTime = prev + 1;
-          if (newTime >= 30) { // 30-second recording
+          if (newTime >= 30) {
+            // 30-second recording
             stopRecording();
             return newTime;
           }
@@ -120,14 +105,12 @@ const Recording = () => {
         clearInterval(intervalRef.current);
       }
     }
-
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
     };
   }, [isRecording]);
-
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -137,105 +120,94 @@ const Recording = () => {
   // STEP 1: Heart Sound Recording with Advanced Noise Cancellation
   const startHeartRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
-          sampleRate: 48000, // High quality sampling
+          sampleRate: 48000,
+          // High quality sampling
           channelCount: 1
-        } 
+        }
       });
-      
       mediaRecorderRef.current = new MediaRecorder(stream, {
         mimeType: 'audio/webm;codecs=opus'
       });
       audioChunksRef.current = [];
-
-      mediaRecorderRef.current.ondataavailable = (event) => {
+      mediaRecorderRef.current.ondataavailable = event => {
         audioChunksRef.current.push(event.data);
       };
-
       mediaRecorderRef.current.onstop = async () => {
-        const rawAudioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        
+        const rawAudioBlob = new Blob(audioChunksRef.current, {
+          type: 'audio/webm'
+        });
+
         // Apply advanced noise cancellation for heart sounds only
         const processedAudio = await processHeartAudio(rawAudioBlob);
         setAudioBlob(processedAudio);
-        
         stream.getTracks().forEach(track => track.stop());
-        
+
         // Auto-analyze heart sounds
         analyzeHeartSounds(processedAudio);
       };
-
       mediaRecorderRef.current.start();
       setIsRecording(true);
       setRecordingTime(0);
-
       toast({
         title: "🎙️ Recording Heart Sounds",
-        description: "Advanced noise cancellation active. Recording for 30 seconds...",
+        description: "Advanced noise cancellation active. Recording for 30 seconds..."
       });
     } catch (error) {
       toast({
         title: "Microphone Access Required",
         description: "Please allow microphone access to record heart sounds.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
     }
   };
-
   const processHeartAudio = async (audioBlob: Blob): Promise<Blob> => {
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const arrayBuffer = await audioBlob.arrayBuffer();
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-      
       const sampleRate = audioBuffer.sampleRate;
       const channels = audioBuffer.numberOfChannels;
       const frameCount = audioBuffer.length;
-      
       const processedBuffer = audioContext.createBuffer(channels, frameCount, sampleRate);
-      
       for (let channel = 0; channel < channels; channel++) {
         const inputData = audioBuffer.getChannelData(channel);
         const outputData = processedBuffer.getChannelData(channel);
-        
+
         // Advanced heart sound isolation
         for (let i = 0; i < frameCount; i++) {
           let sample = inputData[i];
-          
+
           // 1. Bandpass filter for heart frequencies (15-250 Hz)
           sample = heartBandpassFilter(sample, i, sampleRate);
-          
+
           // 2. Advanced noise gate
           sample = adaptiveNoiseGate(sample, inputData, i);
-          
+
           // 3. Heart sound enhancement
           sample = enhanceHeartSounds(sample, i, sampleRate);
-          
+
           // 4. Environment noise removal
           sample = environmentNoiseRemoval(sample, i);
-          
           outputData[i] = Math.max(-1, Math.min(1, sample));
         }
       }
-      
       return audioBufferToWav(processedBuffer);
     } catch (error) {
       console.error('Audio processing error:', error);
       return audioBlob;
     }
   };
-
   const heartBandpassFilter = (sample: number, index: number, sampleRate: number): number => {
     // Optimized for S1 (20-60Hz) and S2 (40-100Hz) heart sounds
     const lowCutoff = 15;
@@ -243,66 +215,54 @@ const Recording = () => {
     const nyquist = sampleRate / 2;
     const low = lowCutoff / nyquist;
     const high = highCutoff / nyquist;
-    
     return sample * (high - low) * Math.cos(2 * Math.PI * ((low + high) / 2) * index / sampleRate);
   };
-
   const adaptiveNoiseGate = (sample: number, inputArray: Float32Array, index: number): number => {
     // Adaptive threshold based on local signal energy
     const windowSize = 1024;
     const start = Math.max(0, index - windowSize / 2);
     const end = Math.min(inputArray.length, index + windowSize / 2);
-    
     let energy = 0;
     for (let i = start; i < end; i++) {
       energy += inputArray[i] * inputArray[i];
     }
-    energy /= (end - start);
-    
+    energy /= end - start;
     const threshold = Math.sqrt(energy) * 0.1;
-    
     if (Math.abs(sample) < threshold) {
       return sample * 0.05; // Heavy reduction for noise
     }
     return sample;
   };
-
   const enhanceHeartSounds = (sample: number, index: number, sampleRate: number): number => {
     // Enhance S1 and S2 heart sound frequencies
     const s1Freq = 40; // S1 dominant frequency
     const s2Freq = 70; // S2 dominant frequency
-    
+
     const s1Enhancement = Math.sin(2 * Math.PI * s1Freq * index / sampleRate) * 0.15;
     const s2Enhancement = Math.sin(2 * Math.PI * s2Freq * index / sampleRate) * 0.12;
-    
     return sample + (s1Enhancement + s2Enhancement) * Math.abs(sample) * 0.3;
   };
-
   const environmentNoiseRemoval = (sample: number, index: number): number => {
     // Remove specific environment frequencies (AC hum, etc.)
     const noiseFreqs = [50, 60, 120]; // Common electrical noise
     let cleanSample = sample;
-    
     noiseFreqs.forEach(freq => {
       const noiseComponent = Math.sin(2 * Math.PI * freq * index / 48000) * 0.05;
       cleanSample -= noiseComponent;
     });
-    
     return cleanSample;
   };
-
   const audioBufferToWav = (buffer: AudioBuffer): Blob => {
     const length = buffer.length * buffer.numberOfChannels * 2;
     const arrayBuffer = new ArrayBuffer(44 + length);
     const view = new DataView(arrayBuffer);
-    
+
     // WAV header
     const writeString = (offset: number, string: string) => {
       for (let i = 0; i < string.length; i++) {
         view.setUint8(offset + i, string.charCodeAt(i));
       }
     };
-    
     writeString(0, 'RIFF');
     view.setUint32(4, 36 + length, true);
     writeString(8, 'WAVE');
@@ -316,7 +276,6 @@ const Recording = () => {
     view.setUint16(34, 16, true);
     writeString(36, 'data');
     view.setUint32(40, length, true);
-    
     const channelData = buffer.getChannelData(0);
     let offset = 44;
     for (let i = 0; i < channelData.length; i++) {
@@ -324,17 +283,15 @@ const Recording = () => {
       view.setInt16(offset, sample * 0x7FFF, true);
       offset += 2;
     }
-    
-    return new Blob([arrayBuffer], { type: 'audio/wav' });
+    return new Blob([arrayBuffer], {
+      type: 'audio/wav'
+    });
   };
-
   const analyzeHeartSounds = async (audioBlob: Blob) => {
     setIsAnalyzingAudio(true);
-    
     try {
       // Simulate advanced heart sound analysis with 96%+ accuracy
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
       const analysis = {
         s1_detected: true,
         s2_detected: true,
@@ -342,28 +299,27 @@ const Recording = () => {
         s4_detected: Math.random() > 0.9,
         murmur_detected: Math.random() > 0.85,
         rhythm_regular: Math.random() > 0.2,
-        heart_rate: 65 + Math.floor(Math.random() * 25), // 65-90 BPM
-        accuracy: 96 + Math.random() * 3, // 96-99% accuracy
+        heart_rate: 65 + Math.floor(Math.random() * 25),
+        // 65-90 BPM
+        accuracy: 96 + Math.random() * 3,
+        // 96-99% accuracy
         condition: Math.random() > 0.8 ? "Abnormal" : "Normal"
       };
-      
       setHeartSoundAnalysis(analysis);
-      
+
       // Mark step 1 as completed
       const newCompleted = [...stepsCompleted];
       newCompleted[0] = true;
       setStepsCompleted(newCompleted);
-      
       toast({
         title: "✅ Heart Sound Analysis Complete",
-        description: `${analysis.accuracy.toFixed(1)}% accuracy achieved. Ready for next step.`,
+        description: `${analysis.accuracy.toFixed(1)}% accuracy achieved. Ready for next step.`
       });
-      
     } catch (error) {
       toast({
         title: "Analysis Failed",
         description: "Please try recording again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsAnalyzingAudio(false);
@@ -373,55 +329,59 @@ const Recording = () => {
   // STEP 2: PPG BPM Monitoring with Flashlight
   const startPPGMonitoring = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: "environment", // Back camera
-          width: { ideal: 640 },
-          height: { ideal: 480 }
-        } 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment",
+          // Back camera
+          width: {
+            ideal: 640
+          },
+          height: {
+            ideal: 480
+          }
+        }
       });
-      
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
         setCameraActive(true);
-        
+
         // Turn on flashlight (if available)
         const track = stream.getVideoTracks()[0];
         try {
           if ('torch' in track.getCapabilities()) {
             await track.applyConstraints({
-              advanced: [{ torch: true } as any]
+              advanced: [{
+                torch: true
+              } as any]
             });
             setFlashlightOn(true);
           }
         } catch (error) {
           console.log('Flashlight not available on this device');
         }
-        
+
         // Start PPG analysis
         startPPGAnalysis();
-        
         toast({
           title: "📸 PPG Monitoring Started",
-          description: "Place finger over camera and flashlight. Hold steady for 60 seconds.",
+          description: "Place finger over camera and flashlight. Hold steady for 60 seconds."
         });
       }
     } catch (error) {
       toast({
         title: "Camera Access Required",
         description: "Please allow camera access for PPG monitoring.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const startPPGAnalysis = () => {
     let progress = 0;
     const analysisInterval = setInterval(() => {
       progress += 1;
       setPpgProgress(progress);
-      
+
       // Simulate PPG readings
       if (progress % 5 === 0) {
         const newReading: PPGData = {
@@ -429,48 +389,39 @@ const Recording = () => {
           quality: 85 + Math.random() * 15,
           timestamp: Date.now()
         };
-        
         setPpgData(newReading);
         setPpgHistory(prev => [...prev.slice(-19), newReading]); // Keep last 20 readings
       }
-      
       if (progress >= 60) {
         clearInterval(analysisInterval);
         completePPGAnalysis();
       }
     }, 1000);
-    
     ppgIntervalRef.current = analysisInterval;
   };
-
   const completePPGAnalysis = () => {
     // Calculate average BPM
-    const avgBPM = ppgHistory.length > 0 
-      ? Math.round(ppgHistory.reduce((sum, reading) => sum + reading.bpm, 0) / ppgHistory.length)
-      : 75;
-    
+    const avgBPM = ppgHistory.length > 0 ? Math.round(ppgHistory.reduce((sum, reading) => sum + reading.bpm, 0) / ppgHistory.length) : 75;
     const finalPPGData: PPGData = {
       bpm: avgBPM,
-      quality: 92 + Math.random() * 7, // 92-99% quality
+      quality: 92 + Math.random() * 7,
+      // 92-99% quality
       timestamp: Date.now()
     };
-    
     setPpgData(finalPPGData);
-    
+
     // Mark step 2 as completed
     const newCompleted = [...stepsCompleted];
     newCompleted[1] = true;
     setStepsCompleted(newCompleted);
-    
     toast({
       title: "✅ PPG Analysis Complete",
-      description: `Average BPM: ${avgBPM}. Quality: ${finalPPGData.quality.toFixed(1)}%`,
+      description: `Average BPM: ${avgBPM}. Quality: ${finalPPGData.quality.toFixed(1)}%`
     });
-    
+
     // Stop camera
     stopPPGMonitoring();
   };
-
   const stopPPGMonitoring = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
@@ -479,7 +430,6 @@ const Recording = () => {
       setCameraActive(false);
       setFlashlightOn(false);
     }
-    
     if (ppgIntervalRef.current) {
       clearInterval(ppgIntervalRef.current);
     }
@@ -488,32 +438,27 @@ const Recording = () => {
   // STEP 3: HRV Stress Analysis
   const startHRVAnalysis = () => {
     setIsAnalyzingHRV(true);
-    
     let progress = 0;
     const hrvInterval = setInterval(() => {
       progress += 2;
       setHrvProgress(progress);
-      
       if (progress >= 100) {
         clearInterval(hrvInterval);
         completeHRVAnalysis();
       }
     }, 600); // 30 seconds total
-    
+
     hrvIntervalRef.current = hrvInterval;
-    
     toast({
       title: "🧠 HRV Stress Analysis Started",
-      description: "Analyzing heart rate variability patterns...",
+      description: "Analyzing heart rate variability patterns..."
     });
   };
-
   const completeHRVAnalysis = () => {
     // Calculate HRV metrics
     const rmssd = 20 + Math.random() * 60; // 20-80ms typical range
     let stressLevel: "Low" | "Moderate" | "High";
     let stressScore: number;
-    
     if (rmssd > 50) {
       stressLevel = "Low";
       stressScore = 20 + Math.random() * 30;
@@ -524,30 +469,26 @@ const Recording = () => {
       stressLevel = "High";
       stressScore = 60 + Math.random() * 30;
     }
-    
     const hrvResult: HRVData = {
       rmssd: Math.round(rmssd),
       stressLevel,
       stressScore: Math.round(stressScore)
     };
-    
     setHrvData(hrvResult);
     setIsAnalyzingHRV(false);
-    
+
     // Mark step 3 as completed
     const newCompleted = [...stepsCompleted];
     newCompleted[2] = true;
     setStepsCompleted(newCompleted);
-    
+
     // Generate final results
     generateFinalResults(hrvResult);
-    
     toast({
       title: "✅ HRV Analysis Complete",
-      description: `Stress Level: ${stressLevel} (RMSSD: ${hrvResult.rmssd}ms)`,
+      description: `Stress Level: ${stressLevel} (RMSSD: ${hrvResult.rmssd}ms)`
     });
   };
-
   const generateFinalResults = async (hrvResult: HRVData) => {
     const results = {
       heart_rate_avg: heartSoundAnalysis?.heart_rate || 75,
@@ -562,56 +503,51 @@ const Recording = () => {
       accuracy: 96.5,
       timestamp: new Date().toISOString()
     };
-    
     setFinalResults(results);
     setShowFinalReport(true);
-    
+
     // Save to database
     if (user) {
       try {
         const reader = new FileReader();
         reader.onload = async () => {
           const base64Audio = (reader.result as string).split(',')[1];
-          
-          const { error } = await supabase
-            .from('heart_recordings')
-            .insert({
-              user_id: user.id,
-              heart_rate_avg: results.heart_rate_avg,
-              heart_rate_min: results.heart_rate_min,
-              heart_rate_max: results.heart_rate_max,
-              attack_risk: results.attack_risk,
-              condition: results.condition,
-              stress_level: results.stress_level,
-              stress_score: results.stress_score,
-              ppg_heart_rate: results.ppg_bpm,
-              model_accuracy: results.accuracy,
-              audio_data: {
-                base64: base64Audio,
-                heart_sounds: heartSoundAnalysis,
-                ppg_data: ppgData ? {
-                  bpm: ppgData.bpm,
-                  quality: ppgData.quality,
-                  timestamp: ppgData.timestamp
-                } : null,
-                hrv_data: hrvResult ? {
-                  rmssd: hrvResult.rmssd,
-                  stressLevel: hrvResult.stressLevel,
-                  stressScore: hrvResult.stressScore
-                } : null,
-                processing_steps: ["noise_cancellation", "ppg_analysis", "hrv_analysis"],
-                accuracy: results.accuracy
-              } as any
-            });
-          
+          const {
+            error
+          } = await supabase.from('heart_recordings').insert({
+            user_id: user.id,
+            heart_rate_avg: results.heart_rate_avg,
+            heart_rate_min: results.heart_rate_min,
+            heart_rate_max: results.heart_rate_max,
+            attack_risk: results.attack_risk,
+            condition: results.condition,
+            stress_level: results.stress_level,
+            stress_score: results.stress_score,
+            ppg_heart_rate: results.ppg_bpm,
+            model_accuracy: results.accuracy,
+            audio_data: {
+              base64: base64Audio,
+              heart_sounds: heartSoundAnalysis,
+              ppg_data: ppgData ? {
+                bpm: ppgData.bpm,
+                quality: ppgData.quality,
+                timestamp: ppgData.timestamp
+              } : null,
+              hrv_data: hrvResult ? {
+                rmssd: hrvResult.rmssd,
+                stressLevel: hrvResult.stressLevel,
+                stressScore: hrvResult.stressScore
+              } : null,
+              processing_steps: ["noise_cancellation", "ppg_analysis", "hrv_analysis"],
+              accuracy: results.accuracy
+            } as any
+          });
           if (error) throw error;
-          
           toast({
             title: "📊 Results Saved",
-            description: "Complete analysis saved to your health records.",
+            description: "Complete analysis saved to your health records."
           });
         };
-        
         if (audioBlob) {
           reader.readAsDataURL(audioBlob);
         }
@@ -620,33 +556,29 @@ const Recording = () => {
       }
     }
   };
-
   const calculateAttackRisk = (): number => {
     let risk = 5; // Base risk
-    
+
     // Factor in heart sound analysis
     if (heartSoundAnalysis?.condition === "Abnormal") risk += 15;
     if (heartSoundAnalysis?.murmur_detected) risk += 10;
     if (!heartSoundAnalysis?.rhythm_regular) risk += 12;
-    
+
     // Factor in HRV stress
     if (hrvData?.stressLevel === "High") risk += 8;
     if (hrvData?.stressLevel === "Moderate") risk += 4;
-    
+
     // Factor in heart rate
     const hr = ppgData?.bpm || heartSoundAnalysis?.heart_rate || 75;
     if (hr > 100) risk += 10;
     if (hr < 50) risk += 8;
-    
     return Math.min(Math.max(risk, 1), 50); // Cap between 1-50%
   };
-
   const nextStep = () => {
     if (currentStep < 3 && stepsCompleted[currentStep - 1]) {
       setCurrentStep(currentStep + 1);
     }
   };
-
   const resetRecording = () => {
     setCurrentStep(1);
     setStepsCompleted([false, false, false]);
@@ -660,16 +592,14 @@ const Recording = () => {
     setPpgProgress(0);
     setHrvProgress(0);
     setRecordingTime(0);
-    
+
     // Stop any active monitoring
     stopPPGMonitoring();
     if (hrvIntervalRef.current) {
       clearInterval(hrvIntervalRef.current);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
@@ -686,55 +616,29 @@ const Recording = () => {
         <Card className="border-0 shadow-lg mb-8">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-6">
-              {[1, 2, 3].map((step) => (
-                <div key={step} className="flex items-center">
-                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                    stepsCompleted[step - 1] 
-                      ? 'bg-success border-success text-success-foreground' 
-                      : currentStep === step 
-                      ? 'bg-primary border-primary text-primary-foreground' 
-                      : 'border-muted-foreground text-muted-foreground'
-                  }`}>
-                    {stepsCompleted[step - 1] ? (
-                      <Check className="h-5 w-5" />
-                    ) : (
-                      <span className="text-sm font-bold">{step}</span>
-                    )}
+              {[1, 2, 3].map(step => <div key={step} className="flex items-center">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${stepsCompleted[step - 1] ? 'bg-success border-success text-success-foreground' : currentStep === step ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground text-muted-foreground'}`}>
+                    {stepsCompleted[step - 1] ? <Check className="h-5 w-5" /> : <span className="text-sm font-bold">{step}</span>}
                   </div>
                   <div className="ml-3">
-                    <p className={`text-sm font-medium ${
-                      currentStep === step ? 'text-foreground' : 'text-muted-foreground'
-                    }`}>
+                    <p className={`text-sm font-medium ${currentStep === step ? 'text-foreground' : 'text-muted-foreground'}`}>
                       {step === 1 && "Heart Sound Recording"}
                       {step === 2 && "PPG BPM Analysis"}
                       {step === 3 && "HRV Stress Analysis"}
                     </p>
                   </div>
-                  {step < 3 && (
-                    <ChevronRight className="h-5 w-5 text-muted-foreground mx-4" />
-                  )}
-                </div>
-              ))}
+                  {step < 3 && <ChevronRight className="h-5 w-5 text-muted-foreground mx-4" />}
+                </div>)}
             </div>
             
             {/* Step Navigation */}
             <div className="flex gap-3">
-              {currentStep > 1 && stepsCompleted[currentStep - 2] && (
-                <Button
-                  onClick={nextStep}
-                  disabled={!stepsCompleted[currentStep - 1]}
-                  className="gap-2"
-                >
+              {currentStep > 1 && stepsCompleted[currentStep - 2] && <Button onClick={nextStep} disabled={!stepsCompleted[currentStep - 1]} className="gap-2">
                   Next Step
                   <ArrowRight className="h-4 w-4" />
-                </Button>
-              )}
+                </Button>}
               
-              <Button
-                onClick={resetRecording}
-                variant="outline"
-                className="gap-2"
-              >
+              <Button onClick={resetRecording} variant="outline" className="gap-2">
                 Start Over
               </Button>
             </div>
@@ -744,8 +648,7 @@ const Recording = () => {
         {/* Step Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Step 1: Heart Sound Recording */}
-          {currentStep === 1 && (
-            <>
+          {currentStep === 1 && <>
               <Card className={`border-0 shadow-lg ${currentStep === 1 ? 'ring-2 ring-primary' : ''}`}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -756,85 +659,44 @@ const Recording = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="text-center">
-                    <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full transition-all duration-300 ${
-                      isRecording 
-                        ? 'bg-critical animate-pulse shadow-lg' 
-                        : 'bg-primary hover:bg-primary/90'
-                    }`}>
-                      {isRecording ? (
-                        <MicOff className="h-8 w-8 text-critical-foreground" />
-                      ) : (
-                        <Mic className="h-8 w-8 text-primary-foreground" />
-                      )}
+                    <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full transition-all duration-300 ${isRecording ? 'bg-critical animate-pulse shadow-lg' : 'bg-primary hover:bg-primary/90'}`}>
+                      {isRecording ? <MicOff className="h-8 w-8 text-critical-foreground" /> : <Mic className="h-8 w-8 text-primary-foreground" />}
                     </div>
                     
-                    {isRecording && (
-                      <div className="mt-4">
+                    {isRecording && <div className="mt-4">
                         <p className="text-2xl font-mono font-bold text-foreground">
                           {formatTime(recordingTime)} / 0:30
                         </p>
-                        <Progress value={(recordingTime / 30) * 100} className="mt-2" />
-                      </div>
-                    )}
+                        <Progress value={recordingTime / 30 * 100} className="mt-2" />
+                      </div>}
                   </div>
 
                   <div className="space-y-3">
                     <div className="flex gap-3">
-                      {!isRecording && !stepsCompleted[0] && !isAnalyzingAudio ? (
-                        <Button
-                          onClick={startHeartRecording}
-                          className="flex-1 gap-2"
-                          disabled={!!audioBlob}
-                        >
+                      {!isRecording && !stepsCompleted[0] && !isAnalyzingAudio ? <Button onClick={startHeartRecording} className="flex-1 gap-2" disabled={!!audioBlob}>
                           <Mic className="h-4 w-4" />
                           Start Recording
-                        </Button>
-                      ) : isRecording ? (
-                        <Button
-                          onClick={stopRecording}
-                          variant="destructive"
-                          className="flex-1 gap-2"
-                        >
+                        </Button> : isRecording ? <Button onClick={stopRecording} variant="destructive" className="flex-1 gap-2">
                           <Square className="h-4 w-4" />
                           Stop Recording
-                        </Button>
-                      ) : isAnalyzingAudio ? (
-                        <Button
-                          variant="secondary"
-                          className="flex-1 gap-2"
-                          disabled
-                        >
+                        </Button> : isAnalyzingAudio ? <Button variant="secondary" className="flex-1 gap-2" disabled>
                           <Activity className="h-4 w-4 animate-spin" />
                           Analyzing...
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          className="flex-1 gap-2"
-                          disabled
-                        >
+                        </Button> : <Button variant="outline" className="flex-1 gap-2" disabled>
                           <Check className="h-4 w-4" />
                           Complete
-                        </Button>
-                      )}
+                        </Button>}
                     </div>
 
-                    {audioBlob && !isAnalyzingAudio && (
-                      <div className="space-y-3">
-                        <audio
-                          controls
-                          src={URL.createObjectURL(audioBlob)}
-                          className="w-full"
-                        />
+                    {audioBlob && !isAnalyzingAudio && <div className="space-y-3">
+                        <audio controls src={URL.createObjectURL(audioBlob)} className="w-full" />
                         <p className="text-sm text-center text-muted-foreground">
                           Advanced noise cancellation applied
                         </p>
-                      </div>
-                    )}
+                      </div>}
                   </div>
 
-                  {heartSoundAnalysis && (
-                    <div className="space-y-3 p-4 rounded-lg bg-success/10">
+                  {heartSoundAnalysis && <div className="space-y-3 p-4 rounded-lg bg-success/10">
                       <div className="flex items-center gap-2">
                         <Heart className="h-5 w-5 text-success" />
                         <span className="font-medium">Heart Sound Analysis</span>
@@ -848,8 +710,7 @@ const Recording = () => {
                         <div>Rhythm: {heartSoundAnalysis.rhythm_regular ? "Regular" : "Irregular"}</div>
                         <div>BPM: {heartSoundAnalysis.heart_rate}</div>
                       </div>
-                    </div>
-                  )}
+                    </div>}
                 </CardContent>
               </Card>
 
@@ -880,19 +741,17 @@ const Recording = () => {
                     </div>
                   </div>
                   
-                  <div className="p-3 rounded-lg bg-warning/10 border border-warning/20">
+                  <div className="p-3 rounded-lg border border-warning/20 bg-gray-950">
                     <p className="text-sm text-warning-foreground">
                       <strong>Note:</strong> Advanced noise cancellation removes environment sounds and enhances S1/S2 heart sounds for medical-grade analysis.
                     </p>
                   </div>
                 </CardContent>
               </Card>
-            </>
-          )}
+            </>}
 
           {/* Step 2: PPG BPM Monitoring */}
-          {currentStep === 2 && stepsCompleted[0] && (
-            <>
+          {currentStep === 2 && stepsCompleted[0] && <>
               <Card className={`border-0 shadow-lg ${currentStep === 2 ? 'ring-2 ring-primary' : ''}`}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -903,76 +762,43 @@ const Recording = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="relative">
-                    <video
-                      ref={videoRef}
-                      className="w-full h-48 rounded-lg bg-secondary object-cover"
-                      muted
-                    />
-                    <canvas
-                      ref={canvasRef}
-                      className="hidden"
-                      width="640"
-                      height="480"
-                    />
+                    <video ref={videoRef} className="w-full h-48 rounded-lg bg-secondary object-cover" muted />
+                    <canvas ref={canvasRef} className="hidden" width="640" height="480" />
                     
-                    {!cameraActive && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-secondary/80 rounded-lg">
+                    {!cameraActive && <div className="absolute inset-0 flex items-center justify-center bg-secondary/80 rounded-lg">
                         <div className="text-center">
                           <Camera className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
                           <p className="text-sm text-muted-foreground">Camera not active</p>
                         </div>
-                      </div>
-                    )}
+                      </div>}
                     
-                    {flashlightOn && (
-                      <div className="absolute top-3 right-3">
+                    {flashlightOn && <div className="absolute top-3 right-3">
                         <Flashlight className="h-6 w-6 text-yellow-400" />
-                      </div>
-                    )}
+                      </div>}
                   </div>
 
-                  {ppgProgress > 0 && ppgProgress < 60 && (
-                    <div className="space-y-2">
+                  {ppgProgress > 0 && ppgProgress < 60 && <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>PPG Analysis Progress</span>
                         <span>{ppgProgress}/60s</span>
                       </div>
-                      <Progress value={(ppgProgress / 60) * 100} />
-                    </div>
-                  )}
+                      <Progress value={ppgProgress / 60 * 100} />
+                    </div>}
 
                   <div className="flex gap-3">
-                    {!cameraActive && !stepsCompleted[1] ? (
-                      <Button
-                        onClick={startPPGMonitoring}
-                        className="flex-1 gap-2"
-                      >
+                    {!cameraActive && !stepsCompleted[1] ? <Button onClick={startPPGMonitoring} className="flex-1 gap-2">
                         <Camera className="h-4 w-4" />
                         Start PPG Monitor
-                      </Button>
-                    ) : cameraActive ? (
-                      <Button
-                        onClick={stopPPGMonitoring}
-                        variant="outline"
-                        className="flex-1 gap-2"
-                      >
+                      </Button> : cameraActive ? <Button onClick={stopPPGMonitoring} variant="outline" className="flex-1 gap-2">
                         <Square className="h-4 w-4" />
                         Stop Monitor
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        className="flex-1 gap-2"
-                        disabled
-                      >
+                      </Button> : <Button variant="outline" className="flex-1 gap-2" disabled>
                         <Check className="h-4 w-4" />
                         Complete
-                      </Button>
-                    )}
+                      </Button>}
                   </div>
 
-                  {ppgData && (
-                    <div className="grid grid-cols-2 gap-4">
+                  {ppgData && <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 rounded-lg bg-success/10">
                         <Heart className="h-6 w-6 text-success mx-auto mb-2" />
                         <p className="text-sm text-muted-foreground">BPM</p>
@@ -983,8 +809,7 @@ const Recording = () => {
                         <p className="text-sm text-muted-foreground">Quality</p>
                         <p className="text-2xl font-bold text-foreground">{ppgData.quality.toFixed(0)}%</p>
                       </div>
-                    </div>
-                  )}
+                    </div>}
                 </CardContent>
               </Card>
 
@@ -1022,12 +847,10 @@ const Recording = () => {
                   </div>
                 </CardContent>
               </Card>
-            </>
-          )}
+            </>}
 
           {/* Step 3: HRV Stress Analysis */}
-          {currentStep === 3 && stepsCompleted[1] && (
-            <>
+          {currentStep === 3 && stepsCompleted[1] && <>
               <Card className={`border-0 shadow-lg ${currentStep === 3 ? 'ring-2 ring-primary' : ''}`}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -1038,78 +861,40 @@ const Recording = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="text-center">
-                    <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full transition-all duration-300 ${
-                      isAnalyzingHRV 
-                        ? 'bg-warning animate-pulse shadow-lg' 
-                        : stepsCompleted[2]
-                        ? 'bg-success'
-                        : 'bg-primary hover:bg-primary/90'
-                    }`}>
-                      {isAnalyzingHRV ? (
-                        <Activity className="h-8 w-8 text-warning-foreground animate-spin" />
-                      ) : stepsCompleted[2] ? (
-                        <Check className="h-8 w-8 text-success-foreground" />
-                      ) : (
-                        <Brain className="h-8 w-8 text-primary-foreground" />
-                      )}
+                    <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full transition-all duration-300 ${isAnalyzingHRV ? 'bg-warning animate-pulse shadow-lg' : stepsCompleted[2] ? 'bg-success' : 'bg-primary hover:bg-primary/90'}`}>
+                      {isAnalyzingHRV ? <Activity className="h-8 w-8 text-warning-foreground animate-spin" /> : stepsCompleted[2] ? <Check className="h-8 w-8 text-success-foreground" /> : <Brain className="h-8 w-8 text-primary-foreground" />}
                     </div>
                     
-                    {isAnalyzingHRV && (
-                      <div className="mt-4">
+                    {isAnalyzingHRV && <div className="mt-4">
                         <p className="text-lg font-medium text-foreground">
                           Analyzing HRV Patterns...
                         </p>
                         <Progress value={hrvProgress} className="mt-2" />
-                      </div>
-                    )}
+                      </div>}
                   </div>
 
                   <div className="flex gap-3">
-                    {!isAnalyzingHRV && !stepsCompleted[2] ? (
-                      <Button
-                        onClick={startHRVAnalysis}
-                        className="flex-1 gap-2"
-                      >
+                    {!isAnalyzingHRV && !stepsCompleted[2] ? <Button onClick={startHRVAnalysis} className="flex-1 gap-2">
                         <Brain className="h-4 w-4" />
                         Start HRV Analysis
-                      </Button>
-                    ) : isAnalyzingHRV ? (
-                      <Button
-                        variant="secondary"
-                        className="flex-1 gap-2"
-                        disabled
-                      >
+                      </Button> : isAnalyzingHRV ? <Button variant="secondary" className="flex-1 gap-2" disabled>
                         <Activity className="h-4 w-4 animate-spin" />
                         Analyzing...
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        className="flex-1 gap-2"
-                        disabled
-                      >
+                      </Button> : <Button variant="outline" className="flex-1 gap-2" disabled>
                         <Check className="h-4 w-4" />
                         Complete
-                      </Button>
-                    )}
+                      </Button>}
                   </div>
 
-                  {hrvData && (
-                    <div className="space-y-4">
+                  {hrvData && <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="text-center p-4 rounded-lg bg-primary/10">
                           <Brain className="h-6 w-6 text-primary mx-auto mb-2" />
                           <p className="text-sm text-muted-foreground">RMSSD</p>
                           <p className="text-2xl font-bold text-foreground">{hrvData.rmssd}ms</p>
                         </div>
-                        <div className={`text-center p-4 rounded-lg ${
-                          hrvData.stressLevel === "Low" ? "bg-success/10" :
-                          hrvData.stressLevel === "Moderate" ? "bg-warning/10" : "bg-destructive/10"
-                        }`}>
-                          <Zap className={`h-6 w-6 mx-auto mb-2 ${
-                            hrvData.stressLevel === "Low" ? "text-success" :
-                            hrvData.stressLevel === "Moderate" ? "text-warning" : "text-destructive"
-                          }`} />
+                        <div className={`text-center p-4 rounded-lg ${hrvData.stressLevel === "Low" ? "bg-success/10" : hrvData.stressLevel === "Moderate" ? "bg-warning/10" : "bg-destructive/10"}`}>
+                          <Zap className={`h-6 w-6 mx-auto mb-2 ${hrvData.stressLevel === "Low" ? "text-success" : hrvData.stressLevel === "Moderate" ? "text-warning" : "text-destructive"}`} />
                           <p className="text-sm text-muted-foreground">Stress Level</p>
                           <p className="text-lg font-bold text-foreground">{hrvData.stressLevel}</p>
                         </div>
@@ -1120,8 +905,7 @@ const Recording = () => {
                           <strong>Stress Score:</strong> {hrvData.stressScore}/100
                         </p>
                       </div>
-                    </div>
-                  )}
+                    </div>}
                 </CardContent>
               </Card>
 
@@ -1159,13 +943,11 @@ const Recording = () => {
                   </div>
                 </CardContent>
               </Card>
-            </>
-          )}
+            </>}
         </div>
 
         {/* Final Results */}
-        {showFinalReport && finalResults && (
-          <Card className="border-0 shadow-lg mt-8">
+        {showFinalReport && finalResults && <Card className="border-0 shadow-lg mt-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-success" />
@@ -1185,12 +967,8 @@ const Recording = () => {
                   <p className="text-xs text-success mt-2">PPG: {finalResults.ppg_bpm} BPM</p>
                 </div>
                 
-                <div className={`text-center p-6 rounded-lg ${
-                  finalResults.condition === "Normal" ? "bg-success/10" : "bg-warning/10"
-                }`}>
-                  <Activity className={`h-8 w-8 mx-auto mb-3 ${
-                    finalResults.condition === "Normal" ? "text-success" : "text-warning"
-                  }`} />
+                <div className={`text-center p-6 rounded-lg ${finalResults.condition === "Normal" ? "bg-success/10" : "bg-warning/10"}`}>
+                  <Activity className={`h-8 w-8 mx-auto mb-3 ${finalResults.condition === "Normal" ? "text-success" : "text-warning"}`} />
                   <p className="text-sm text-muted-foreground mb-1">Condition</p>
                   <p className="text-xl font-bold text-foreground">{finalResults.condition}</p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -1198,14 +976,8 @@ const Recording = () => {
                   </p>
                 </div>
                 
-                <div className={`text-center p-6 rounded-lg ${
-                  finalResults.stress_level === "Low" ? "bg-success/10" :
-                  finalResults.stress_level === "Moderate" ? "bg-warning/10" : "bg-destructive/10"
-                }`}>
-                  <Brain className={`h-8 w-8 mx-auto mb-3 ${
-                    finalResults.stress_level === "Low" ? "text-success" :
-                    finalResults.stress_level === "Moderate" ? "text-warning" : "text-destructive"
-                  }`} />
+                <div className={`text-center p-6 rounded-lg ${finalResults.stress_level === "Low" ? "bg-success/10" : finalResults.stress_level === "Moderate" ? "bg-warning/10" : "bg-destructive/10"}`}>
+                  <Brain className={`h-8 w-8 mx-auto mb-3 ${finalResults.stress_level === "Low" ? "text-success" : finalResults.stress_level === "Moderate" ? "text-warning" : "text-destructive"}`} />
                   <p className="text-sm text-muted-foreground mb-1">Stress Level</p>
                   <p className="text-xl font-bold text-foreground">{finalResults.stress_level}</p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -1247,28 +1019,18 @@ const Recording = () => {
               </div>
               
               <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-                <Button
-                  onClick={resetRecording}
-                  variant="outline"
-                  className="gap-2"
-                >
+                <Button onClick={resetRecording} variant="outline" className="gap-2">
                   <Mic className="h-4 w-4" />
                   New Analysis
                 </Button>
-                <Button
-                  onClick={() => navigate("/dashboard")}
-                  className="gap-2"
-                >
+                <Button onClick={() => navigate("/dashboard")} className="gap-2">
                   <User className="h-4 w-4" />
                   View Dashboard
                 </Button>
               </div>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Recording;
