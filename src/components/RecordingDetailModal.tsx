@@ -307,7 +307,7 @@ const RecordingDetailModal = ({
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(24);
       doc.setFont('helvetica', 'bold');
-      doc.text('Cardia Sentinel - Cardiac Analysis Report', 20, 25);
+      doc.text('Cardia Sentinel', 20, 25);
       
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
