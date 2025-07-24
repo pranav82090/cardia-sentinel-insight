@@ -556,23 +556,84 @@ const Recording = () => {
       }
     }
   };
+  // Age-adjusted heart rate thresholds for pediatrics
+  const getPediatricThresholds = (age: number) => {
+    const maxHR = 220 - age;
+    const minHR = 70 + (2 * age);
+    return { maxHR, minHR };
+  };
+
   const calculateAttackRisk = (): number => {
-    let risk = 5; // Base risk
+    // Use default values or user-provided values if available
+    const age = 35; // Default age - in a real app this would come from user profile
+    const systolicBP = 120; // Default BP - this could be measured separately
+    const smoker = false; // Default - could come from user profile
+    const diabetes = false; // Default - could come from user profile
+    const heartRate = ppgData?.bpm || heartSoundAnalysis?.heart_rate || 75;
 
-    // Factor in heart sound analysis
-    if (heartSoundAnalysis?.condition === "Abnormal") risk += 15;
-    if (heartSoundAnalysis?.murmur_detected) risk += 10;
-    if (!heartSoundAnalysis?.rhythm_regular) risk += 12;
+    try {
+      // Pediatric cases (age < 18)
+      if (age < 18) {
+        const { maxHR, minHR } = getPediatricThresholds(age);
+        
+        if (heartRate > maxHR * 1.3) {
+          return 45; // High risk - Dangerous Pediatric Tachycardia
+        } else if (heartRate < minHR * 0.7) {
+          return 45; // High risk - Dangerous Pediatric Bradycardia
+        } else if (heartRate > maxHR || heartRate < minHR) {
+          return 25; // Intermediate risk - Abnormal Pediatric Heart Rate
+        } else {
+          return 5; // Normal
+        }
+      }
 
-    // Factor in HRV stress
-    if (hrvData?.stressLevel === "High") risk += 8;
-    if (hrvData?.stressLevel === "Moderate") risk += 4;
+      // Adult calculation (age >= 18)
+      let baseRisk = Math.min(age, 80) * 0.12;
 
-    // Factor in heart rate
-    const hr = ppgData?.bpm || heartSoundAnalysis?.heart_rate || 75;
-    if (hr > 100) risk += 10;
-    if (hr < 50) risk += 8;
-    return Math.min(Math.max(risk, 1), 50); // Cap between 1-50%
+      // Blood pressure component
+      if (systolicBP >= 180) {
+        baseRisk += 8.0 + (systolicBP - 180) * 0.1;
+      } else if (systolicBP >= 140) {
+        baseRisk += 4.0 + (systolicBP - 140) * 0.1;
+      } else {
+        baseRisk += systolicBP * 0.03;
+      }
+
+      // Risk factors
+      if (smoker && age >= 12) {
+        baseRisk += age < 45 ? 1.2 : 0.8;
+      }
+      if (diabetes && age >= 10) {
+        baseRisk += age < 50 ? 1.5 : 0.9;
+      }
+
+      // Heart rate adjustments
+      if (heartRate > 120) baseRisk *= 1.4;
+      else if (heartRate > 100) baseRisk *= 1.2;
+      else if (heartRate < 40) baseRisk *= 1.5;
+      else if (heartRate < 50) baseRisk *= 1.2;
+
+      // Critical overrides
+      if (systolicBP > 220 || heartRate > 180) {
+        return 45; // High risk - Critical Cardiovascular Emergency
+      }
+      if (systolicBP < 70 && heartRate > 120) {
+        return 45; // High risk - Potential Shock State
+      }
+
+      // Final classification
+      if (baseRisk < 5) {
+        return Math.max(baseRisk, 1); // Normal
+      } else if (baseRisk < 15) {
+        return Math.min(baseRisk, 25); // Intermediate
+      } else {
+        return Math.min(Math.round(baseRisk), 50); // High
+      }
+
+    } catch (error) {
+      console.error("Risk calculation error:", error);
+      return 10; // Default moderate risk if calculation fails
+    }
   };
   const nextStep = () => {
     if (currentStep < 3 && stepsCompleted[currentStep - 1]) {
