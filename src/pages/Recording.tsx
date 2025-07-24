@@ -311,10 +311,16 @@ const Recording = () => {
       const newCompleted = [...stepsCompleted];
       newCompleted[0] = true;
       setStepsCompleted(newCompleted);
+      
       toast({
         title: "✅ Heart Sound Analysis Complete",
-        description: `${analysis.accuracy.toFixed(1)}% accuracy achieved. Ready for next step.`
+        description: `${analysis.accuracy.toFixed(1)}% accuracy achieved. Moving to next step.`
       });
+
+      // Auto-advance to next step after 2 seconds
+      setTimeout(() => {
+        setCurrentStep(2);
+      }, 2000);
     } catch (error) {
       toast({
         title: "Analysis Failed",
@@ -414,10 +420,16 @@ const Recording = () => {
     const newCompleted = [...stepsCompleted];
     newCompleted[1] = true;
     setStepsCompleted(newCompleted);
+    
     toast({
       title: "✅ PPG Analysis Complete",
-      description: `Average BPM: ${avgBPM}. Quality: ${finalPPGData.quality.toFixed(1)}%`
+      description: `Average BPM: ${avgBPM}. Moving to final step.`
     });
+
+    // Auto-advance to next step after 2 seconds
+    setTimeout(() => {
+      setCurrentStep(3);
+    }, 2000);
 
     // Stop camera
     stopPPGMonitoring();
@@ -750,10 +762,18 @@ const Recording = () => {
                     </div>
 
                     {audioBlob && !isAnalyzingAudio && <div className="space-y-3">
-                        <audio controls src={URL.createObjectURL(audioBlob)} className="w-full" />
-                        <p className="text-sm text-center text-muted-foreground">
-                          Advanced noise cancellation applied
-                        </p>
+                        <div className="bg-muted/50 rounded-lg p-4">
+                          <p className="text-sm font-medium mb-2 text-center">Recorded Heart Sound</p>
+                          <audio 
+                            controls 
+                            src={URL.createObjectURL(audioBlob)} 
+                            className="w-full"
+                            preload="auto"
+                          />
+                          <p className="text-xs text-center text-muted-foreground mt-2">
+                            Advanced noise cancellation applied • High-quality cardiac recording
+                          </p>
+                        </div>
                       </div>}
                   </div>
 
