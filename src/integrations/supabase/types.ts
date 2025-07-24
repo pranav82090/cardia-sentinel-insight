@@ -19,7 +19,6 @@ export type Database = {
           checkup_api_key: string | null
           created_at: string
           id: string
-          medius_api_key: string | null
           rapidapi_key: string | null
           updated_at: string
           user_id: string
@@ -28,7 +27,6 @@ export type Database = {
           checkup_api_key?: string | null
           created_at?: string
           id?: string
-          medius_api_key?: string | null
           rapidapi_key?: string | null
           updated_at?: string
           user_id: string
@@ -37,7 +35,6 @@ export type Database = {
           checkup_api_key?: string | null
           created_at?: string
           id?: string
-          medius_api_key?: string | null
           rapidapi_key?: string | null
           updated_at?: string
           user_id?: string
