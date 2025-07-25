@@ -158,7 +158,9 @@ const Recording = () => {
   };
 
   const analyzeUploadedAudio = async () => {
-  }, [isRecording]);
+    if (!audioBlob) return;
+    await analyzeHeartSound();
+  };
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -812,7 +814,8 @@ const Recording = () => {
       clearInterval(hrvIntervalRef.current);
     }
   };
-  return <div className="min-h-screen bg-background">
+  return (
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
@@ -1398,6 +1401,7 @@ const Recording = () => {
             </CardContent>
           </Card>}
       </div>
-    </div>;
+    </div>
+  );
 };
 export default Recording;
