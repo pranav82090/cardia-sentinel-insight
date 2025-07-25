@@ -135,7 +135,8 @@ const Recording = () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-  };
+    };
+  }, [isRecording]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -159,7 +160,7 @@ const Recording = () => {
 
   const analyzeUploadedAudio = async () => {
     if (!audioBlob) return;
-    await analyzeHeartSound();
+    await analyzeHeartSounds(audioBlob);
   };
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -726,50 +727,40 @@ const Recording = () => {
 
     setIsSavingReport(true);
     try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64Audio = (reader.result as string).split(',')[1];
-        const { error } = await supabase
-          .from('heart_recordings')
-          .insert({
-            user_id: user.id,
-            heart_rate_avg: finalResults.heart_rate_avg,
-            heart_rate_min: finalResults.heart_rate_min,
-            heart_rate_max: finalResults.heart_rate_max,
-            attack_risk: finalResults.attack_risk,
-            condition: finalResults.condition,
-            stress_level: finalResults.stress_level,
-            stress_score: finalResults.stress_score,
-            ppg_heart_rate: finalResults.ppg_bpm,
-            model_accuracy: finalResults.accuracy,
-            systolic_bp: parseInt(additionalInputs.systolicBP) || null,
-            diastolic_bp: parseInt(additionalInputs.diastolicBP) || null,
-            audio_data: {
-              base64: base64Audio,
-              heart_sounds: heartSoundAnalysis,
-              ppg_data: ppgData,
-              hrv_data: hrvData,
-              additional_inputs: additionalInputs,
-              processing_steps: ["noise_cancellation", "ppg_analysis", "hrv_analysis"],
-              accuracy: finalResults.accuracy
-            } as any,
-            waveform_data: {
-              ppg_history: ppgHistory,
-              timestamps: ppgHistory.map(p => p.timestamp)
-            } as any
-          });
-
-        if (error) throw error;
-        
-        toast({
-          title: "✅ Report Saved Successfully",
-          description: "Complete analysis saved to your health records."
+      const { error } = await supabase
+        .from('heart_recordings')
+        .insert({
+          user_id: user.id,
+          heart_rate_avg: finalResults.heart_rate_avg,
+          heart_rate_min: finalResults.heart_rate_min,
+          heart_rate_max: finalResults.heart_rate_max,
+          attack_risk: finalResults.attack_risk,
+          condition: finalResults.condition,
+          stress_level: finalResults.stress_level,
+          stress_score: finalResults.stress_score,
+          ppg_heart_rate: finalResults.ppg_bpm,
+          model_accuracy: finalResults.accuracy,
+          systolic_bp: parseInt(additionalInputs.systolicBP) || null,
+          diastolic_bp: parseInt(additionalInputs.diastolicBP) || null,
+          audio_data: {
+            heart_sounds: heartSoundAnalysis,
+            ppg_data: ppgData,
+            hrv_data: hrvData,
+            additional_inputs: additionalInputs
+          } as any
         });
-      };
+
+      if (error) throw error;
       
-      if (audioBlob) {
-        reader.readAsDataURL(audioBlob);
-      }
+      toast({
+        title: "✅ Report Saved Successfully", 
+        description: "Analysis saved to your health records."
+      });
+
+      // Navigate to dashboard to view saved reports
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
     } catch (error) {
       console.error('Save error:', error);
       toast({
@@ -889,19 +880,52 @@ const Recording = () => {
 
                   <div className="space-y-3">
                     <div className="flex gap-3">
-                      {!isRecording && !stepsCompleted[0] && !isAnalyzingAudio ? <Button onClick={startHeartRecording} className="flex-1 gap-2" disabled={!!audioBlob}>
-                          <Mic className="h-4 w-4" />
-                          Start Recording
-                        </Button> : isRecording ? <Button onClick={stopRecording} variant="destructive" className="flex-1 gap-2">
+                      {!isRecording && !stepsCompleted[0] && !isAnalyzingAudio ? (
+                        <>
+                          <Button onClick={startHeartRecording} className="flex-1 gap-2" disabled={!!audioBlob}>
+                            <Mic className="h-4 w-4" />
+                            Start Recording
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="gap-2"
+                            onClick={() => document.getElementById('audio-upload')?.click()}
+                          >
+                            <Upload className="h-4 w-4" />
+                            Upload File
+                          </Button>
+                          <input 
+                            id="audio-upload"
+                            type="file"
+                            accept="audio/*"
+                            className="hidden"
+                            onChange={handleFileUpload}
+                          />
+                        </>
+                      ) : isRecording ? (
+                        <Button onClick={stopRecording} variant="destructive" className="flex-1 gap-2">
                           <Square className="h-4 w-4" />
                           Stop Recording
-                        </Button> : isAnalyzingAudio ? <Button variant="secondary" className="flex-1 gap-2" disabled>
+                        </Button>
+                      ) : isAnalyzingAudio ? (
+                        <Button variant="secondary" className="flex-1 gap-2" disabled>
                           <Activity className="h-4 w-4 animate-spin" />
                           Analyzing...
-                        </Button> : <Button variant="outline" className="flex-1 gap-2" disabled>
+                        </Button>
+                      ) : (
+                        <Button variant="outline" className="flex-1 gap-2" disabled>
                           <Check className="h-4 w-4" />
                           Complete
-                        </Button>}
+                        </Button>
+                      )}
+                    </div>
+
+                    {audioBlob && !isAnalyzingAudio && !stepsCompleted[0] && (
+                      <Button onClick={analyzeUploadedAudio} className="w-full gap-2">
+                        <Activity className="h-4 w-4" />
+                        Analyze Heart Sound
+                      </Button>
+                    )}
                     </div>
 
                     {audioBlob && !isAnalyzingAudio && <div className="space-y-3">
