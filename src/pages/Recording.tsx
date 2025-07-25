@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Mic, MicOff, Play, Square, Check, ArrowRight, Heart, Activity, Brain, Camera, Flashlight, FlashlightOff, User, Zap, ChevronRight, Volume2, FileText, Save } from "lucide-react";
+import { Mic, MicOff, Play, Square, Check, ArrowRight, Heart, Activity, Brain, Camera, Flashlight, FlashlightOff, User, Zap, ChevronRight, Volume2, FileText, Save, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -135,7 +135,29 @@ const Recording = () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-    };
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('audio/')) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload an audio file (MP3, WAV, M4A, etc.)",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setAudioBlob(file);
+    toast({
+      title: "File Uploaded Successfully",
+      description: "Click analyze to process your heart sound recording.",
+    });
+  };
+
+  const analyzeUploadedAudio = async () => {
   }, [isRecording]);
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
