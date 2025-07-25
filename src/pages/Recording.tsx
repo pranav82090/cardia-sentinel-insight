@@ -5,7 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Mic, MicOff, Play, Square, Check, ArrowRight, Heart, Activity, Brain, Camera, Flashlight, FlashlightOff, User, Zap, ChevronRight, Volume2 } from "lucide-react";
+import { Mic, MicOff, Play, Square, Check, ArrowRight, Heart, Activity, Brain, Camera, Flashlight, FlashlightOff, User, Zap, ChevronRight, Volume2, FileText, Save } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 interface PPGData {
@@ -47,6 +52,19 @@ const Recording = () => {
   // Final results
   const [finalResults, setFinalResults] = useState<any>(null);
   const [showFinalReport, setShowFinalReport] = useState(false);
+  const [showAdditionalInputs, setShowAdditionalInputs] = useState(false);
+  const [additionalInputs, setAdditionalInputs] = useState({
+    age: '',
+    gender: '',
+    smoker: false,
+    diabetes: false,
+    systolicBP: '',
+    diastolicBP: '',
+    familyHistory: false,
+    exerciseFrequency: '',
+    medications: ''
+  });
+  const [isSavingReport, setIsSavingReport] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -58,6 +76,14 @@ const Recording = () => {
   const {
     toast
   } = useToast();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
   useEffect(() => {
     const checkAuth = async () => {
       const {
@@ -494,12 +520,15 @@ const Recording = () => {
     newCompleted[2] = true;
     setStepsCompleted(newCompleted);
 
-    // Generate final results
-    generateFinalResults(hrvResult);
     toast({
       title: "✅ HRV Analysis Complete",
-      description: `Stress Level: ${stressLevel} (RMSSD: ${hrvResult.rmssd}ms)`
+      description: `Stress Level: ${stressLevel} (RMSSD: ${hrvResult.rmssd}ms). Please provide additional information.`
     });
+
+    // Show additional inputs instead of generating final results immediately
+    setTimeout(() => {
+      setShowAdditionalInputs(true);
+    }, 2000);
   };
   const generateFinalResults = async (hrvResult: HRVData) => {
     const results = {
@@ -652,6 +681,83 @@ const Recording = () => {
       setCurrentStep(currentStep + 1);
     }
   };
+  const handleAdditionalInputsSubmit = async () => {
+    if (!additionalInputs.age || !additionalInputs.gender) {
+      toast({
+        title: "Required Information Missing",
+        description: "Please provide age and gender for accurate risk calculation.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Generate final results with additional inputs
+    if (hrvData) {
+      await generateFinalResults(hrvData);
+    }
+  };
+
+  const saveReportToDatabase = async () => {
+    if (!user || !finalResults) return;
+
+    setIsSavingReport(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Audio = (reader.result as string).split(',')[1];
+        const { error } = await supabase
+          .from('heart_recordings')
+          .insert({
+            user_id: user.id,
+            heart_rate_avg: finalResults.heart_rate_avg,
+            heart_rate_min: finalResults.heart_rate_min,
+            heart_rate_max: finalResults.heart_rate_max,
+            attack_risk: finalResults.attack_risk,
+            condition: finalResults.condition,
+            stress_level: finalResults.stress_level,
+            stress_score: finalResults.stress_score,
+            ppg_heart_rate: finalResults.ppg_bpm,
+            model_accuracy: finalResults.accuracy,
+            systolic_bp: parseInt(additionalInputs.systolicBP) || null,
+            diastolic_bp: parseInt(additionalInputs.diastolicBP) || null,
+            audio_data: {
+              base64: base64Audio,
+              heart_sounds: heartSoundAnalysis,
+              ppg_data: ppgData,
+              hrv_data: hrvData,
+              additional_inputs: additionalInputs,
+              processing_steps: ["noise_cancellation", "ppg_analysis", "hrv_analysis"],
+              accuracy: finalResults.accuracy
+            } as any,
+            waveform_data: {
+              ppg_history: ppgHistory,
+              timestamps: ppgHistory.map(p => p.timestamp)
+            } as any
+          });
+
+        if (error) throw error;
+        
+        toast({
+          title: "✅ Report Saved Successfully",
+          description: "Complete analysis saved to your health records."
+        });
+      };
+      
+      if (audioBlob) {
+        reader.readAsDataURL(audioBlob);
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save report. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSavingReport(false);
+    }
+  };
+
   const resetRecording = () => {
     setCurrentStep(1);
     setStepsCompleted([false, false, false]);
@@ -662,6 +768,18 @@ const Recording = () => {
     setHrvData(null);
     setFinalResults(null);
     setShowFinalReport(false);
+    setShowAdditionalInputs(false);
+    setAdditionalInputs({
+      age: '',
+      gender: '',
+      smoker: false,
+      diabetes: false,
+      systolicBP: '',
+      diastolicBP: '',
+      familyHistory: false,
+      exerciseFrequency: '',
+      medications: ''
+    });
     setPpgProgress(0);
     setHrvProgress(0);
     setRecordingTime(0);
@@ -1027,6 +1145,140 @@ const Recording = () => {
             </>}
         </div>
 
+        {/* Additional Inputs Form */}
+        {showAdditionalInputs && !showFinalReport && stepsCompleted.every(completed => completed) && (
+          <Card className="border-0 shadow-lg mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                Additional Information Required
+                <Badge variant="outline" className="ml-auto">Step 4</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="age">Age *</Label>
+                      <Input
+                        id="age"
+                        type="number"
+                        placeholder="Enter age"
+                        value={additionalInputs.age}
+                        onChange={(e) => setAdditionalInputs(prev => ({ ...prev, age: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="gender">Gender *</Label>
+                      <Select value={additionalInputs.gender} onValueChange={(value) => setAdditionalInputs(prev => ({ ...prev, gender: value }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="systolic">Systolic BP (mmHg)</Label>
+                      <Input
+                        id="systolic"
+                        type="number"
+                        placeholder="120"
+                        value={additionalInputs.systolicBP}
+                        onChange={(e) => setAdditionalInputs(prev => ({ ...prev, systolicBP: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="diastolic">Diastolic BP (mmHg)</Label>
+                      <Input
+                        id="diastolic"
+                        type="number"
+                        placeholder="80"
+                        value={additionalInputs.diastolicBP}
+                        onChange={(e) => setAdditionalInputs(prev => ({ ...prev, diastolicBP: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="exercise">Exercise Frequency</Label>
+                    <Select value={additionalInputs.exerciseFrequency} onValueChange={(value) => setAdditionalInputs(prev => ({ ...prev, exerciseFrequency: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="never">Never</SelectItem>
+                        <SelectItem value="rarely">Rarely (1-2 times/month)</SelectItem>
+                        <SelectItem value="sometimes">Sometimes (1-2 times/week)</SelectItem>
+                        <SelectItem value="regularly">Regularly (3-4 times/week)</SelectItem>
+                        <SelectItem value="daily">Daily</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="smoker">Current Smoker</Label>
+                      <Switch
+                        id="smoker"
+                        checked={additionalInputs.smoker}
+                        onCheckedChange={(checked) => setAdditionalInputs(prev => ({ ...prev, smoker: checked }))}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="diabetes">Diabetes</Label>
+                      <Switch
+                        id="diabetes"
+                        checked={additionalInputs.diabetes}
+                        onCheckedChange={(checked) => setAdditionalInputs(prev => ({ ...prev, diabetes: checked }))}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="family">Family History of Heart Disease</Label>
+                      <Switch
+                        id="family"
+                        checked={additionalInputs.familyHistory}
+                        onCheckedChange={(checked) => setAdditionalInputs(prev => ({ ...prev, familyHistory: checked }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="medications">Current Medications</Label>
+                    <Textarea
+                      id="medications"
+                      placeholder="List any heart or blood pressure medications..."
+                      value={additionalInputs.medications}
+                      onChange={(e) => setAdditionalInputs(prev => ({ ...prev, medications: e.target.value }))}
+                      rows={4}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-3 justify-center">
+                <Button 
+                  onClick={handleAdditionalInputsSubmit}
+                  className="gap-2"
+                  disabled={!additionalInputs.age || !additionalInputs.gender}
+                >
+                  <Activity className="h-4 w-4" />
+                  Generate Complete Report
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Final Results */}
         {showFinalReport && finalResults && <Card className="border-0 shadow-lg mt-8">
             <CardHeader>
@@ -1100,11 +1352,23 @@ const Recording = () => {
               </div>
               
               <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                <Button 
+                  onClick={saveReportToDatabase} 
+                  className="gap-2"
+                  disabled={isSavingReport}
+                >
+                  {isSavingReport ? (
+                    <Activity className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  {isSavingReport ? "Saving..." : "Save & See Report Page"}
+                </Button>
                 <Button onClick={resetRecording} variant="outline" className="gap-2">
                   <Mic className="h-4 w-4" />
                   New Analysis
                 </Button>
-                <Button onClick={() => navigate("/dashboard")} className="gap-2">
+                <Button onClick={() => navigate("/dashboard")} variant="secondary" className="gap-2">
                   <User className="h-4 w-4" />
                   View Dashboard
                 </Button>
