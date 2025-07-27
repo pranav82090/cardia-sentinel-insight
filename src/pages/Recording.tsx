@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 import { RecordingSteps } from "@/components/RecordingSteps";
+import CardiovascularRiskCalculator from "@/components/CardiovascularRiskCalculator";
 interface PPGData {
   bpm: number;
   quality: number;
@@ -40,6 +41,9 @@ const Recording = () => {
   const [finalResults, setFinalResults] = useState<any>(null);
   const [showFinalReport, setShowFinalReport] = useState(false);
   const [showAdditionalInputs, setShowAdditionalInputs] = useState(false);
+  const [showRiskCalculators, setShowRiskCalculators] = useState(false);
+  const [ascvdResults, setAscvdResults] = useState<any>(null);
+  const [preventResults, setPreventResults] = useState<any>(null);
   const [additionalInputs, setAdditionalInputs] = useState({
     age: '',
     gender: '',
@@ -81,6 +85,11 @@ const Recording = () => {
 
   const onAnalysisComplete = (hrvResult: HRVData) => {
     setShowAdditionalInputs(true);
+  };
+
+  const onRiskCalculationComplete = (ascvd: any, prevent: any) => {
+    setAscvdResults(ascvd);
+    setPreventResults(prevent);
   };
 
   const calculateAttackRisk = (): number => {
@@ -182,6 +191,11 @@ const Recording = () => {
       return;
     }
 
+    // Show risk calculators after basic inputs
+    setShowRiskCalculators(true);
+  };
+
+  const proceedToFinalReport = async () => {
     if (hrvData) {
       await generateFinalResults(hrvData);
     }
@@ -211,7 +225,9 @@ const Recording = () => {
             heart_sounds: heartSoundAnalysis,
             ppg_data: ppgData,
             hrv_data: hrvData,
-            additional_inputs: additionalInputs
+            additional_inputs: additionalInputs,
+            ascvd_results: ascvdResults,
+            prevent_results: preventResults
           } as any
         });
 
@@ -248,18 +264,21 @@ const Recording = () => {
     setHrvData(null);
     setFinalResults(null);
     setShowFinalReport(false);
-    setShowAdditionalInputs(false);
-    setAdditionalInputs({
-      age: '',
-      gender: '',
-      smoker: false,
-      diabetes: false,
-      systolicBP: '',
-      diastolicBP: '',
-      familyHistory: false,
-      exerciseFrequency: '',
-      medications: ''
-    });
+        setShowAdditionalInputs(false);
+        setShowRiskCalculators(false);
+        setAscvdResults(null);
+        setPreventResults(null);
+        setAdditionalInputs({
+          age: '',
+          gender: '',
+          smoker: false,
+          diabetes: false,
+          systolicBP: '',
+          diastolicBP: '',
+          familyHistory: false,
+          exerciseFrequency: '',
+          medications: ''
+        });
   };
   return (
     <div className="min-h-screen bg-background">
@@ -300,7 +319,7 @@ const Recording = () => {
         </div>
 
         {/* Additional Inputs Form */}
-        {showAdditionalInputs && !showFinalReport && stepsCompleted.every(completed => completed) && (
+        {showAdditionalInputs && !showRiskCalculators && !showFinalReport && stepsCompleted.every(completed => completed) && (
           <Card className="border-0 shadow-lg mt-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -426,11 +445,30 @@ const Recording = () => {
                   disabled={!additionalInputs.age || !additionalInputs.gender}
                 >
                   <Activity className="h-4 w-4" />
-                  Generate Complete Report
+                  Continue to Risk Assessment
                 </Button>
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Cardiovascular Risk Calculators */}
+        {showRiskCalculators && !showFinalReport && (
+          <>
+            <CardiovascularRiskCalculator
+              existingInputs={additionalInputs}
+              onResultsComplete={onRiskCalculationComplete}
+            />
+            
+            {ascvdResults && preventResults && (
+              <div className="mt-6 flex justify-center">
+                <Button onClick={proceedToFinalReport} className="gap-2">
+                  <Activity className="h-4 w-4" />
+                  Generate Complete Medical Report
+                </Button>
+              </div>
+            )}
+          </>
         )}
 
         {/* Final Results */}

@@ -403,7 +403,7 @@ export const RecordingSteps = ({
           timestamp: Date.now()
         };
         setPpgData(newReading);
-        setPpgHistory(prev => [...prev.slice(-19), newReading]);
+        setPpgHistory((prev: PPGData[]) => [...prev.slice(-19), newReading]);
       }
       
       if (progress >= 60) {
