@@ -95,6 +95,18 @@ const Dashboard = () => {
     return Math.round(recordings.reduce((sum, r) => sum + r.attack_risk, 0) / recordings.length);
   };
   const getRiskLevel = (risk: number) => {
+    if (risk <= 10) return "Low";
+    if (risk <= 19) return "Moderate";  
+    return "High";
+  };
+
+  const getAvgRiskLevel = (risk: number) => {
+    if (risk <= 10) return "Low";
+    if (risk <= 19) return "Moderate";
+    return "High";
+  };
+
+  const getRiskLevelInfo = (risk: number) => {
     if (risk <= 10) return {
       level: "Low",
       color: "success",
@@ -106,7 +118,7 @@ const Dashboard = () => {
       description: "Moderate cardiovascular risk"
     };
     return {
-      level: "Danger",
+      level: "High",
       color: "critical",
       description: "High cardiovascular risk"
     };
@@ -129,7 +141,7 @@ const Dashboard = () => {
   const recentRecording = getRecentRecording();
   const avgHeartRate = getAverageHeartRate();
   const avgRisk = getAverageRisk();
-  const riskInfo = getRiskLevel(avgRisk);
+  const riskInfo = getRiskLevelInfo(avgRisk);
   return <div className="min-h-screen bg-background">
       <Navbar />
       
@@ -176,7 +188,7 @@ const Dashboard = () => {
                 <div className="min-w-0 flex-1">
                   <p className="text-xs sm:text-sm text-muted-foreground mb-1">Risk Level</p>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">{avgRisk}%</p>
+                    <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">{getAvgRiskLevel(avgRisk)}</p>
                     <Badge variant="outline" className={`text-${riskInfo.color} text-xs shrink-0`}>
                       {riskInfo.level}
                     </Badge>
@@ -284,8 +296,8 @@ const Dashboard = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-3 sm:shrink-0">
-                          <Badge variant="outline" className={`text-${getRiskLevel(recording.attack_risk).color} text-xs`}>
-                            {recording.attack_risk}% Risk
+                          <Badge variant="outline" className={`text-${getRiskLevelInfo(recording.attack_risk).color} text-xs`}>
+                            {getRiskLevel(recording.attack_risk)} Risk
                           </Badge>
                           <Button onClick={() => handleViewRecording(recording)} variant="outline" size="sm" className="shrink-0">
                             <Eye className="h-4 w-4 mr-1" />
@@ -346,8 +358,8 @@ const Dashboard = () => {
                         </div>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 shrink-0">
                           <div className="flex flex-col sm:text-right">
-                            <Badge variant="outline" className={`text-${getRiskLevel(recording.attack_risk).color} mb-1 text-xs w-fit`}>
-                              {recording.attack_risk}% Risk
+                            <Badge variant="outline" className={`text-${getRiskLevelInfo(recording.attack_risk).color} mb-1 text-xs w-fit`}>
+                              {getRiskLevel(recording.attack_risk)} Risk
                             </Badge>
                              <p className="text-xs text-muted-foreground">
                                Accuracy: {recording.model_accuracy || 96}%

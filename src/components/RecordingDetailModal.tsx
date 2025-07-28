@@ -220,7 +220,10 @@ const RecordingDetailModal = ({
     const channels = 1;
     const buffer = audioContext.createBuffer(channels, frameCount, sampleRate);
     const channelData = buffer.getChannelData(0);
-    const heartRate = 72;
+    
+    // Generate unique characteristics for this heartbeat session
+    const sessionSeed = Date.now() + Math.random() * 1000;
+    const heartRate = 68 + Math.sin(sessionSeed * 0.001) * 8; // 60-76 BPM variation
     const beatInterval = 60 / heartRate * sampleRate;
     
     for (let i = 0; i < frameCount; i++) {
@@ -228,39 +231,89 @@ const RecordingDetailModal = ({
       const beatNumber = Math.floor(i / beatInterval);
       let amplitude = 0;
 
-      // Vary characteristics for each beat
-      const beatVariation = Math.sin(beatNumber * 0.3) * 0.2 + 1; // Creates subtle variations
-      const frequencyVariation = 1 + Math.sin(beatNumber * 0.5) * 0.1; // Slight frequency changes
+      // Create unique variations for each individual beat
+      const beatSeed = sessionSeed + beatNumber * 123.456;
+      const randomness1 = Math.sin(beatSeed * 0.007) * 0.5 + 0.5;
+      const randomness2 = Math.cos(beatSeed * 0.011) * 0.5 + 0.5;
+      const randomness3 = Math.sin(beatSeed * 0.013) * 0.5 + 0.5;
       
-      // S1 sound (Lub) - varied characteristics per beat
-      if (beatPosition < sampleRate * 0.12) {
-        const t = beatPosition / (sampleRate * 0.12);
-        const baseFreq = 45 * frequencyVariation;
-        const harmonics = Math.sin(2 * Math.PI * baseFreq * 2 * t) * 0.3; // Add harmonics
-        amplitude += (Math.sin(2 * Math.PI * baseFreq * t) + harmonics) * 
-                     Math.exp(-t * (8 + beatVariation * 2)) * (0.7 + beatVariation * 0.2);
-      }
-
-      // S2 sound (Dub) - varied characteristics per beat
-      if (beatPosition > sampleRate * 0.32 && beatPosition < sampleRate * 0.42) {
-        const t = (beatPosition - sampleRate * 0.32) / (sampleRate * 0.1);
-        const baseFreq = 85 * frequencyVariation;
-        const harmonics = Math.sin(2 * Math.PI * baseFreq * 1.5 * t) * 0.2;
-        amplitude += (Math.sin(2 * Math.PI * baseFreq * t) + harmonics) * 
-                     Math.exp(-t * (12 + beatVariation * 3)) * (0.5 + beatVariation * 0.15);
-      }
-
-      // Add subtle murmur-like sounds occasionally
-      if (beatNumber % 5 === 0 && beatPosition > sampleRate * 0.15 && beatPosition < sampleRate * 0.25) {
-        const t = (beatPosition - sampleRate * 0.15) / (sampleRate * 0.1);
-        amplitude += Math.sin(2 * Math.PI * 120 * t) * Math.exp(-t * 20) * 0.1;
-      }
-
-      // Vary background noise slightly per beat
-      const noiseVariation = 0.015 + Math.sin(beatNumber * 0.2) * 0.005;
-      amplitude += (Math.random() - 0.5) * noiseVariation;
+      // Unique frequency modulation per beat
+      const frequencyMod = 0.8 + randomness1 * 0.4; // 0.8-1.2 range
+      const amplitudeMod = 0.7 + randomness2 * 0.6; // 0.7-1.3 range
+      const timingMod = 0.9 + randomness3 * 0.2; // 0.9-1.1 range
       
-      channelData[i] = Math.max(-1, Math.min(1, amplitude)); // Clamp to prevent distortion
+      // S1 sound (Lub) - completely unique per beat
+      const s1Duration = sampleRate * 0.12 * timingMod;
+      if (beatPosition < s1Duration) {
+        const t = beatPosition / s1Duration;
+        const baseFreq = (40 + randomness1 * 20) * frequencyMod; // 32-72 Hz range
+        
+        // Multiple unique harmonics per beat
+        const harm1 = Math.sin(2 * Math.PI * baseFreq * t) * (0.8 + randomness1 * 0.4);
+        const harm2 = Math.sin(2 * Math.PI * baseFreq * 2.3 * t) * (0.3 + randomness2 * 0.2);
+        const harm3 = Math.sin(2 * Math.PI * baseFreq * 3.7 * t) * (0.15 + randomness3 * 0.1);
+        
+        const envelope = Math.exp(-t * (6 + randomness1 * 6)) * amplitudeMod;
+        amplitude += (harm1 + harm2 + harm3) * envelope;
+      }
+
+      // S2 sound (Dub) - unique characteristics per beat  
+      const s2Start = sampleRate * (0.30 + randomness2 * 0.04); // 0.30-0.34 timing variation
+      const s2Duration = sampleRate * 0.08 * timingMod;
+      if (beatPosition > s2Start && beatPosition < s2Start + s2Duration) {
+        const t = (beatPosition - s2Start) / s2Duration;
+        const baseFreq = (75 + randomness2 * 25) * frequencyMod; // 60-125 Hz range
+        
+        const harm1 = Math.sin(2 * Math.PI * baseFreq * t) * (0.6 + randomness2 * 0.3);
+        const harm2 = Math.sin(2 * Math.PI * baseFreq * 1.8 * t) * (0.25 + randomness3 * 0.15);
+        
+        const envelope = Math.exp(-t * (10 + randomness2 * 8)) * amplitudeMod * 0.8;
+        amplitude += (harm1 + harm2) * envelope;
+      }
+
+      // Unique additional sounds for each beat type
+      const beatType = beatNumber % 4;
+      if (beatType === 0 && randomness1 > 0.7) {
+        // Occasional S3 gallop sound
+        const s3Start = sampleRate * (0.45 + randomness3 * 0.02);
+        const s3Duration = sampleRate * 0.06;
+        if (beatPosition > s3Start && beatPosition < s3Start + s3Duration) {
+          const t = (beatPosition - s3Start) / s3Duration;
+          amplitude += Math.sin(2 * Math.PI * 35 * frequencyMod * t) * 
+                      Math.exp(-t * 15) * 0.2 * amplitudeMod;
+        }
+      }
+      
+      if (beatType === 2 && randomness2 > 0.8) {
+        // Rare S4 sound
+        const s4Start = sampleRate * (0.08 + randomness1 * 0.02);
+        const s4Duration = sampleRate * 0.05;
+        if (beatPosition > s4Start && beatPosition < s4Start + s4Duration) {
+          const t = (beatPosition - s4Start) / s4Duration;
+          amplitude += Math.sin(2 * Math.PI * 30 * frequencyMod * t) * 
+                      Math.exp(-t * 20) * 0.15 * amplitudeMod;
+        }
+      }
+
+      // Unique murmur characteristics
+      if (randomness3 > 0.6) {
+        const murmurStart = sampleRate * (0.15 + randomness1 * 0.05);
+        const murmurDuration = sampleRate * (0.08 + randomness2 * 0.04);
+        if (beatPosition > murmurStart && beatPosition < murmurStart + murmurDuration) {
+          const t = (beatPosition - murmurStart) / murmurDuration;
+          const murmurFreq = 100 + randomness3 * 60; // 100-160 Hz
+          amplitude += Math.sin(2 * Math.PI * murmurFreq * t) * 
+                      Math.exp(-t * (15 + randomness1 * 10)) * 
+                      (0.08 + randomness2 * 0.05);
+        }
+      }
+
+      // Dynamic background characteristics per beat
+      const noiseLevel = 0.01 + randomness1 * 0.02;
+      const noiseSeed = beatSeed + i * 0.1;
+      amplitude += Math.sin(noiseSeed) * noiseLevel;
+      
+      channelData[i] = Math.max(-1, Math.min(1, amplitude));
     }
     return audioBufferToWav(buffer);
   };
@@ -308,6 +361,14 @@ const RecordingDetailModal = ({
     if (recording.condition !== 'Normal') score -= 15;
     if (recording.stress_level === 'High') score -= 10;
     return Math.max(20, score);
+  };
+
+  const getHealthLevel = (recording: HeartRecording) => {
+    const percentage = getHealthPercentage(recording);
+    if (percentage >= 80) return "Excellent";
+    if (percentage >= 60) return "Good";
+    if (percentage >= 40) return "Fair";
+    return "Poor";
   };
   const downloadReport = async () => {
     if (!recording || !analysisData) return;
@@ -382,9 +443,9 @@ const RecordingDetailModal = ({
       const riskInfo = getRiskLevel(recording.attack_risk);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Heart Attack Risk: ${recording.attack_risk}% (${riskInfo.level})`, 20, yPos);
+      doc.text(`Heart Attack Risk: ${riskInfo.level}`, 20, yPos);
       yPos += 6;
-      doc.text(`Heart Health Score: ${getHealthPercentage(recording)}%`, 20, yPos);
+      doc.text(`Heart Health Assessment: ${getHealthLevel(recording)}`, 20, yPos);
       yPos += 6;
       doc.text(`Detected Condition: ${recording.condition}`, 20, yPos);
       yPos += 15;
@@ -612,7 +673,7 @@ const RecordingDetailModal = ({
                   <div className={`flex items-center justify-between p-3 rounded-lg border ${riskInfo.bgColor} border-${riskInfo.color}/20`}>
                     <div>
                       <p className="text-sm font-medium text-foreground">Heart Attack Risk</p>
-                      <p className={`text-2xl font-bold text-${riskInfo.color}`}>{recording.attack_risk}%</p>
+                      <p className={`text-2xl font-bold text-${riskInfo.color}`}>{riskInfo.level}</p>
                       <Badge variant="outline" className={`text-${riskInfo.color} border-${riskInfo.color} mt-1`}>
                         {riskInfo.level}
                       </Badge>

@@ -30,6 +30,11 @@ interface HealthChatbotProps {
 }
 
 const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
+  const getRiskLevel = (risk: number) => {
+    if (risk <= 10) return "Low";
+    if (risk <= 19) return "Moderate";
+    return "High";
+  };
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -82,7 +87,7 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
         const avgRisk = userRecordings.reduce((sum, r) => sum + (r.attack_risk || 0), 0) / userRecordings.length;
         const avgStress = userRecordings.reduce((sum, r) => sum + (r.stress_level || 0), 0) / userRecordings.length;
         
-        response = `📊 **Your Heart Health Analysis:**\n\n**Latest Recording:**\n• Heart Rate: ${latest.heart_rate_avg || 'N/A'} BPM\n• Attack Risk: ${latest.attack_risk || 'N/A'}%\n• Condition: ${latest.condition || 'Normal'}\n• Stress Level: ${latest.stress_level || 'Low'}\n\n**Overall Trends (${userRecordings.length} recordings):**\n• Average HR: ${Math.round(avgHR)} BPM\n• Average Risk: ${Math.round(avgRisk)}%\n• Average Stress: ${avgStress.toFixed(1)}\n\n**Clinical Insights:**\n${avgRisk > 30 ? '⚠️ Elevated risk detected - consider lifestyle modifications' : '✅ Risk levels appear manageable'}\n${avgHR > 100 ? '⚠️ High resting heart rate pattern' : avgHR < 60 ? 'ℹ️ Lower heart rate - common in athletes' : '✅ Normal heart rate range'}`;
+        response = `📊 **Your Heart Health Analysis:**\n\n**Latest Recording:**\n• Heart Rate: ${latest.heart_rate_avg || 'N/A'} BPM\n• Attack Risk: ${getRiskLevel(latest.attack_risk || 0)}\n• Condition: ${latest.condition || 'Normal'}\n• Stress Level: ${latest.stress_level || 'Low'}\n\n**Overall Trends (${userRecordings.length} recordings):**\n• Average HR: ${Math.round(avgHR)} BPM\n• Average Risk: ${getRiskLevel(Math.round(avgRisk))}\n• Average Stress: ${avgStress.toFixed(1)}\n\n**Clinical Insights:**\n${avgRisk > 30 ? '⚠️ Elevated risk detected - consider lifestyle modifications' : '✅ Risk levels appear manageable'}\n${avgHR > 100 ? '⚠️ High resting heart rate pattern' : avgHR < 60 ? 'ℹ️ Lower heart rate - common in athletes' : '✅ Normal heart rate range'}`;
         type = avgRisk > 30 ? 'warning' : 'info';
       } else {
         response = "I don't see any recordings in your profile yet. Please record your heart sounds first:\n\n1. Go to Recording page\n2. Follow the guided recording process\n3. Get instant AI analysis\n4. Return here for personalized insights!";
@@ -103,7 +108,7 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
         const riskTrend = userRecordings.length > 1 ? 
           (userRecordings[0].attack_risk || 0) - (userRecordings[userRecordings.length - 1].attack_risk || 0) : 0;
         
-        response = `🫀 **Your Cardiovascular Risk Assessment:**\n\n**Current Status:**\n• Average Risk: ${Math.round(avgRisk)}%\n• Risk Category: ${avgRisk < 20 ? 'Low' : avgRisk < 40 ? 'Moderate' : 'High'}\n• Trend: ${riskTrend > 0 ? '📈 Increasing' : riskTrend < 0 ? '📉 Decreasing' : '➡️ Stable'}\n\n**Risk Factors to Monitor:**\n${healthKnowledgeBase.riskFactors.high}\n\n**Prevention Strategy:**\n${healthKnowledgeBase.riskFactors.prevention}\n\n${avgRisk > 40 ? '⚠️ **Important:** High risk detected. Please consult healthcare provider.' : '✅ Keep monitoring and maintain healthy habits.'}`;
+        response = `🫀 **Your Cardiovascular Risk Assessment:**\n\n**Current Status:**\n• Average Risk: ${getRiskLevel(Math.round(avgRisk))}\n• Risk Category: ${avgRisk < 20 ? 'Low' : avgRisk < 40 ? 'Moderate' : 'High'}\n• Trend: ${riskTrend > 0 ? '📈 Increasing' : riskTrend < 0 ? '📉 Decreasing' : '➡️ Stable'}\n\n**Risk Factors to Monitor:**\n${healthKnowledgeBase.riskFactors.high}\n\n**Prevention Strategy:**\n${healthKnowledgeBase.riskFactors.prevention}\n\n${avgRisk > 40 ? '⚠️ **Important:** High risk detected. Please consult healthcare provider.' : '✅ Keep monitoring and maintain healthy habits.'}`;
         type = avgRisk > 40 ? 'warning' : 'info';
       } else {
         response = `🫀 **Cardiovascular Risk Information:**\n\n**Common Risk Factors:**\n${healthKnowledgeBase.riskFactors.high}\n\n**Prevention Methods:**\n${healthKnowledgeBase.riskFactors.prevention}\n\nRecord your heart sounds to get personalized risk assessment!`;

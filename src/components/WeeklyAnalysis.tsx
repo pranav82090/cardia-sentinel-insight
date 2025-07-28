@@ -296,6 +296,18 @@ const WeeklyAnalysis = ({ recordings }: WeeklyAnalysisProps) => {
   };
 
   const getRiskLevel = (risk: number) => {
+    if (risk <= 10) return "Low";
+    if (risk <= 19) return "Moderate";
+    return "High";
+  };
+
+  const getAvgRiskLevel = (risk: number) => {
+    if (risk <= 10) return "Low";
+    if (risk <= 19) return "Moderate";
+    return "High";
+  };
+
+  const getRiskLevelInfo = (risk: number) => {
     if (risk <= 10) return { level: "Low", color: "success", description: "Minimal risk" };
     if (risk <= 19) return { level: "Moderate", color: "warning", description: "Moderate risk" };
     return { level: "Danger", color: "critical", description: "High risk" };
@@ -507,12 +519,12 @@ const WeeklyAnalysis = ({ recordings }: WeeklyAnalysisProps) => {
           <CardContent className="p-4 text-center">
             <Shield className="h-6 w-6 text-warning mx-auto mb-2" />
             <div className="flex items-center justify-center gap-1 mb-1">
-              <span className="text-2xl font-bold text-foreground">{weeklyData.avgRisk}%</span>
+              <span className="text-2xl font-bold text-foreground">{getAvgRiskLevel(weeklyData.avgRisk)}</span>
               {getTrendIcon(weeklyData.riskTrend, true)}
             </div>
             <p className="text-xs text-muted-foreground">Avg Risk</p>
-            <Badge variant="outline" className={`text-xs text-${riskInfo.color}`}>
-              {riskInfo.level}
+            <Badge variant="outline" className={`text-xs text-${getRiskLevelInfo(weeklyData.avgRisk).color}`}>
+              {getRiskLevelInfo(weeklyData.avgRisk).level}
             </Badge>
           </CardContent>
         </Card>
@@ -574,7 +586,7 @@ const WeeklyAnalysis = ({ recordings }: WeeklyAnalysisProps) => {
                   {day.hasData && (
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>💓 {day.heartRate} BPM ({day.heartRateMin}-{day.heartRateMax})</span>
-                      <span>⚠️ {day.risk}% risk</span>
+                      <span>⚠️ {getRiskLevel(day.risk)} risk</span>
                       <span>🎯 {day.averageAccuracy}% accuracy</span>
                     </div>
                   )}
