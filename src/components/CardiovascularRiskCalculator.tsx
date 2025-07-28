@@ -602,15 +602,15 @@ const CardiovascularRiskCalculator: React.FC<CardiovascularRiskProps> = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center space-y-2">
-                    <div className="text-3xl font-bold text-foreground">
-                      {ascvdResults.riskPercent}%
+                  <div className="text-center space-y-3">
+                    <div className={`text-4xl font-bold ${getRiskColorClass(ascvdResults.classification)}`}>
+                      {ascvdResults.classification}
                     </div>
-                    <div className={`text-lg font-semibold ${getRiskColorClass(ascvdResults.classification)}`}>
-                      {ascvdResults.classification} Risk
+                    <div className="text-lg font-medium text-muted-foreground">
+                      Risk Level
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      10-Year Cardiovascular Risk
+                      10-Year Cardiovascular Risk Assessment
                     </p>
                   </div>
                 </CardContent>
@@ -625,15 +625,15 @@ const CardiovascularRiskCalculator: React.FC<CardiovascularRiskProps> = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center space-y-2">
-                    <div className="text-3xl font-bold text-foreground">
-                      {preventResults.riskPercent}%
+                  <div className="text-center space-y-3">
+                    <div className={`text-4xl font-bold ${getRiskColorClass(preventResults.classification)}`}>
+                      {preventResults.classification}
                     </div>
-                    <div className={`text-lg font-semibold ${getRiskColorClass(preventResults.classification)}`}>
-                      {preventResults.classification} Risk
+                    <div className="text-lg font-medium text-muted-foreground">
+                      Risk Level
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      10-Year Cardiovascular Risk
+                      10-Year Cardiovascular Risk Assessment
                     </p>
                   </div>
                 </CardContent>
