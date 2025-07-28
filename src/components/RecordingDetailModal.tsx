@@ -222,23 +222,45 @@ const RecordingDetailModal = ({
     const channelData = buffer.getChannelData(0);
     const heartRate = 72;
     const beatInterval = 60 / heartRate * sampleRate;
+    
     for (let i = 0; i < frameCount; i++) {
       const beatPosition = i % beatInterval;
+      const beatNumber = Math.floor(i / beatInterval);
       let amplitude = 0;
 
-      // S1 sound (Lub)
-      if (beatPosition < sampleRate * 0.1) {
-        const t = beatPosition / (sampleRate * 0.1);
-        amplitude += Math.sin(2 * Math.PI * 40 * t) * Math.exp(-t * 10) * 0.8;
+      // Vary characteristics for each beat
+      const beatVariation = Math.sin(beatNumber * 0.3) * 0.2 + 1; // Creates subtle variations
+      const frequencyVariation = 1 + Math.sin(beatNumber * 0.5) * 0.1; // Slight frequency changes
+      
+      // S1 sound (Lub) - varied characteristics per beat
+      if (beatPosition < sampleRate * 0.12) {
+        const t = beatPosition / (sampleRate * 0.12);
+        const baseFreq = 45 * frequencyVariation;
+        const harmonics = Math.sin(2 * Math.PI * baseFreq * 2 * t) * 0.3; // Add harmonics
+        amplitude += (Math.sin(2 * Math.PI * baseFreq * t) + harmonics) * 
+                     Math.exp(-t * (8 + beatVariation * 2)) * (0.7 + beatVariation * 0.2);
       }
 
-      // S2 sound (Dub)
-      if (beatPosition > sampleRate * 0.3 && beatPosition < sampleRate * 0.4) {
-        const t = (beatPosition - sampleRate * 0.3) / (sampleRate * 0.1);
-        amplitude += Math.sin(2 * Math.PI * 80 * t) * Math.exp(-t * 15) * 0.6;
+      // S2 sound (Dub) - varied characteristics per beat
+      if (beatPosition > sampleRate * 0.32 && beatPosition < sampleRate * 0.42) {
+        const t = (beatPosition - sampleRate * 0.32) / (sampleRate * 0.1);
+        const baseFreq = 85 * frequencyVariation;
+        const harmonics = Math.sin(2 * Math.PI * baseFreq * 1.5 * t) * 0.2;
+        amplitude += (Math.sin(2 * Math.PI * baseFreq * t) + harmonics) * 
+                     Math.exp(-t * (12 + beatVariation * 3)) * (0.5 + beatVariation * 0.15);
       }
-      amplitude += (Math.random() - 0.5) * 0.02;
-      channelData[i] = amplitude;
+
+      // Add subtle murmur-like sounds occasionally
+      if (beatNumber % 5 === 0 && beatPosition > sampleRate * 0.15 && beatPosition < sampleRate * 0.25) {
+        const t = (beatPosition - sampleRate * 0.15) / (sampleRate * 0.1);
+        amplitude += Math.sin(2 * Math.PI * 120 * t) * Math.exp(-t * 20) * 0.1;
+      }
+
+      // Vary background noise slightly per beat
+      const noiseVariation = 0.015 + Math.sin(beatNumber * 0.2) * 0.005;
+      amplitude += (Math.random() - 0.5) * noiseVariation;
+      
+      channelData[i] = Math.max(-1, Math.min(1, amplitude)); // Clamp to prevent distortion
     }
     return audioBufferToWav(buffer);
   };
