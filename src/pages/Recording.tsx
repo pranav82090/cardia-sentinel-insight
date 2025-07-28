@@ -213,7 +213,7 @@ const Recording = () => {
           heart_rate_avg: finalResults.heart_rate_avg,
           heart_rate_min: finalResults.heart_rate_min,
           heart_rate_max: finalResults.heart_rate_max,
-          attack_risk: finalResults.attack_risk,
+          attack_risk: Math.round(finalResults.attack_risk),
           condition: finalResults.condition,
           stress_level: finalResults.stress_level,
           stress_score: finalResults.stress_score,
