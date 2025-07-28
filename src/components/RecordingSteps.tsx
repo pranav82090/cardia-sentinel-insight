@@ -31,7 +31,7 @@ interface RecordingStepsProps {
   ppgData: PPGData | null;
   setPpgData: (data: PPGData | null) => void;
   ppgHistory: PPGData[];
-  setPpgHistory: (history: PPGData[]) => void;
+  setPpgHistory: (history: PPGData[] | ((prev: PPGData[]) => PPGData[])) => void;
   hrvData: HRVData | null;
   setHrvData: (data: HRVData | null) => void;
   audioBlob: Blob | null;
