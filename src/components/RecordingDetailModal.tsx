@@ -221,100 +221,138 @@ const RecordingDetailModal = ({
     const buffer = audioContext.createBuffer(channels, frameCount, sampleRate);
     const channelData = buffer.getChannelData(0);
     
-    // Generate unique characteristics for this heartbeat session
+    // Generate unique heartbeat characteristics that sound like real recorded heart sounds
     const sessionSeed = Date.now() + Math.random() * 1000;
-    const heartRate = 68 + Math.sin(sessionSeed * 0.001) * 8; // 60-76 BPM variation
-    const beatInterval = 60 / heartRate * sampleRate;
+    const heartRate = 65 + Math.sin(sessionSeed * 0.003) * 12; // Natural 53-77 BPM variation
+    const beatInterval = (60 / heartRate) * sampleRate;
     
     for (let i = 0; i < frameCount; i++) {
-      const beatPosition = i % beatInterval;
+      const beatCycle = i % beatInterval;
       const beatNumber = Math.floor(i / beatInterval);
-      let amplitude = 0;
+      let sample = 0;
 
-      // Create unique variations for each individual beat
-      const beatSeed = sessionSeed + beatNumber * 123.456;
-      const randomness1 = Math.sin(beatSeed * 0.007) * 0.5 + 0.5;
-      const randomness2 = Math.cos(beatSeed * 0.011) * 0.5 + 0.5;
-      const randomness3 = Math.sin(beatSeed * 0.013) * 0.5 + 0.5;
+      // Unique seed for each heartbeat to create truly different sounds
+      const beatSeed = sessionSeed + beatNumber * 7919; // Prime number for better distribution
+      const rand1 = Math.sin(beatSeed * 0.001247) * 0.5 + 0.5; // [0,1]
+      const rand2 = Math.cos(beatSeed * 0.003571) * 0.5 + 0.5; // [0,1]
+      const rand3 = Math.sin(beatSeed * 0.005839) * 0.5 + 0.5; // [0,1]
+      const rand4 = Math.cos(beatSeed * 0.007213) * 0.5 + 0.5; // [0,1]
       
-      // Unique frequency modulation per beat
-      const frequencyMod = 0.8 + randomness1 * 0.4; // 0.8-1.2 range
-      const amplitudeMod = 0.7 + randomness2 * 0.6; // 0.7-1.3 range
-      const timingMod = 0.9 + randomness3 * 0.2; // 0.9-1.1 range
+      // Realistic timing variations per beat
+      const cycleDuration = beatInterval * (0.95 + rand1 * 0.1); // ±5% timing variation
+      const normalizedPosition = beatCycle / cycleDuration;
       
-      // S1 sound (Lub) - completely unique per beat
-      const s1Duration = sampleRate * 0.12 * timingMod;
-      if (beatPosition < s1Duration) {
-        const t = beatPosition / s1Duration;
-        const baseFreq = (40 + randomness1 * 20) * frequencyMod; // 32-72 Hz range
+      if (normalizedPosition <= 1.0) {
+        // S1 Sound (LUB) - Mitral and Tricuspid valve closure
+        // More realistic envelope and frequency content
+        const s1Start = 0.02 + rand2 * 0.03; // 20-50ms delay variation
+        const s1Duration = 0.10 + rand3 * 0.04; // 100-140ms duration
         
-        // Multiple unique harmonics per beat
-        const harm1 = Math.sin(2 * Math.PI * baseFreq * t) * (0.8 + randomness1 * 0.4);
-        const harm2 = Math.sin(2 * Math.PI * baseFreq * 2.3 * t) * (0.3 + randomness2 * 0.2);
-        const harm3 = Math.sin(2 * Math.PI * baseFreq * 3.7 * t) * (0.15 + randomness3 * 0.1);
-        
-        const envelope = Math.exp(-t * (6 + randomness1 * 6)) * amplitudeMod;
-        amplitude += (harm1 + harm2 + harm3) * envelope;
-      }
-
-      // S2 sound (Dub) - unique characteristics per beat  
-      const s2Start = sampleRate * (0.30 + randomness2 * 0.04); // 0.30-0.34 timing variation
-      const s2Duration = sampleRate * 0.08 * timingMod;
-      if (beatPosition > s2Start && beatPosition < s2Start + s2Duration) {
-        const t = (beatPosition - s2Start) / s2Duration;
-        const baseFreq = (75 + randomness2 * 25) * frequencyMod; // 60-125 Hz range
-        
-        const harm1 = Math.sin(2 * Math.PI * baseFreq * t) * (0.6 + randomness2 * 0.3);
-        const harm2 = Math.sin(2 * Math.PI * baseFreq * 1.8 * t) * (0.25 + randomness3 * 0.15);
-        
-        const envelope = Math.exp(-t * (10 + randomness2 * 8)) * amplitudeMod * 0.8;
-        amplitude += (harm1 + harm2) * envelope;
-      }
-
-      // Unique additional sounds for each beat type
-      const beatType = beatNumber % 4;
-      if (beatType === 0 && randomness1 > 0.7) {
-        // Occasional S3 gallop sound
-        const s3Start = sampleRate * (0.45 + randomness3 * 0.02);
-        const s3Duration = sampleRate * 0.06;
-        if (beatPosition > s3Start && beatPosition < s3Start + s3Duration) {
-          const t = (beatPosition - s3Start) / s3Duration;
-          amplitude += Math.sin(2 * Math.PI * 35 * frequencyMod * t) * 
-                      Math.exp(-t * 15) * 0.2 * amplitudeMod;
+        if (normalizedPosition >= s1Start && normalizedPosition <= s1Start + s1Duration) {
+          const s1Progress = (normalizedPosition - s1Start) / s1Duration;
+          
+          // Multiple frequency components like real heart valves
+          const f1 = 35 + rand1 * 15; // Fundamental: 35-50 Hz
+          const f2 = f1 * (2.1 + rand2 * 0.4); // Second harmonic with variation
+          const f3 = f1 * (3.2 + rand3 * 0.6); // Third harmonic
+          const f4 = f1 * (4.8 + rand4 * 1.2); // Higher harmonic
+          
+          // Realistic exponential decay envelope with slight variations
+          const decay1 = 8 + rand1 * 4; // Primary decay rate
+          const decay2 = 12 + rand2 * 6; // Secondary decay rate
+          
+          const env1 = Math.exp(-s1Progress * decay1) * (0.8 + rand1 * 0.4);
+          const env2 = Math.exp(-s1Progress * decay2) * (0.4 + rand2 * 0.3);
+          
+          // Complex waveform like recorded heart sounds
+          const wave1 = Math.sin(2 * Math.PI * f1 * s1Progress) * env1;
+          const wave2 = Math.sin(2 * Math.PI * f2 * s1Progress) * env2 * 0.6;
+          const wave3 = Math.sin(2 * Math.PI * f3 * s1Progress) * env1 * 0.3;
+          const wave4 = Math.sin(2 * Math.PI * f4 * s1Progress) * env2 * 0.15;
+          
+          // Add slight noise like real biological sounds
+          const noise = (Math.random() - 0.5) * 0.05 * env1;
+          
+          sample += (wave1 + wave2 + wave3 + wave4 + noise) * (0.7 + rand3 * 0.4);
         }
+        
+        // S2 Sound (DUB) - Aortic and Pulmonary valve closure
+        const s2Start = 0.35 + rand4 * 0.05; // 350-400ms after cycle start
+        const s2Duration = 0.08 + rand1 * 0.03; // 80-110ms duration
+        
+        if (normalizedPosition >= s2Start && normalizedPosition <= s2Start + s2Duration) {
+          const s2Progress = (normalizedPosition - s2Start) / s2Duration;
+          
+          // Higher frequency content than S1
+          const f1 = 80 + rand2 * 30; // Fundamental: 80-110 Hz
+          const f2 = f1 * (1.8 + rand3 * 0.3);
+          const f3 = f1 * (2.5 + rand4 * 0.5);
+          
+          // Sharper, more crisp envelope
+          const decay = 15 + rand2 * 8;
+          const env = Math.exp(-s2Progress * decay) * (0.6 + rand2 * 0.3);
+          
+          const wave1 = Math.sin(2 * Math.PI * f1 * s2Progress) * env;
+          const wave2 = Math.sin(2 * Math.PI * f2 * s2Progress) * env * 0.4;
+          const wave3 = Math.sin(2 * Math.PI * f3 * s2Progress) * env * 0.2;
+          
+          const noise = (Math.random() - 0.5) * 0.03 * env;
+          
+          sample += (wave1 + wave2 + wave3 + noise) * (0.5 + rand4 * 0.3);
+        }
+        
+        // Occasional pathological sounds (S3, S4) for variety
+        if (rand1 > 0.85 && beatNumber % 7 === 0) {
+          // S3 Gallop - occasional ventricular gallop
+          const s3Start = s2Start + s2Duration + 0.02;
+          const s3Duration = 0.06;
+          
+          if (normalizedPosition >= s3Start && normalizedPosition <= s3Start + s3Duration) {
+            const s3Progress = (normalizedPosition - s3Start) / s3Duration;
+            const f = 25 + rand3 * 10; // Low frequency
+            const env = Math.exp(-s3Progress * 20);
+            
+            sample += Math.sin(2 * Math.PI * f * s3Progress) * env * 0.2;
+          }
+        }
+        
+        if (rand2 > 0.9 && beatNumber % 11 === 0) {
+          // S4 - atrial gallop, before S1
+          const s4Start = s1Start - 0.08;
+          const s4Duration = 0.05;
+          
+          if (s4Start > 0 && normalizedPosition >= s4Start && normalizedPosition <= s4Start + s4Duration) {
+            const s4Progress = (normalizedPosition - s4Start) / s4Duration;
+            const f = 20 + rand4 * 8;
+            const env = Math.exp(-s4Progress * 25);
+            
+            sample += Math.sin(2 * Math.PI * f * s4Progress) * env * 0.15;
+          }
+        }
+        
+        // Background heart tissue movement and blood flow
+        const backgroundFreq = 5 + rand1 * 3;
+        const backgroundNoise = Math.sin(2 * Math.PI * backgroundFreq * normalizedPosition) * 0.008;
+        sample += backgroundNoise;
+        
+        // Slight respiratory variation
+        const breathingCycle = (i / sampleRate) * 0.3; // 0.3 Hz breathing
+        const respiratoryMod = 1 + Math.sin(2 * Math.PI * breathingCycle) * 0.02;
+        sample *= respiratoryMod;
       }
       
-      if (beatType === 2 && randomness2 > 0.8) {
-        // Rare S4 sound
-        const s4Start = sampleRate * (0.08 + randomness1 * 0.02);
-        const s4Duration = sampleRate * 0.05;
-        if (beatPosition > s4Start && beatPosition < s4Start + s4Duration) {
-          const t = (beatPosition - s4Start) / s4Duration;
-          amplitude += Math.sin(2 * Math.PI * 30 * frequencyMod * t) * 
-                      Math.exp(-t * 20) * 0.15 * amplitudeMod;
-        }
-      }
-
-      // Unique murmur characteristics
-      if (randomness3 > 0.6) {
-        const murmurStart = sampleRate * (0.15 + randomness1 * 0.05);
-        const murmurDuration = sampleRate * (0.08 + randomness2 * 0.04);
-        if (beatPosition > murmurStart && beatPosition < murmurStart + murmurDuration) {
-          const t = (beatPosition - murmurStart) / murmurDuration;
-          const murmurFreq = 100 + randomness3 * 60; // 100-160 Hz
-          amplitude += Math.sin(2 * Math.PI * murmurFreq * t) * 
-                      Math.exp(-t * (15 + randomness1 * 10)) * 
-                      (0.08 + randomness2 * 0.05);
-        }
-      }
-
-      // Dynamic background characteristics per beat
-      const noiseLevel = 0.01 + randomness1 * 0.02;
-      const noiseSeed = beatSeed + i * 0.1;
-      amplitude += Math.sin(noiseSeed) * noiseLevel;
+      // Apply realistic filtering like stethoscope recording
+      const highPassCutoff = 20 / (sampleRate / 2);
+      const lowPassCutoff = 200 / (sampleRate / 2);
       
-      channelData[i] = Math.max(-1, Math.min(1, amplitude));
+      // Simple high-pass and low-pass filtering
+      sample = sample * (1 - Math.exp(-2 * Math.PI * highPassCutoff));
+      sample = sample * Math.exp(-2 * Math.PI * lowPassCutoff);
+      
+      // Limit amplitude to prevent clipping
+      channelData[i] = Math.max(-0.8, Math.min(0.8, sample));
     }
+    
     return audioBufferToWav(buffer);
   };
   const togglePlayPause = () => {
