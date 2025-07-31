@@ -31,8 +31,14 @@ interface HealthChatbotProps {
 
 const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
   const getRiskLevel = (risk: number) => {
-    if (risk <= 10) return "Low";
-    if (risk <= 19) return "Moderate";
+    if (risk <= 7) return "Low";
+    if (risk <= 15) return "Moderate";
+    return "High";
+  };
+
+  const getRiskCategory = (risk: number) => {
+    if (risk <= 7) return "Low";
+    if (risk <= 15) return "Moderate";
     return "High";
   };
   const [messages, setMessages] = useState<Message[]>([
@@ -108,7 +114,7 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
         const riskTrend = userRecordings.length > 1 ? 
           (userRecordings[0].attack_risk || 0) - (userRecordings[userRecordings.length - 1].attack_risk || 0) : 0;
         
-        response = `🫀 **Your Cardiovascular Risk Assessment:**\n\n**Current Status:**\n• Average Risk: ${getRiskLevel(Math.round(avgRisk))}\n• Risk Category: ${avgRisk < 20 ? 'Low' : avgRisk < 40 ? 'Moderate' : 'High'}\n• Trend: ${riskTrend > 0 ? '📈 Increasing' : riskTrend < 0 ? '📉 Decreasing' : '➡️ Stable'}\n\n**Risk Factors to Monitor:**\n${healthKnowledgeBase.riskFactors.high}\n\n**Prevention Strategy:**\n${healthKnowledgeBase.riskFactors.prevention}\n\n${avgRisk > 40 ? '⚠️ **Important:** High risk detected. Please consult healthcare provider.' : '✅ Keep monitoring and maintain healthy habits.'}`;
+        response = `🫀 **Your Cardiovascular Risk Assessment:**\n\n**Current Status:**\n• Average Risk: ${getRiskLevel(Math.round(avgRisk))}\n• Risk Category: ${getRiskCategory(Math.round(avgRisk))}\n• Trend: ${riskTrend > 0 ? '📈 Increasing' : riskTrend < 0 ? '📉 Decreasing' : '➡️ Stable'}\n\n**Risk Factors to Monitor:**\n${healthKnowledgeBase.riskFactors.high}\n\n**Prevention Strategy:**\n${healthKnowledgeBase.riskFactors.prevention}\n\n${avgRisk > 15 ? '⚠️ **Important:** Elevated risk detected. Please consult healthcare provider.' : '✅ Keep monitoring and maintain healthy habits.'}`;
         type = avgRisk > 40 ? 'warning' : 'info';
       } else {
         response = `🫀 **Cardiovascular Risk Information:**\n\n**Common Risk Factors:**\n${healthKnowledgeBase.riskFactors.high}\n\n**Prevention Methods:**\n${healthKnowledgeBase.riskFactors.prevention}\n\nRecord your heart sounds to get personalized risk assessment!`;

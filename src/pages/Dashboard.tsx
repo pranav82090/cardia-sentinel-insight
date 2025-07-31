@@ -95,24 +95,24 @@ const Dashboard = () => {
     return Math.round(recordings.reduce((sum, r) => sum + r.attack_risk, 0) / recordings.length);
   };
   const getRiskLevel = (risk: number) => {
-    if (risk <= 10) return "Low";
-    if (risk <= 19) return "Moderate";  
+    if (risk <= 7) return "Low";
+    if (risk <= 15) return "Moderate";  
     return "High";
   };
 
   const getAvgRiskLevel = (risk: number) => {
-    if (risk <= 10) return "Low";
-    if (risk <= 19) return "Moderate";
+    if (risk <= 7) return "Low";
+    if (risk <= 15) return "Moderate";
     return "High";
   };
 
   const getRiskLevelInfo = (risk: number) => {
-    if (risk <= 10) return {
+    if (risk <= 7) return {
       level: "Low",
       color: "success",
       description: "Minimal cardiovascular risk"
     };
-    if (risk <= 19) return {
+    if (risk <= 15) return {
       level: "Moderate",
       color: "warning",
       description: "Moderate cardiovascular risk"
@@ -120,7 +120,7 @@ const Dashboard = () => {
     return {
       level: "High",
       color: "critical",
-      description: "High cardiovascular risk"
+      description: "Elevated cardiovascular risk"
     };
   };
   const handleViewRecording = (recording: HeartRecording) => {

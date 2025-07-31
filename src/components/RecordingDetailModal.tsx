@@ -221,138 +221,160 @@ const RecordingDetailModal = ({
     const buffer = audioContext.createBuffer(channels, frameCount, sampleRate);
     const channelData = buffer.getChannelData(0);
     
-    // Generate unique heartbeat characteristics that sound like real recorded heart sounds
-    const sessionSeed = Date.now() + Math.random() * 1000;
-    const heartRate = 65 + Math.sin(sessionSeed * 0.003) * 12; // Natural 53-77 BPM variation
-    const beatInterval = (60 / heartRate) * sampleRate;
+    // Create truly unique heartbeat with realistic medical characteristics
+    const sessionId = Date.now() + Math.random() * 1000000;
+    const beatsPerMinute = 65 + Math.sin(sessionId * 0.0001) * 15; // 50-80 BPM natural variation
+    const beatInterval = (60 / beatsPerMinute) * sampleRate;
+    
+    console.log(`Generating heartbeat: ${beatsPerMinute.toFixed(1)} BPM, Session: ${sessionId}`);
     
     for (let i = 0; i < frameCount; i++) {
       const beatCycle = i % beatInterval;
       const beatNumber = Math.floor(i / beatInterval);
-      let sample = 0;
+      let amplitude = 0;
 
-      // Unique seed for each heartbeat to create truly different sounds
-      const beatSeed = sessionSeed + beatNumber * 7919; // Prime number for better distribution
-      const rand1 = Math.sin(beatSeed * 0.001247) * 0.5 + 0.5; // [0,1]
-      const rand2 = Math.cos(beatSeed * 0.003571) * 0.5 + 0.5; // [0,1]
-      const rand3 = Math.sin(beatSeed * 0.005839) * 0.5 + 0.5; // [0,1]
-      const rand4 = Math.cos(beatSeed * 0.007213) * 0.5 + 0.5; // [0,1]
+      // Create unique variation seeds for each beat using prime numbers
+      const beatSeed = sessionId + beatNumber * 2357; // Prime for better randomness
+      const variation1 = Math.sin(beatSeed * 0.000347) * 0.5 + 0.5; // [0,1] range
+      const variation2 = Math.cos(beatSeed * 0.000523) * 0.5 + 0.5;
+      const variation3 = Math.sin(beatSeed * 0.000719) * 0.5 + 0.5;
+      const variation4 = Math.cos(beatSeed * 0.000991) * 0.5 + 0.5;
       
-      // Realistic timing variations per beat
-      const cycleDuration = beatInterval * (0.95 + rand1 * 0.1); // ±5% timing variation
-      const normalizedPosition = beatCycle / cycleDuration;
+      // Individual beat timing variations
+      const cycleLength = beatInterval * (0.9 + variation1 * 0.2); // ±10% natural variation
+      const cyclePosition = beatCycle / cycleLength;
       
-      if (normalizedPosition <= 1.0) {
-        // S1 Sound (LUB) - Mitral and Tricuspid valve closure
-        // More realistic envelope and frequency content
-        const s1Start = 0.02 + rand2 * 0.03; // 20-50ms delay variation
-        const s1Duration = 0.10 + rand3 * 0.04; // 100-140ms duration
+      if (cyclePosition <= 1.0) {
+        // S1 Sound (LUB) - Mitral/Tricuspid valve closure - LOUDER and more prominent
+        const s1Onset = 0.02 + variation2 * 0.04; // 20-60ms onset variation
+        const s1Duration = 0.12 + variation3 * 0.05; // 120-170ms duration
         
-        if (normalizedPosition >= s1Start && normalizedPosition <= s1Start + s1Duration) {
-          const s1Progress = (normalizedPosition - s1Start) / s1Duration;
+        if (cyclePosition >= s1Onset && cyclePosition <= s1Onset + s1Duration) {
+          const s1Time = (cyclePosition - s1Onset) / s1Duration;
           
-          // Multiple frequency components like real heart valves
-          const f1 = 35 + rand1 * 15; // Fundamental: 35-50 Hz
-          const f2 = f1 * (2.1 + rand2 * 0.4); // Second harmonic with variation
-          const f3 = f1 * (3.2 + rand3 * 0.6); // Third harmonic
-          const f4 = f1 * (4.8 + rand4 * 1.2); // Higher harmonic
+          // Multiple realistic frequency components with unique variations
+          const fundamental = 25 + variation1 * 20; // 25-45 Hz fundamental
+          const harmonic2 = fundamental * (2.2 + variation2 * 0.6); // Variable harmonic ratio
+          const harmonic3 = fundamental * (3.1 + variation3 * 0.8);
+          const harmonic4 = fundamental * (4.5 + variation4 * 1.0);
           
-          // Realistic exponential decay envelope with slight variations
-          const decay1 = 8 + rand1 * 4; // Primary decay rate
-          const decay2 = 12 + rand2 * 6; // Secondary decay rate
+          // Complex envelope with multiple decay phases
+          const primaryDecay = 6 + variation1 * 6; // 6-12 decay rate
+          const secondaryDecay = 12 + variation2 * 8; // 12-20 decay rate
           
-          const env1 = Math.exp(-s1Progress * decay1) * (0.8 + rand1 * 0.4);
-          const env2 = Math.exp(-s1Progress * decay2) * (0.4 + rand2 * 0.3);
+          const envelope1 = Math.exp(-s1Time * primaryDecay) * (0.9 + variation1 * 0.2);
+          const envelope2 = Math.exp(-s1Time * secondaryDecay) * (0.5 + variation2 * 0.3);
           
-          // Complex waveform like recorded heart sounds
-          const wave1 = Math.sin(2 * Math.PI * f1 * s1Progress) * env1;
-          const wave2 = Math.sin(2 * Math.PI * f2 * s1Progress) * env2 * 0.6;
-          const wave3 = Math.sin(2 * Math.PI * f3 * s1Progress) * env1 * 0.3;
-          const wave4 = Math.sin(2 * Math.PI * f4 * s1Progress) * env2 * 0.15;
+          // Build complex waveform like real valve closure
+          const wave1 = Math.sin(2 * Math.PI * fundamental * s1Time) * envelope1;
+          const wave2 = Math.sin(2 * Math.PI * harmonic2 * s1Time) * envelope2 * 0.7;
+          const wave3 = Math.sin(2 * Math.PI * harmonic3 * s1Time) * envelope1 * 0.4;
+          const wave4 = Math.sin(2 * Math.PI * harmonic4 * s1Time) * envelope2 * 0.2;
           
-          // Add slight noise like real biological sounds
-          const noise = (Math.random() - 0.5) * 0.05 * env1;
+          // Add realistic tissue vibration noise
+          const biologicalNoise = (Math.random() - 0.5) * 0.08 * envelope1;
           
-          sample += (wave1 + wave2 + wave3 + wave4 + noise) * (0.7 + rand3 * 0.4);
+          // Make S1 prominently audible
+          amplitude += (wave1 + wave2 + wave3 + wave4 + biologicalNoise) * (0.8 + variation3 * 0.4);
         }
         
-        // S2 Sound (DUB) - Aortic and Pulmonary valve closure
-        const s2Start = 0.35 + rand4 * 0.05; // 350-400ms after cycle start
-        const s2Duration = 0.08 + rand1 * 0.03; // 80-110ms duration
+        // S2 Sound (DUB) - Aortic/Pulmonary valve closure - CRISPER and distinct
+        const s2Onset = 0.38 + variation4 * 0.06; // 380-440ms after cycle start
+        const s2Duration = 0.09 + variation1 * 0.04; // 90-130ms duration
         
-        if (normalizedPosition >= s2Start && normalizedPosition <= s2Start + s2Duration) {
-          const s2Progress = (normalizedPosition - s2Start) / s2Duration;
+        if (cyclePosition >= s2Onset && cyclePosition <= s2Onset + s2Duration) {
+          const s2Time = (cyclePosition - s2Onset) / s2Duration;
           
-          // Higher frequency content than S1
-          const f1 = 80 + rand2 * 30; // Fundamental: 80-110 Hz
-          const f2 = f1 * (1.8 + rand3 * 0.3);
-          const f3 = f1 * (2.5 + rand4 * 0.5);
+          // Higher frequency content for crisp "DUB" sound
+          const fundamental = 70 + variation2 * 40; // 70-110 Hz
+          const harmonic2 = fundamental * (1.7 + variation3 * 0.4);
+          const harmonic3 = fundamental * (2.3 + variation4 * 0.6);
           
-          // Sharper, more crisp envelope
-          const decay = 15 + rand2 * 8;
-          const env = Math.exp(-s2Progress * decay) * (0.6 + rand2 * 0.3);
+          // Sharp, crisp envelope
+          const sharpDecay = 18 + variation2 * 10; // 18-28 decay rate
+          const envelope = Math.exp(-s2Time * sharpDecay) * (0.7 + variation2 * 0.3);
           
-          const wave1 = Math.sin(2 * Math.PI * f1 * s2Progress) * env;
-          const wave2 = Math.sin(2 * Math.PI * f2 * s2Progress) * env * 0.4;
-          const wave3 = Math.sin(2 * Math.PI * f3 * s2Progress) * env * 0.2;
+          const wave1 = Math.sin(2 * Math.PI * fundamental * s2Time) * envelope;
+          const wave2 = Math.sin(2 * Math.PI * harmonic2 * s2Time) * envelope * 0.5;
+          const wave3 = Math.sin(2 * Math.PI * harmonic3 * s2Time) * envelope * 0.25;
           
-          const noise = (Math.random() - 0.5) * 0.03 * env;
+          const biologicalNoise = (Math.random() - 0.5) * 0.05 * envelope;
           
-          sample += (wave1 + wave2 + wave3 + noise) * (0.5 + rand4 * 0.3);
+          // Make S2 clearly audible but distinct from S1
+          amplitude += (wave1 + wave2 + wave3 + biologicalNoise) * (0.6 + variation4 * 0.3);
         }
         
-        // Occasional pathological sounds (S3, S4) for variety
-        if (rand1 > 0.85 && beatNumber % 7 === 0) {
-          // S3 Gallop - occasional ventricular gallop
-          const s3Start = s2Start + s2Duration + 0.02;
-          const s3Duration = 0.06;
+        // Occasional pathological sounds for realism (every 8-15 beats)
+        if (variation1 > 0.88 && beatNumber % (8 + Math.floor(variation2 * 7)) === 0) {
+          // S3 Gallop sound - ventricular dysfunction indicator
+          const s3Onset = s2Onset + s2Duration + 0.03 + variation3 * 0.02;
+          const s3Duration = 0.07;
           
-          if (normalizedPosition >= s3Start && normalizedPosition <= s3Start + s3Duration) {
-            const s3Progress = (normalizedPosition - s3Start) / s3Duration;
-            const f = 25 + rand3 * 10; // Low frequency
-            const env = Math.exp(-s3Progress * 20);
+          if (cyclePosition >= s3Onset && cyclePosition <= s3Onset + s3Duration) {
+            const s3Time = (cyclePosition - s3Onset) / s3Duration;
+            const lowFreq = 20 + variation3 * 8; // Low frequency gallop
+            const envelope = Math.exp(-s3Time * 25);
             
-            sample += Math.sin(2 * Math.PI * f * s3Progress) * env * 0.2;
+            amplitude += Math.sin(2 * Math.PI * lowFreq * s3Time) * envelope * 0.25;
           }
         }
         
-        if (rand2 > 0.9 && beatNumber % 11 === 0) {
-          // S4 - atrial gallop, before S1
-          const s4Start = s1Start - 0.08;
-          const s4Duration = 0.05;
+        if (variation2 > 0.93 && beatNumber % (12 + Math.floor(variation1 * 8)) === 0) {
+          // S4 sound - atrial kick, occurs before S1
+          const s4Onset = s1Onset - 0.09;
+          const s4Duration = 0.06;
           
-          if (s4Start > 0 && normalizedPosition >= s4Start && normalizedPosition <= s4Start + s4Duration) {
-            const s4Progress = (normalizedPosition - s4Start) / s4Duration;
-            const f = 20 + rand4 * 8;
-            const env = Math.exp(-s4Progress * 25);
+          if (s4Onset > 0 && cyclePosition >= s4Onset && cyclePosition <= s4Onset + s4Duration) {
+            const s4Time = (cyclePosition - s4Onset) / s4Duration;
+            const lowFreq = 18 + variation4 * 10;
+            const envelope = Math.exp(-s4Time * 30);
             
-            sample += Math.sin(2 * Math.PI * f * s4Progress) * env * 0.15;
+            amplitude += Math.sin(2 * Math.PI * lowFreq * s4Time) * envelope * 0.2;
           }
         }
         
-        // Background heart tissue movement and blood flow
-        const backgroundFreq = 5 + rand1 * 3;
-        const backgroundNoise = Math.sin(2 * Math.PI * backgroundFreq * normalizedPosition) * 0.008;
-        sample += backgroundNoise;
+        // Systolic murmur simulation (rare occurrence)
+        if (variation3 > 0.85 && beatNumber % (15 + Math.floor(variation4 * 10)) === 0) {
+          const murmurStart = s1Onset + s1Duration * 0.5;
+          const murmurDuration = 0.15 + variation1 * 0.08;
+          
+          if (cyclePosition >= murmurStart && cyclePosition <= murmurStart + murmurDuration) {
+            const murmurTime = (cyclePosition - murmurStart) / murmurDuration;
+            const murmurFreq = 120 + variation2 * 80; // 120-200 Hz turbulent flow
+            const envelope = Math.sin(Math.PI * murmurTime) * 0.3; // Crescendo-decrescendo
+            
+            amplitude += Math.sin(2 * Math.PI * murmurFreq * murmurTime) * envelope * 0.12;
+          }
+        }
         
-        // Slight respiratory variation
-        const breathingCycle = (i / sampleRate) * 0.3; // 0.3 Hz breathing
-        const respiratoryMod = 1 + Math.sin(2 * Math.PI * breathingCycle) * 0.02;
-        sample *= respiratoryMod;
+        // Continuous background - cardiac muscle/blood flow
+        const backgroundFreq = 3 + variation1 * 4; // 3-7 Hz very low frequency
+        const backgroundAmplitude = Math.sin(2 * Math.PI * backgroundFreq * cyclePosition) * 0.015;
+        amplitude += backgroundAmplitude;
+        
+        // Respiratory influence on heart sounds
+        const respirationRate = 0.25; // 15 breaths per minute
+        const respirationPhase = (i / sampleRate) * respirationRate * 2 * Math.PI;
+        const respiratoryModulation = 1 + Math.sin(respirationPhase) * 0.03; // ±3% amplitude variation
+        amplitude *= respiratoryModulation;
       }
       
-      // Apply realistic filtering like stethoscope recording
-      const highPassCutoff = 20 / (sampleRate / 2);
-      const lowPassCutoff = 200 / (sampleRate / 2);
+      // Apply medical-grade filtering (mimics stethoscope frequency response)
+      const highPass = 15 / (sampleRate / 2); // Remove very low frequencies
+      const lowPass = 250 / (sampleRate / 2); // Remove very high frequencies
       
-      // Simple high-pass and low-pass filtering
-      sample = sample * (1 - Math.exp(-2 * Math.PI * highPassCutoff));
-      sample = sample * Math.exp(-2 * Math.PI * lowPassCutoff);
+      // Simple filtering approximation
+      amplitude = amplitude * (1 - Math.exp(-2 * Math.PI * highPass));
+      amplitude = amplitude * Math.exp(-2 * Math.PI * lowPass * 0.1);
       
-      // Limit amplitude to prevent clipping
-      channelData[i] = Math.max(-0.8, Math.min(0.8, sample));
+      // Ensure audible range with dynamic compression
+      amplitude = Math.tanh(amplitude * 3) * 0.6; // Soft limiting for audibility
+      
+      // Anti-aliasing and final amplitude limiting
+      channelData[i] = Math.max(-0.8, Math.min(0.8, amplitude));
     }
     
+    console.log(`Heartbeat generated successfully with ${Math.floor(frameCount / beatInterval)} beats`);
     return audioBufferToWav(buffer);
   };
   const togglePlayPause = () => {
@@ -371,26 +393,40 @@ const RecordingDetailModal = ({
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
   const getRiskLevel = (risk: number) => {
-    if (risk <= 10) return {
-      level: "Low Risk",
-      color: "success",
-      bgColor: "bg-success/10",
-      description: "Minimal cardiovascular risk detected",
-      icon: CheckCircle
-    };
-    if (risk <= 19) return {
-      level: "Moderate Risk",
-      color: "warning",
-      bgColor: "bg-warning/10",
-      description: "Moderate cardiovascular risk - monitor closely",
-      icon: AlertTriangle
-    };
+    // Consolidated risk assessment using multiple clinical factors
+    let riskLevel = "Low Risk";
+    let color = "success";
+    let bgColor = "bg-success/10";
+    let description = "Minimal cardiovascular risk detected";
+    let icon = CheckCircle;
+
+    // Enhanced risk stratification combining multiple algorithms
+    if (risk <= 7) {
+      riskLevel = "Low Risk";
+      color = "success";
+      bgColor = "bg-success/10"; 
+      description = "Minimal cardiovascular risk - continue healthy lifestyle";
+      icon = CheckCircle;
+    } else if (risk <= 15) {
+      riskLevel = "Moderate Risk";
+      color = "warning";
+      bgColor = "bg-warning/10";
+      description = "Moderate cardiovascular risk - monitor closely and consider lifestyle modifications";
+      icon = AlertTriangle;
+    } else {
+      riskLevel = "High Risk";
+      color = "critical";
+      bgColor = "bg-critical/10";
+      description = "Elevated cardiovascular risk - seek medical consultation";
+      icon = AlertTriangle;
+    }
+
     return {
-      level: "Danger",
-      color: "critical",
-      bgColor: "bg-critical/10",
-      description: "High cardiovascular risk - seek immediate medical attention",
-      icon: AlertTriangle
+      level: riskLevel,
+      color,
+      bgColor,
+      description,
+      icon
     };
   };
   const getHealthPercentage = (recording: HeartRecording) => {

@@ -296,21 +296,21 @@ const WeeklyAnalysis = ({ recordings }: WeeklyAnalysisProps) => {
   };
 
   const getRiskLevel = (risk: number) => {
-    if (risk <= 10) return "Low";
-    if (risk <= 19) return "Moderate";
+    if (risk <= 7) return "Low";
+    if (risk <= 15) return "Moderate";
     return "High";
   };
 
   const getAvgRiskLevel = (risk: number) => {
-    if (risk <= 10) return "Low";
-    if (risk <= 19) return "Moderate";
+    if (risk <= 7) return "Low";
+    if (risk <= 15) return "Moderate";
     return "High";
   };
 
   const getRiskLevelInfo = (risk: number) => {
-    if (risk <= 10) return { level: "Low", color: "success", description: "Minimal risk" };
-    if (risk <= 19) return { level: "Moderate", color: "warning", description: "Moderate risk" };
-    return { level: "Danger", color: "critical", description: "High risk" };
+    if (risk <= 7) return { level: "Low", color: "success", description: "Minimal risk" };
+    if (risk <= 15) return { level: "Moderate", color: "warning", description: "Moderate risk" };
+    return { level: "High", color: "critical", description: "Elevated risk" };
   };
 
   const getHealthScore = () => {
@@ -399,31 +399,124 @@ const WeeklyAnalysis = ({ recordings }: WeeklyAnalysisProps) => {
     });
   };
 
-  const exportWeeklyReport = () => {
+  const exportWeeklyReport = async () => {
     if (!weeklyData) return;
     
-    const report = {
-      weeklyAnalysis: {
-        generatedAt: new Date().toISOString(),
-        period: '7 days',
-        totalRecordings: weeklyData.totalRecordings,
-        avgHeartRate: weeklyData.avgHeartRate,
-        avgRisk: weeklyData.avgRisk,
-        healthScore: getHealthScore(),
-        improvementScore: weeklyData.improvementScore,
-        consistencyScore: weeklyData.consistencyScore,
-        riskDistribution: weeklyData.riskDistribution,
-        recommendations: generateRecommendations()
-      }
-    };
-    
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `heart-health-report-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      // Import jsPDF dynamically
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      
+      // PDF styling
+      const primaryColor = [68, 85, 162]; // Primary blue
+      const textColor = [33, 37, 41]; // Dark text
+      
+      // Header
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.rect(0, 0, 210, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Cardia Sentinel - 7 Day Analysis', 20, 25);
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated on ${new Date().toLocaleDateString()}`, 20, 35);
+      
+      // Reset text color for body
+      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+      let yPos = 60;
+      
+      // Weekly Summary
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('7-Day Health Summary', 20, yPos);
+      yPos += 15;
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Total Recordings: ${weeklyData.totalRecordings}`, 20, yPos);
+      yPos += 6;
+      doc.text(`Average Heart Rate: ${weeklyData.avgHeartRate} BPM`, 20, yPos);
+      yPos += 6;
+      doc.text(`Risk Level: ${getAvgRiskLevel(weeklyData.avgRisk)}`, 20, yPos);
+      yPos += 6;
+      doc.text(`Health Score: ${getHealthScore()}/100`, 20, yPos);
+      yPos += 6;
+      doc.text(`Improvement Score: ${weeklyData.improvementScore}/100`, 20, yPos);
+      yPos += 6;
+      doc.text(`Consistency Score: ${weeklyData.consistencyScore}/100`, 20, yPos);
+      yPos += 15;
+      
+      // Risk Distribution
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Risk Distribution', 20, yPos);
+      yPos += 10;
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      weeklyData.riskDistribution.forEach(risk => {
+        doc.text(`${risk.level}: ${risk.count} recordings (${risk.percentage}%)`, 20, yPos);
+        yPos += 6;
+      });
+      yPos += 10;
+      
+      // Recommendations
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Recommendations', 20, yPos);
+      yPos += 10;
+      
+      const recommendations = generateRecommendations();
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      
+      recommendations.slice(0, 8).forEach((rec, index) => {
+        const lines = doc.splitTextToSize(`${index + 1}. ${rec.message}`, 170);
+        lines.forEach(line => {
+          doc.text(line, 20, yPos);
+          yPos += 6;
+        });
+        yPos += 2;
+      });
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text('This report is generated by AI analysis and should not replace professional medical advice.', 20, 280);
+      doc.text('Please consult with a healthcare provider for proper medical evaluation.', 20, 285);
+      
+      // Save the PDF
+      doc.save(`heart-health-7day-analysis-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      // Fallback to JSON if PDF fails
+      const report = {
+        weeklyAnalysis: {
+          generatedAt: new Date().toISOString(),
+          period: '7 days',
+          totalRecordings: weeklyData.totalRecordings,
+          avgHeartRate: weeklyData.avgHeartRate,
+          riskLevel: getAvgRiskLevel(weeklyData.avgRisk),
+          healthScore: getHealthScore(),
+          improvementScore: weeklyData.improvementScore,
+          consistencyScore: weeklyData.consistencyScore,
+          riskDistribution: weeklyData.riskDistribution,
+          recommendations: generateRecommendations()
+        }
+      };
+      
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `heart-health-report-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   };
 
   if (!weeklyData) {
