@@ -214,8 +214,14 @@ const RecordingDetailModal = ({
   };
   const generateSyntheticHeartbeat = async (): Promise<Blob> => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Resume audio context for modern browsers
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume();
+    }
+    
     const sampleRate = 44100;
-    const duration = 10;
+    const duration = 8; // Shorter for better loading
     const frameCount = sampleRate * duration;
     const channels = 1;
     const buffer = audioContext.createBuffer(channels, frameCount, sampleRate);
@@ -377,14 +383,32 @@ const RecordingDetailModal = ({
     console.log(`Heartbeat generated successfully with ${Math.floor(frameCount / beatInterval)} beats`);
     return audioBufferToWav(buffer);
   };
-  const togglePlayPause = () => {
+  const togglePlayPause = async () => {
     if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
+      try {
+        if (isPlaying) {
+          audioRef.current.pause();
+          setIsPlaying(false);
+        } else {
+          // Ensure audio is loaded
+          if (audioRef.current.readyState < 2) {
+            await new Promise((resolve) => {
+              audioRef.current!.addEventListener('canplay', resolve, { once: true });
+            });
+          }
+          
+          audioRef.current.volume = 0.8; // Set higher volume
+          await audioRef.current.play();
+          setIsPlaying(true);
+        }
+      } catch (error) {
+        console.error('Audio playback error:', error);
+        toast({
+          title: "Audio Playback Error",
+          description: "Unable to play heart sound. Please try again.",
+          variant: "destructive"
+        });
       }
-      setIsPlaying(!isPlaying);
     }
   };
   const formatTime = (time: number) => {

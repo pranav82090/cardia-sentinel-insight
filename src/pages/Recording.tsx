@@ -482,67 +482,79 @@ const Recording = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="text-center p-6 rounded-lg bg-success/10">
-                  <Heart className="h-8 w-8 text-success mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground mb-1">Heart Rate</p>
-                  <p className="text-3xl font-bold text-foreground">{finalResults.heart_rate_avg}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div className="text-center p-4 sm:p-6 rounded-lg bg-success/10">
+                  <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-success mx-auto mb-3" />
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Heart Rate</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-foreground">{finalResults.heart_rate_avg}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Range: {finalResults.heart_rate_min}-{finalResults.heart_rate_max} BPM
                   </p>
                   <p className="text-xs text-success mt-2">PPG: {finalResults.ppg_bpm} BPM</p>
                 </div>
                 
-                <div className={`text-center p-6 rounded-lg ${finalResults.condition === "Normal" ? "bg-success/10" : "bg-warning/10"}`}>
-                  <Activity className={`h-8 w-8 mx-auto mb-3 ${finalResults.condition === "Normal" ? "text-success" : "text-warning"}`} />
-                  <p className="text-sm text-muted-foreground mb-1">Condition</p>
-                  <p className="text-xl font-bold text-foreground">{finalResults.condition}</p>
+                <div className={`text-center p-4 sm:p-6 rounded-lg ${finalResults.condition === "Normal" ? "bg-success/10" : "bg-warning/10"}`}>
+                  <Activity className={`h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-3 ${finalResults.condition === "Normal" ? "text-success" : "text-warning"}`} />
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Condition</p>
+                  <p className="text-lg sm:text-xl font-bold text-foreground">{finalResults.condition}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Heart Sound Analysis
                   </p>
                 </div>
                 
-                <div className={`text-center p-6 rounded-lg ${
+                <div className={`text-center p-4 sm:p-6 rounded-lg ${
                   finalResults.stress_level === "Low" ? "bg-success/10" : 
                   finalResults.stress_level === "Moderate" ? "bg-warning/10" : "bg-destructive/10"
                 }`}>
-                  <Brain className={`h-8 w-8 mx-auto mb-3 ${
+                  <Brain className={`h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-3 ${
                     finalResults.stress_level === "Low" ? "text-success" : 
                     finalResults.stress_level === "Moderate" ? "text-warning" : "text-destructive"
                   }`} />
-                  <p className="text-sm text-muted-foreground mb-1">Stress Level</p>
-                  <p className="text-xl font-bold text-foreground">{finalResults.stress_level}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Stress Level</p>
+                  <p className="text-lg sm:text-xl font-bold text-foreground">{finalResults.stress_level}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     HRV: {finalResults.hrv_rmssd}ms | Score: {finalResults.stress_score}/100
                   </p>
                 </div>
                 
-                <div className="text-center p-6 rounded-lg bg-critical/10">
-                  <Badge variant="outline" className="text-critical border-critical mb-3">
+                <div className={`text-center p-4 sm:p-6 rounded-lg ${
+                  finalResults.attack_risk <= 7 ? "bg-success/10" :
+                  finalResults.attack_risk <= 15 ? "bg-warning/10" : "bg-destructive/10"
+                }`}>
+                  <Badge variant="outline" className={`mb-3 ${
+                    finalResults.attack_risk <= 7 ? "text-success border-success" :
+                    finalResults.attack_risk <= 15 ? "text-warning border-warning" : "text-destructive border-destructive"
+                  }`}>
                     RISK ASSESSMENT
                   </Badge>
-                  <p className="text-3xl font-bold text-critical">{finalResults.attack_risk}%</p>
-                  <p className="text-sm text-muted-foreground mt-1">Attack Risk</p>
+                  <p className={`text-xl sm:text-2xl font-bold ${
+                    finalResults.attack_risk <= 7 ? "text-success" :
+                    finalResults.attack_risk <= 15 ? "text-warning" : "text-destructive"
+                  }`}>
+                    {finalResults.attack_risk <= 7 ? "Low Risk" :
+                     finalResults.attack_risk <= 15 ? "Moderate Risk" : "High Risk"}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">Cardiovascular Risk</p>
                   <p className="text-xs text-muted-foreground mt-2">
                     Comprehensive Analysis
                   </p>
                 </div>
               </div>
               
-              <div className="mt-8 p-6 rounded-lg bg-primary/5 border border-primary/20">
-                <h4 className="font-semibold text-foreground mb-3">Analysis Summary</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div>
+              <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-lg bg-primary/5 border border-primary/20">
+                <h4 className="font-semibold text-foreground mb-3 text-sm sm:text-base">Analysis Summary</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
+                  <div className="space-y-1">
                     <p className="font-medium text-foreground">Heart Sound Analysis:</p>
                     <p className="text-muted-foreground">Advanced noise cancellation applied</p>
                     <p className="text-muted-foreground">S1/S2 sounds detected and analyzed</p>
                   </div>
-                  <div>
+                  <div className="space-y-1">
                     <p className="font-medium text-foreground">PPG Monitoring:</p>
                     <p className="text-muted-foreground">60-second continuous monitoring</p>
                     <p className="text-muted-foreground">Flashlight-assisted measurement</p>
                   </div>
-                  <div>
+                  <div className="space-y-1">
                     <p className="font-medium text-foreground">HRV Analysis:</p>
                     <p className="text-muted-foreground">RMSSD calculation completed</p>
                     <p className="text-muted-foreground">Autonomic system assessment</p>
@@ -550,25 +562,26 @@ const Recording = () => {
                 </div>
               </div>
               
-              <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center px-2">
                 <Button 
                   onClick={saveReportToDatabase} 
-                  className="gap-2"
+                  className="gap-2 text-xs sm:text-sm"
                   disabled={isSavingReport}
+                  size="sm"
                 >
                   {isSavingReport ? (
-                    <Activity className="h-4 w-4 animate-spin" />
+                    <Activity className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                   ) : (
-                    <Save className="h-4 w-4" />
+                    <Save className="h-3 w-3 sm:h-4 sm:w-4" />
                   )}
                   {isSavingReport ? "Saving..." : "Save & See Report Page"}
                 </Button>
-                <Button onClick={resetRecording} variant="outline" className="gap-2">
-                  <Mic className="h-4 w-4" />
+                <Button onClick={resetRecording} variant="outline" className="gap-2 text-xs sm:text-sm" size="sm">
+                  <Mic className="h-3 w-3 sm:h-4 sm:w-4" />
                   New Analysis
                 </Button>
-                <Button onClick={() => navigate("/dashboard")} variant="secondary" className="gap-2">
-                  <User className="h-4 w-4" />
+                <Button onClick={() => navigate("/dashboard")} variant="secondary" className="gap-2 text-xs sm:text-sm" size="sm">
+                  <User className="h-3 w-3 sm:h-4 sm:w-4" />
                   View Dashboard
                 </Button>
               </div>
