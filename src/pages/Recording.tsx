@@ -164,6 +164,13 @@ const Recording = () => {
       return 10; // Default moderate risk if calculation fails
     }
   };
+
+  const getStressLevelFromScore = (score: number): string => {
+    if (score <= 30) return "Low";
+    if (score <= 70) return "Moderate"; 
+    return "High";
+  };
+  
   const generateFinalResults = async (hrvResult: HRVData) => {
     const results = {
       heart_rate_avg: heartSoundAnalysis?.heart_rate || 75,
@@ -513,7 +520,7 @@ const Recording = () => {
                   <p className="text-xs sm:text-sm text-muted-foreground mb-1">Stress Level</p>
                   <p className="text-lg sm:text-xl font-bold text-foreground">{finalResults.stress_level}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    HRV: {finalResults.hrv_rmssd}ms | Score: {finalResults.stress_score}/100
+                    HRV: {finalResults.hrv_rmssd}ms | Level: {finalResults.stress_level}
                   </p>
                 </div>
                 

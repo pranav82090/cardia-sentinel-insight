@@ -560,10 +560,8 @@ const RecordingDetailModal = ({
         doc.setFont('helvetica', 'normal');
         doc.text(`Stress Level: ${recording.stress_level}`, 20, yPos);
         yPos += 6;
-        if (recording.stress_score) {
-          doc.text(`Stress Score: ${recording.stress_score}/100`, 20, yPos);
-          yPos += 6;
-        }
+        doc.text(`Stress Level: ${recording.stress_level}`, 20, yPos);
+        yPos += 6;
         yPos += 10;
       }
       
@@ -712,37 +710,6 @@ const RecordingDetailModal = ({
             </CardContent>
           </Card>
 
-          {/* Heart Sound Recording */}
-          <Card className="border border-border/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Volume2 className="h-5 w-5 text-primary" />
-                Heart Sound Recording
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4 p-4 bg-secondary/50 rounded-lg">
-                <Button onClick={togglePlayPause} variant="outline" size="lg" className="w-12 h-12 rounded-full">
-                  {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
-                </Button>
-                
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{formatTime(currentTime)}</span>
-                    <span>{formatTime(duration)}</span>
-                  </div>
-                  <Progress value={currentTime / duration * 100} className="h-2" />
-                </div>
-                
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Download Audio
-                </Button>
-              </div>
-              
-              <audio ref={audioRef} onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime || 0)} onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} className="hidden" />
-            </CardContent>
-          </Card>
 
           {/* Heart Analysis Results */}
           <div className="grid lg:grid-cols-2 gap-6">
@@ -823,16 +790,10 @@ const RecordingDetailModal = ({
                     <p className="text-xl font-bold text-warning">
                       {recording.stress_level || "Normal"}
                     </p>
-                    {recording.stress_score && <div className="mt-2">
-                        <p className="text-xs text-muted-foreground mb-1">Stress Score</p>
-                        <div className="flex items-center gap-2">
-                          <Progress value={recording.stress_score} className="flex-1" />
-                          <span className="text-sm font-medium">{recording.stress_score}/100</span>
-                        </div>
-                      </div>}
                   </div>
 
-                  {analysisData && <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                  {analysisData && (
+                    <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
                       <div className="flex items-center justify-between mb-2">
                         <p className="text-sm font-medium text-foreground">Heart Rate Variability</p>
                         <PulseIcon className="h-5 w-5 text-primary" />
@@ -841,7 +802,8 @@ const RecordingDetailModal = ({
                       <p className="text-xs text-muted-foreground mt-1">
                         {analysisData.heartRateVariability < 30 ? 'Low variability' : analysisData.heartRateVariability < 60 ? 'Normal variability' : 'High variability'}
                       </p>
-                    </div>}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
