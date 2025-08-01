@@ -383,31 +383,32 @@ const RecordingDetailModal = ({
     console.log(`Heartbeat generated successfully with ${Math.floor(frameCount / beatInterval)} beats`);
     return audioBufferToWav(buffer);
   };
-  const togglePlayPause = async () => {
+  const togglePlayPause = () => {
     if (audioRef.current) {
-      try {
-        if (isPlaying) {
-          audioRef.current.pause();
-          setIsPlaying(false);
-        } else {
-          // Ensure audio is loaded
-          if (audioRef.current.readyState < 2) {
-            await new Promise((resolve) => {
-              audioRef.current!.addEventListener('canplay', resolve, { once: true });
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        // Set volume and play
+        audioRef.current.volume = 0.8;
+        const playPromise = audioRef.current.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+            })
+            .catch((error) => {
+              console.error('Audio playback error:', error);
+              toast({
+                title: "Audio Playback Error",
+                description: "Unable to play heart sound. Please try again.",
+                variant: "destructive"
+              });
             });
-          }
-          
-          audioRef.current.volume = 0.8; // Set higher volume
-          await audioRef.current.play();
+        } else {
           setIsPlaying(true);
         }
-      } catch (error) {
-        console.error('Audio playback error:', error);
-        toast({
-          title: "Audio Playback Error",
-          description: "Unable to play heart sound. Please try again.",
-          variant: "destructive"
-        });
       }
     }
   };

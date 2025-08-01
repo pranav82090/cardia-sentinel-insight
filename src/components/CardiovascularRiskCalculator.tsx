@@ -46,6 +46,7 @@ const CardiovascularRiskCalculator: React.FC<CardiovascularRiskProps> = ({
   
   const [ascvdResults, setAscvdResults] = useState<any>(null);
   const [preventResults, setPreventResults] = useState<any>(null);
+  const [consolidatedRisk, setConsolidatedRisk] = useState<any>(null);
   const [errors, setErrors] = useState<any>({});
   const [ageGroup, setAgeGroup] = useState('adult');
 
@@ -401,19 +402,44 @@ const CardiovascularRiskCalculator: React.FC<CardiovascularRiskProps> = ({
         confidence: Math.min(95, Math.max(85, 90 + Math.random() * 10))
       };
       
-      setAscvdResults(ascvd);
-      setPreventResults(prevent);
-      onResultsComplete(ascvd, prevent);
-      
       return consolidatedResults;
     }
     
     return null;
   };
 
+  // Update consolidated risk when inputs change
+  useEffect(() => {
+    const newConsolidatedRisk = calculateConsolidatedRisk();
+    if (newConsolidatedRisk) {
+      setConsolidatedRisk(newConsolidatedRisk);
+      
+      const ascvd = calculateASCVD();
+      const prevent = calculatePREVENT();
+      
+      if (ascvd && prevent) {
+        setAscvdResults(ascvd);
+        setPreventResults(prevent);
+        onResultsComplete(ascvd, prevent);
+      }
+    }
+  }, [inputs]);
+
   // Calculate both risks
   const calculateBothRisks = () => {
-    return calculateConsolidatedRisk();
+    const newConsolidatedRisk = calculateConsolidatedRisk();
+    if (newConsolidatedRisk) {
+      setConsolidatedRisk(newConsolidatedRisk);
+      
+      const ascvd = calculateASCVD();
+      const prevent = calculatePREVENT();
+      
+      if (ascvd && prevent) {
+        setAscvdResults(ascvd);
+        setPreventResults(prevent);
+        onResultsComplete(ascvd, prevent);
+      }
+    }
   };
 
   // Get age group label
@@ -650,27 +676,28 @@ const CardiovascularRiskCalculator: React.FC<CardiovascularRiskProps> = ({
               </CardHeader>
               <CardContent>
                 <div className="text-center space-y-4">
-                  {(() => {
-                    const consolidatedRisk = calculateConsolidatedRisk();
-                    return consolidatedRisk ? (
-                      <>
-                        <div className={`text-5xl font-bold ${getRiskColorClass(consolidatedRisk.riskLevel)}`}>
-                          {consolidatedRisk.riskLevel} Risk
-                        </div>
-                        <div className="text-lg font-medium text-muted-foreground">
-                          Overall Cardiovascular Risk Level
-                        </div>
-                        <div className="mt-6 p-4 rounded-lg bg-secondary/20">
-                          <p className="text-sm text-muted-foreground">
-                            <strong>Assessment Method:</strong> {consolidatedRisk.methodology}
-                          </p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            <strong>Clinical Confidence:</strong> {consolidatedRisk.confidence.toFixed(0)}%
-                          </p>
-                        </div>
-                      </>
-                    ) : null;
-                  })()}
+                  {consolidatedRisk ? (
+                    <>
+                      <div className={`text-5xl font-bold ${getRiskColorClass(consolidatedRisk.riskLevel)}`}>
+                        {consolidatedRisk.riskLevel} Risk
+                      </div>
+                      <div className="text-lg font-medium text-muted-foreground">
+                        Overall Cardiovascular Risk Level
+                      </div>
+                      <div className="mt-6 p-4 rounded-lg bg-secondary/20">
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Assessment Method:</strong> {consolidatedRisk.methodology}
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          <strong>Clinical Confidence:</strong> {consolidatedRisk.confidence.toFixed(0)}%
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-muted-foreground">
+                      Complete the form to see your cardiovascular risk assessment
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
