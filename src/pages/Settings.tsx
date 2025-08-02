@@ -55,6 +55,7 @@ const Settings = () => {
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -216,6 +217,15 @@ const Settings = () => {
 
   const deleteAccount = async () => {
     if (!user) return;
+    
+    if (deleteConfirmEmail !== user.email) {
+      toast({
+        title: "Email Confirmation Required",
+        description: "Please type your email address exactly to confirm account deletion.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsDeletingAccount(true);
     
@@ -628,17 +638,16 @@ const Settings = () => {
                       </AlertDialogHeader>
                       <div className="py-4">
                         <Input
+                          value={deleteConfirmEmail}
                           placeholder={`Type ${user?.email} to confirm`}
-                          onChange={(e) => {
-                            // You could add email confirmation logic here
-                          }}
+                          onChange={(e) => setDeleteConfirmEmail(e.target.value)}
                         />
                       </div>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel onClick={() => setDeleteConfirmEmail("")}>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={deleteAccount}
-                          disabled={isDeletingAccount}
+                          disabled={isDeletingAccount || deleteConfirmEmail !== user?.email}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                           {isDeletingAccount ? (
