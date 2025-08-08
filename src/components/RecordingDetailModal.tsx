@@ -649,7 +649,7 @@ const RecordingDetailModal = ({
   const riskInfo = getRiskLevel(recording.attack_risk);
   const healthPercentage = getHealthPercentage(recording);
   return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full h-full max-w-none max-h-none m-0 p-0 sm:max-w-[95vw] sm:max-h-[95vh] sm:m-4 sm:rounded-lg overflow-hidden">
+      <DialogContent className="w-full h-[100dvh] max-w-none m-0 p-0 sm:max-w-[95vw] sm:max-h-[90dvh] sm:m-4 sm:rounded-lg">
         <div className="h-full flex flex-col">
           <DialogHeader className="border-b bg-background px-4 py-3 sm:px-6 sm:py-4 shrink-0">
             <DialogTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -680,7 +680,7 @@ const RecordingDetailModal = ({
           </DialogHeader>
 
           {/* Scrollable content area */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6">
             <div className="space-y-4 sm:space-y-6">
               {/* Recording Information */}
               <Card className="border border-border/50">
