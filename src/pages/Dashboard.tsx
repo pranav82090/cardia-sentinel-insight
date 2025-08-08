@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, Activity, Brain, TrendingUp, Camera, Mic, Calendar, Shield, Eye, MessageCircle, BarChart3 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
-import RecordingDetailModal from "@/components/RecordingDetailModal";
+
 import HealthChatbot from "@/components/HealthChatbot";
 import WeeklyAnalysis from "@/components/WeeklyAnalysis";
 interface HeartRecording {
@@ -30,8 +30,6 @@ const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [recordings, setRecordings] = useState<HeartRecording[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRecording, setSelectedRecording] = useState<HeartRecording | null>(null);
-  const [showDetailModal, setShowDetailModal] = useState(false);
   const navigate = useNavigate();
   const {
     toast
@@ -124,8 +122,7 @@ const Dashboard = () => {
     };
   };
   const handleViewRecording = (recording: HeartRecording) => {
-    setSelectedRecording(recording);
-    setShowDetailModal(true);
+    navigate(`/report/${recording.id}`);
   };
   if (loading) {
     return <div className="min-h-screen bg-background">
@@ -389,11 +386,6 @@ const Dashboard = () => {
         </Tabs>
       </div>
 
-      {/* Recording Detail Modal */}
-      <RecordingDetailModal recording={selectedRecording} isOpen={showDetailModal} onClose={() => {
-      setShowDetailModal(false);
-      setSelectedRecording(null);
-    }} />
     </div>;
 };
 export default Dashboard;
