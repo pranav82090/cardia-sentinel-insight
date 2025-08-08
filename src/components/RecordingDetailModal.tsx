@@ -680,7 +680,7 @@ const RecordingDetailModal = ({
           </DialogHeader>
 
           {/* Scrollable content area */}
-          <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6">
+          <div className="flex-1 overflow-y-auto overscroll-contain modal-scroll touch-pan-y px-4 py-4 sm:px-6">
             <div className="space-y-4 sm:space-y-6">
               {/* Recording Information */}
               <Card className="border border-border/50">
