@@ -288,16 +288,16 @@ const Recording = () => {
         });
   };
   return (
-    <div className="min-h-[100dvh] bg-background overflow-x-hidden">
+    <div className="min-h-[100dvh] bg-background">
       <Navbar />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-        <div className="mb-6 lg:mb-8">
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
-            Advanced Heart Analysis
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-4xl">
+        <div className="mb-4 sm:mb-6 text-center">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-2">
+            Heart Analysis
           </h1>
-          <p className="text-muted-foreground">
-            Complete 3-step cardiovascular assessment with 96%+ accuracy
+          <p className="text-sm sm:text-base text-muted-foreground px-2">
+            Complete 3-step cardiovascular assessment
           </p>
         </div>
 
@@ -319,24 +319,26 @@ const Recording = () => {
           onAnalysisComplete={onAnalysisComplete}
         />
 
-        <div className="mt-8 flex gap-3 justify-center">
-          <Button onClick={resetRecording} variant="outline" className="gap-2">
+        <div className="mt-6 sm:mt-8 flex justify-center px-4">
+          <Button onClick={resetRecording} variant="outline" className="gap-2 text-sm sm:text-base">
             Start Over
           </Button>
         </div>
 
         {/* Additional Inputs Form */}
         {showAdditionalInputs && !showRiskCalculators && !showFinalReport && stepsCompleted.every(completed => completed) && (
-          <Card className="border-0 shadow-lg mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
-                Additional Information Required
-                <Badge variant="outline" className="ml-auto">Step 4</Badge>
+          <Card className="border-0 shadow-sm mt-6 sm:mt-8 mx-2 sm:mx-0">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  <span className="text-base sm:text-lg">Additional Information</span>
+                </div>
+                <Badge variant="outline" className="self-start sm:ml-auto text-xs">Step 4</Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardContent className="px-4 sm:px-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -445,10 +447,10 @@ const Recording = () => {
                 </div>
               </div>
 
-              <div className="mt-6 flex gap-3 justify-center">
+              <div className="mt-6 flex justify-center px-2">
                 <Button 
                   onClick={handleAdditionalInputsSubmit}
-                  className="gap-2"
+                  className="gap-2 w-full sm:w-auto text-sm sm:text-base"
                   disabled={!additionalInputs.age || !additionalInputs.gender}
                 >
                   <Activity className="h-4 w-4" />
