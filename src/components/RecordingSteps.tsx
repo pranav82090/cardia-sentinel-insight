@@ -518,12 +518,12 @@ export const RecordingSteps = ({
   return (
     <>
       {/* Progress Steps */}
-      <Card className="border-0 shadow-lg mb-8">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            {[1, 2, 3].map(step => (
-              <div key={step} className="flex items-center">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+      <Card className="border-0 shadow-sm mb-6 sm:mb-8 mx-2 sm:mx-0">
+        <CardContent className="p-3 sm:p-4 lg:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-2 mb-4 sm:mb-6">
+            {[1, 2, 3].map((step, index) => (
+              <div key={step} className="flex items-center justify-center sm:justify-start">
+                <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 ${
                   stepsCompleted[step - 1] 
                     ? 'bg-success border-success text-success-foreground' 
                     : currentStep === step 
@@ -531,21 +531,21 @@ export const RecordingSteps = ({
                     : 'border-muted-foreground text-muted-foreground'
                 }`}>
                   {stepsCompleted[step - 1] ? (
-                    <Check className="h-5 w-5" />
+                    <Check className="h-4 w-4 sm:h-5 sm:w-5" />
                   ) : (
-                    <span className="text-sm font-bold">{step}</span>
+                    <span className="text-xs sm:text-sm font-bold">{step}</span>
                   )}
                 </div>
-                <div className="ml-3">
-                  <p className={`text-sm font-medium ${
+                <div className="ml-2 sm:ml-3 flex-1 sm:flex-none">
+                  <p className={`text-xs sm:text-sm font-medium text-center sm:text-left ${
                     currentStep === step ? 'text-foreground' : 'text-muted-foreground'
                   }`}>
-                    {step === 1 && "Heart Sound Recording"}
-                    {step === 2 && "PPG BPM Analysis"}
-                    {step === 3 && "HRV Stress Analysis"}
+                    {step === 1 && "Heart Sound"}
+                    {step === 2 && "PPG Analysis"}
+                    {step === 3 && "HRV Stress"}
                   </p>
                 </div>
-                {step < 3 && <ChevronRight className="h-5 w-5 text-muted-foreground mx-4" />}
+                {step < 3 && <ChevronRight className="hidden sm:block h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground mx-2 lg:mx-4" />}
               </div>
             ))}
           </div>
