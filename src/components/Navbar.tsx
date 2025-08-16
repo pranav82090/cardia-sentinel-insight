@@ -38,10 +38,6 @@ const Navbar = () => {
         variant: "destructive",
       });
     } else {
-      toast({
-        title: "Signed out successfully",
-        description: "You have been signed out of your account.",
-      });
       navigate("/");
     }
     setIsOpen(false);

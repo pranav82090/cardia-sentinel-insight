@@ -109,11 +109,6 @@ const Settings = () => {
       // Sign out the user
       await supabase.auth.signOut();
       
-      toast({
-        title: "Account Deleted",
-        description: "Your account and all associated data have been permanently deleted.",
-      });
-      
       navigate("/");
     } catch (error: any) {
       console.error('Account deletion error:', error);
