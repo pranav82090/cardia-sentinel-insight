@@ -43,7 +43,10 @@ const Report = () => {
           .select('*')
           .eq('id', id)
           .single();
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching recording:', error);
+          throw error;
+        }
         setRecording(data as HeartRecording);
         document.title = `Heart Report • ${new Date(data.recorded_at).toLocaleDateString()} | Cardia Sentinel AI`;
         const meta = document.querySelector('meta[name="description"]');

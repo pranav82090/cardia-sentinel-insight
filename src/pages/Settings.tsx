@@ -99,7 +99,7 @@ const Settings = () => {
       ]);
       
       // Call the delete user function to remove from auth.users
-      const { error: deleteError } = await supabase.rpc('delete_user');
+      const { data, error: deleteError } = await supabase.rpc('delete_user');
       
       if (deleteError) {
         console.warn('Delete user function error:', deleteError);
