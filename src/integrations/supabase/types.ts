@@ -126,8 +126,8 @@ export type Database = {
         Returns: boolean
       }
       reset_user_account: {
-        Args: { user_email: string }
-        Returns: boolean
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {
