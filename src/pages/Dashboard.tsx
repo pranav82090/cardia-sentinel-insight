@@ -5,7 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Activity, Brain, TrendingUp, Camera, Mic, Calendar, Shield, Eye, MessageCircle, BarChart3 } from "lucide-react";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Heart, Activity, Brain, TrendingUp, Camera, Mic, Calendar, Shield, Eye, MessageCircle, BarChart3, Trash2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 
@@ -123,6 +134,32 @@ const Dashboard = () => {
   };
   const handleViewRecording = (recording: HeartRecording) => {
     navigate(`/report/${recording.id}`);
+  };
+
+  const handleDeleteRecording = async (recordingId: string) => {
+    try {
+      const { error } = await supabase
+        .from('heart_recordings')
+        .delete()
+        .eq('id', recordingId);
+
+      if (error) throw error;
+
+      // Update local state to remove the deleted recording
+      setRecordings(prev => prev.filter(r => r.id !== recordingId));
+      
+      toast({
+        title: "Recording deleted",
+        description: "The heart recording has been successfully deleted.",
+        variant: "success"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error deleting recording",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
   if (loading) {
     return <div className="min-h-screen bg-background">
@@ -292,7 +329,7 @@ const Dashboard = () => {
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 sm:shrink-0">
+                        <div className="flex items-center gap-2 sm:shrink-0">
                           <Badge variant="outline" className={`text-${getRiskLevelInfo(recording.attack_risk).color} text-xs`}>
                             {getRiskLevel(recording.attack_risk)} Risk
                           </Badge>
@@ -300,6 +337,30 @@ const Dashboard = () => {
                             <Eye className="h-4 w-4 mr-1" />
                             <span className="hidden sm:inline">View</span>
                           </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="shrink-0 text-destructive hover:text-destructive-foreground hover:bg-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Recording</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this heart recording from {new Date(recording.recorded_at).toLocaleDateString()}? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDeleteRecording(recording.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>)}
                   </div>}
@@ -362,11 +423,37 @@ const Dashboard = () => {
                                Accuracy: {recording.model_accuracy || 96}%
                              </p>
                           </div>
-                          <Button onClick={() => handleViewRecording(recording)} variant="outline" size="sm" className="w-full sm:w-auto">
-                            <Eye className="h-4 w-4 mr-1" />
-                            <span className="sm:hidden">View</span>
-                            <span className="hidden sm:inline">View Report</span>
-                          </Button>
+                          <div className="flex gap-2 w-full sm:w-auto">
+                            <Button onClick={() => handleViewRecording(recording)} variant="outline" size="sm" className="flex-1 sm:flex-initial">
+                              <Eye className="h-4 w-4 mr-1" />
+                              <span className="sm:hidden">View</span>
+                              <span className="hidden sm:inline">View Report</span>
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="shrink-0 text-destructive hover:text-destructive-foreground hover:bg-destructive">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Recording</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this heart recording from {new Date(recording.recorded_at).toLocaleDateString()}? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => handleDeleteRecording(recording.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </div>
                       </div>)}
                   </div>}
