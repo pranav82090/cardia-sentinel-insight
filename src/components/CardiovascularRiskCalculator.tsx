@@ -106,7 +106,7 @@ const CardiovascularRiskCalculator: React.FC<CardiovascularRiskProps> = ({
       }
     },
     
-    // PREVENT™ parameters (simplified)
+    // PREVENT parameters (simplified)
     preventParams: {
       baseAge: 0.22,
       cholRatio: 0.35,
