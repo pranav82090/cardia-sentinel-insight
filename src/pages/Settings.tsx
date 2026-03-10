@@ -94,8 +94,7 @@ const Settings = () => {
       // Delete user data from all tables
       await Promise.all([
         supabase.from('profiles').delete().eq('id', user.id),
-        supabase.from('heart_recordings').delete().eq('user_id', user.id),
-        supabase.from('api_settings').delete().eq('user_id', user.id)
+        supabase.from('heart_recordings').delete().eq('user_id', user.id)
       ]);
       
       // Call the delete user function to remove from auth.users
