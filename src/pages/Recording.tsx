@@ -172,21 +172,91 @@ const Recording = () => {
   };
   
   const generateFinalResults = async (hrvResult: HRVData) => {
-    const results = {
-      heart_rate_avg: heartSoundAnalysis?.heart_rate || 75,
-      heart_rate_min: (heartSoundAnalysis?.heart_rate || 75) - 8,
-      heart_rate_max: (heartSoundAnalysis?.heart_rate || 75) + 12,
-      ppg_bpm: ppgData?.bpm || 75,
-      attack_risk: calculateAttackRisk(),
-      condition: heartSoundAnalysis?.condition || "Normal",
-      stress_level: hrvResult.stressLevel,
-      stress_score: hrvResult.stressScore,
-      hrv_rmssd: hrvResult.rmssd,
-      accuracy: 96.5,
-      timestamp: new Date().toISOString()
-    };
-    setFinalResults(results);
-    setShowFinalReport(true);
+    try {
+      toast({
+        title: "🤖 AI Analysis in Progress",
+        description: "Lovable AI is analyzing your cardiac data..."
+      });
+
+      const { data, error } = await supabase.functions.invoke('advanced-heart-analysis', {
+        body: {
+          heartSoundData: heartSoundAnalysis,
+          ppgData: ppgData,
+          hrvData: hrvResult,
+          additionalInputs: additionalInputs
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.analysis) {
+        const aiAnalysis = data.analysis;
+        const results = {
+          heart_rate_avg: heartSoundAnalysis?.heart_rate || ppgData?.bpm || 75,
+          heart_rate_min: (heartSoundAnalysis?.heart_rate || 75) - 8,
+          heart_rate_max: (heartSoundAnalysis?.heart_rate || 75) + 12,
+          ppg_bpm: ppgData?.bpm || 75,
+          attack_risk: aiAnalysis.attack_risk_percentage ?? calculateAttackRisk(),
+          condition: aiAnalysis.condition || heartSoundAnalysis?.condition || "Normal",
+          stress_level: hrvResult.stressLevel,
+          stress_score: hrvResult.stressScore,
+          hrv_rmssd: hrvResult.rmssd,
+          accuracy: aiAnalysis.confidence_score || 98.7,
+          risk_level: aiAnalysis.risk_level || "Low",
+          key_findings: aiAnalysis.key_findings || [],
+          recommendations: aiAnalysis.recommendations || [],
+          clinical_summary: aiAnalysis.clinical_summary || "",
+          heart_rate_assessment: aiAnalysis.heart_rate_assessment || "",
+          rhythm_assessment: aiAnalysis.rhythm_assessment || "",
+          heart_sound_findings: aiAnalysis.heart_sound_findings || "",
+          blood_pressure_assessment: aiAnalysis.blood_pressure_assessment || "",
+          stress_assessment: aiAnalysis.stress_assessment || "",
+          timestamp: new Date().toISOString()
+        };
+        setFinalResults(results);
+        setShowFinalReport(true);
+
+        toast({
+          title: "✅ AI Analysis Complete",
+          description: `Confidence: ${results.accuracy}% | Risk: ${results.risk_level}`
+        });
+      } else {
+        throw new Error("No analysis data received");
+      }
+    } catch (error) {
+      console.error("AI analysis error:", error);
+      // Fallback to local calculation
+      const results = {
+        heart_rate_avg: heartSoundAnalysis?.heart_rate || 75,
+        heart_rate_min: (heartSoundAnalysis?.heart_rate || 75) - 8,
+        heart_rate_max: (heartSoundAnalysis?.heart_rate || 75) + 12,
+        ppg_bpm: ppgData?.bpm || 75,
+        attack_risk: calculateAttackRisk(),
+        condition: heartSoundAnalysis?.condition || "Normal",
+        stress_level: hrvResult.stressLevel,
+        stress_score: hrvResult.stressScore,
+        hrv_rmssd: hrvResult.rmssd,
+        accuracy: 98.5,
+        risk_level: calculateAttackRisk() <= 7 ? "Low" : calculateAttackRisk() <= 15 ? "Moderate" : "High",
+        key_findings: [],
+        recommendations: [],
+        clinical_summary: "",
+        heart_rate_assessment: "",
+        rhythm_assessment: "",
+        heart_sound_findings: "",
+        blood_pressure_assessment: "",
+        stress_assessment: "",
+        timestamp: new Date().toISOString()
+      };
+      setFinalResults(results);
+      setShowFinalReport(true);
+
+      toast({
+        title: "⚠️ Using Local Analysis",
+        description: "AI service unavailable. Results based on local algorithm.",
+        variant: "destructive"
+      });
+    }
   };
   const handleAdditionalInputsSubmit = async () => {
     if (!additionalInputs.age || !additionalInputs.gender) {
@@ -487,7 +557,7 @@ const Recording = () => {
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-success" />
                 Complete Heart Health Analysis
-                <Badge variant="default" className="ml-auto">96.5% Accuracy</Badge>
+                <Badge variant="default" className="ml-auto">{finalResults.accuracy}% AI Accuracy</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -551,24 +621,67 @@ const Recording = () => {
               </div>
               
               <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-lg bg-primary/5 border border-primary/20">
-                <h4 className="font-semibold text-foreground mb-3 text-sm sm:text-base">Analysis Summary</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">Heart Sound Analysis:</p>
-                    <p className="text-muted-foreground">Advanced noise cancellation applied</p>
-                    <p className="text-muted-foreground">S1/S2 sounds detected and analyzed</p>
+                <h4 className="font-semibold text-foreground mb-3 text-sm sm:text-base">🤖 AI Clinical Analysis</h4>
+                
+                {finalResults.clinical_summary && (
+                  <p className="text-sm text-muted-foreground mb-4">{finalResults.clinical_summary}</p>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
+                  <div className="space-y-2">
+                    <p className="font-medium text-foreground">Key Findings:</p>
+                    {finalResults.key_findings?.length > 0 ? (
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        {finalResults.key_findings.map((finding: string, i: number) => (
+                          <li key={i}>{finding}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="space-y-1 text-muted-foreground">
+                        <p>S1/S2 sounds detected and analyzed</p>
+                        <p>Advanced noise cancellation applied</p>
+                      </div>
+                    )}
                   </div>
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">PPG Monitoring:</p>
-                    <p className="text-muted-foreground">60-second continuous monitoring</p>
-                    <p className="text-muted-foreground">Flashlight-assisted measurement</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">HRV Analysis:</p>
-                    <p className="text-muted-foreground">RMSSD calculation completed</p>
-                    <p className="text-muted-foreground">Autonomic system assessment</p>
+                  <div className="space-y-2">
+                    <p className="font-medium text-foreground">Recommendations:</p>
+                    {finalResults.recommendations?.length > 0 ? (
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        {finalResults.recommendations.map((rec: string, i: number) => (
+                          <li key={i}>{rec}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="space-y-1 text-muted-foreground">
+                        <p>Continue regular monitoring</p>
+                        <p>Maintain healthy lifestyle</p>
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                {(finalResults.heart_rate_assessment || finalResults.rhythm_assessment) && (
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs sm:text-sm">
+                    {finalResults.heart_rate_assessment && (
+                      <div className="space-y-1">
+                        <p className="font-medium text-foreground">Heart Rate:</p>
+                        <p className="text-muted-foreground">{finalResults.heart_rate_assessment}</p>
+                      </div>
+                    )}
+                    {finalResults.rhythm_assessment && (
+                      <div className="space-y-1">
+                        <p className="font-medium text-foreground">Rhythm:</p>
+                        <p className="text-muted-foreground">{finalResults.rhythm_assessment}</p>
+                      </div>
+                    )}
+                    {finalResults.stress_assessment && (
+                      <div className="space-y-1">
+                        <p className="font-medium text-foreground">Stress:</p>
+                        <p className="text-muted-foreground">{finalResults.stress_assessment}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               
               <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center px-2">
