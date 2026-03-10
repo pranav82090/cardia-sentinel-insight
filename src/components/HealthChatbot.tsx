@@ -29,22 +29,13 @@ interface HealthChatbotProps {
   userRecordings?: any[];
 }
 
-const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
-  const getRiskLevel = (risk: number) => {
-    if (risk <= 7) return "Low";
-    if (risk <= 15) return "Moderate";
-    return "High";
-  };
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/health-chat`;
 
-  const getRiskCategory = (risk: number) => {
-    if (risk <= 7) return "Low";
-    if (risk <= 15) return "Moderate";
-    return "High";
-  };
+const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hello! I'm your Health AI Assistant. I can help you with:\n\n• Analyzing your specific heart recordings and metrics\n• Interpreting your personalized health data\n• Providing insights based on your recording history\n• Comprehensive cardiovascular health guidance\n• App features and advanced analytics\n\nI have access to your recording data and can provide personalized insights. How can I assist you today?",
+      content: "Hello! I'm your AI Health Assistant powered by Lovable AI. I can analyze your heart recordings, explain your health metrics, and provide evidence-based cardiovascular guidance.\n\nHow can I help you today?",
       sender: 'bot',
       timestamp: new Date(),
       type: 'info'
@@ -60,128 +51,108 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
     }
   }, [messages]);
 
-  const healthKnowledgeBase = {
-    heartRate: {
-      normal: "A normal resting heart rate for adults ranges from 60-100 beats per minute. Athletes may have lower rates (40-60 bpm).",
-      high: "A heart rate above 100 bpm at rest (tachycardia) may indicate stress, dehydration, medication effects, or heart conditions.",
-      low: "A heart rate below 60 bpm (bradycardia) may be normal for athletes or could indicate heart rhythm issues."
-    },
-    riskFactors: {
-      high: "High cardiovascular risk factors include: high blood pressure, smoking, diabetes, high cholesterol, family history, obesity, and sedentary lifestyle.",
-      prevention: "Heart disease prevention includes: regular exercise, healthy diet, maintaining healthy weight, not smoking, limiting alcohol, managing stress."
-    },
-    symptoms: {
-      warning: "Seek immediate medical attention for: chest pain, shortness of breath, irregular heartbeat, dizziness, fainting, or severe fatigue.",
-      normal: "Common heart sounds include lub-dub rhythm. Murmurs aren't always concerning but should be evaluated by a doctor."
-    },
-    lifestyle: {
-      diet: "Heart-healthy diet: fruits, vegetables, whole grains, lean proteins, fish, nuts. Limit processed foods, salt, and saturated fats.",
-      exercise: "Aim for 150 minutes of moderate aerobic activity weekly, plus strength training twice a week."
+  const streamChat = async (userMessages: { role: string; content: string }[]) => {
+    const resp = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ 
+        messages: userMessages,
+        userRecordings: userRecordings.slice(0, 10) // Send latest 10 recordings for context
+      }),
+    });
+
+    if (!resp.ok) {
+      const errorData = await resp.json().catch(() => ({}));
+      throw new Error(errorData.error || "Failed to connect to AI");
     }
+
+    if (!resp.body) throw new Error("No response stream");
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let textBuffer = "";
+    let assistantContent = "";
+    let streamDone = false;
+
+    while (!streamDone) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      textBuffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") {
+          streamDone = true;
+          break;
+        }
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) {
+            assistantContent += content;
+            // Update the assistant message in real-time
+            setMessages(prev => {
+              const last = prev[prev.length - 1];
+              if (last?.sender === 'bot' && last.id === 'streaming') {
+                return prev.map((m, i) => 
+                  i === prev.length - 1 ? { ...m, content: assistantContent } : m
+                );
+              }
+              return [...prev, {
+                id: 'streaming',
+                content: assistantContent,
+                sender: 'bot' as const,
+                timestamp: new Date(),
+                type: 'info' as const
+              }];
+            });
+          }
+        } catch {
+          textBuffer = line + "\n" + textBuffer;
+          break;
+        }
+      }
+    }
+
+    // Final flush
+    if (textBuffer.trim()) {
+      for (let raw of textBuffer.split("\n")) {
+        if (!raw) continue;
+        if (raw.endsWith("\r")) raw = raw.slice(0, -1);
+        if (raw.startsWith(":") || raw.trim() === "") continue;
+        if (!raw.startsWith("data: ")) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) assistantContent += content;
+        } catch { /* ignore */ }
+      }
+    }
+
+    // Finalize the streaming message with a permanent ID
+    setMessages(prev => prev.map(m => 
+      m.id === 'streaming' ? { ...m, id: Date.now().toString(), content: assistantContent } : m
+    ));
+
+    return assistantContent;
   };
 
-  const generateBotResponse = (userMessage: string): Message => {
-    const message = userMessage.toLowerCase();
-    let response = "";
-    let type: 'text' | 'info' | 'warning' = 'text';
-
-    // Enhanced personalized responses with user data analysis
-    if (message.includes('my report') || message.includes('my recording') || message.includes('analyze') || message.includes('my data')) {
-      if (userRecordings.length > 0) {
-        const latest = userRecordings[0];
-        const avgHR = userRecordings.reduce((sum, r) => sum + (r.heart_rate_avg || 0), 0) / userRecordings.length;
-        const avgRisk = userRecordings.reduce((sum, r) => sum + (r.attack_risk || 0), 0) / userRecordings.length;
-        const avgStress = userRecordings.reduce((sum, r) => sum + (r.stress_level || 0), 0) / userRecordings.length;
-        
-        response = `📊 **Your Heart Health Analysis:**\n\n**Latest Recording:**\n• Heart Rate: ${latest.heart_rate_avg || 'N/A'} BPM\n• Attack Risk: ${getRiskLevel(latest.attack_risk || 0)}\n• Condition: ${latest.condition || 'Normal'}\n• Stress Level: ${latest.stress_level || 'Low'}\n\n**Overall Trends (${userRecordings.length} recordings):**\n• Average HR: ${Math.round(avgHR)} BPM\n• Average Risk: ${getRiskLevel(Math.round(avgRisk))}\n• Average Stress: ${avgStress.toFixed(1)}\n\n**Clinical Insights:**\n${avgRisk > 30 ? '⚠️ Elevated risk detected - consider lifestyle modifications' : '✅ Risk levels appear manageable'}\n${avgHR > 100 ? '⚠️ High resting heart rate pattern' : avgHR < 60 ? 'ℹ️ Lower heart rate - common in athletes' : '✅ Normal heart rate range'}`;
-        type = avgRisk > 30 ? 'warning' : 'info';
-      } else {
-        response = "I don't see any recordings in your profile yet. Please record your heart sounds first:\n\n1. Go to Recording page\n2. Follow the guided recording process\n3. Get instant AI analysis\n4. Return here for personalized insights!";
-        type = 'info';
-      }
-    }
-    else if (message.includes('recording') || message.includes('how to record')) {
-      response = "🎙️ **Recording Your Heart Sounds:**\n\n**Step-by-Step Guide:**\n1. Navigate to Recording page\n2. Ensure quiet environment\n3. Place phone on chest (left side)\n4. Click 'Start Recording'\n5. Breathe normally for 15-30 seconds\n6. Click 'Stop' and wait for AI analysis\n\n**Pro Tips:**\n• Use in quiet room for best results\n• Phone positioning is crucial\n• Multiple recordings improve accuracy\n• Best times: morning/evening when relaxed";
-      type = 'info';
-    }
-    else if (message.includes('accuracy') || message.includes('noise') || message.includes('ai')) {
-      response = "🤖 **Advanced AI Technology:**\n\n**Core Features:**\n• 95%+ accuracy in heart sound detection\n• Advanced noise filtering algorithms\n• Real-time signal processing\n• Machine learning pattern recognition\n• Continuous improvement through usage\n\n**Analysis Capabilities:**\n• S1, S2, S3, S4 heart sound detection\n• Murmur identification\n• Rhythm irregularity detection\n• Risk assessment algorithms\n• Stress level evaluation";
-      type = 'info';
-    }
-    else if (message.includes('risk') || message.includes('heart attack') || message.includes('cardiovascular')) {
-      if (userRecordings.length > 0) {
-        const avgRisk = userRecordings.reduce((sum, r) => sum + (r.attack_risk || 0), 0) / userRecordings.length;
-        const riskTrend = userRecordings.length > 1 ? 
-          (userRecordings[0].attack_risk || 0) - (userRecordings[userRecordings.length - 1].attack_risk || 0) : 0;
-        
-        response = `🫀 **Your Cardiovascular Risk Assessment:**\n\n**Current Status:**\n• Average Risk: ${getRiskLevel(Math.round(avgRisk))}\n• Risk Category: ${getRiskCategory(Math.round(avgRisk))}\n• Trend: ${riskTrend > 0 ? '📈 Increasing' : riskTrend < 0 ? '📉 Decreasing' : '➡️ Stable'}\n\n**Risk Factors to Monitor:**\n${healthKnowledgeBase.riskFactors.high}\n\n**Prevention Strategy:**\n${healthKnowledgeBase.riskFactors.prevention}\n\n${avgRisk > 15 ? '⚠️ **Important:** Elevated risk detected. Please consult healthcare provider.' : '✅ Keep monitoring and maintain healthy habits.'}`;
-        type = avgRisk > 40 ? 'warning' : 'info';
-      } else {
-        response = `🫀 **Cardiovascular Risk Information:**\n\n**Common Risk Factors:**\n${healthKnowledgeBase.riskFactors.high}\n\n**Prevention Methods:**\n${healthKnowledgeBase.riskFactors.prevention}\n\nRecord your heart sounds to get personalized risk assessment!`;
-        type = 'info';
-      }
-    }
-    else if (message.includes('heart rate') || message.includes('bpm') || message.includes('pulse')) {
-      if (userRecordings.length > 0) {
-        const hrData = userRecordings.map(r => r.heart_rate_avg || 0).filter(hr => hr > 0);
-        const avgHR = hrData.reduce((sum, hr) => sum + hr, 0) / hrData.length;
-        const minHR = Math.min(...hrData);
-        const maxHR = Math.max(...hrData);
-        
-        response = `💓 **Your Heart Rate Analysis:**\n\n**Personal Data:**\n• Average: ${Math.round(avgHR)} BPM\n• Range: ${minHR} - ${maxHR} BPM\n• Recordings: ${hrData.length}\n\n**Clinical Reference:**\n${healthKnowledgeBase.heartRate.normal}\n\n**Your Status:**\n${avgHR > 100 ? '⚠️ Above normal range - consider medical consultation' : avgHR < 60 ? 'ℹ️ Below normal - common in athletes or may need evaluation' : '✅ Within normal range'}\n\n**Recommendations:**\n• Monitor trends over time\n• Note any symptoms during high/low readings\n• Record at consistent times for better tracking`;
-        type = avgHR > 100 || avgHR < 50 ? 'warning' : 'info';
-      } else {
-        response = `💓 **Heart Rate Information:**\n\n${healthKnowledgeBase.heartRate.normal}\n\n${healthKnowledgeBase.heartRate.high}\n\n${healthKnowledgeBase.heartRate.low}\n\nRecord your heart sounds to get personalized heart rate analysis!`;
-        type = 'info';
-      }
-    }
-    else if (message.includes('symptoms') || message.includes('chest pain') || message.includes('emergency') || message.includes('urgent')) {
-      response = `🚨 **Emergency Warning:**\n\n${healthKnowledgeBase.symptoms.warning}\n\n**When to Call 911:**\n• Severe chest pain or pressure\n• Difficulty breathing\n• Loss of consciousness\n• Severe dizziness\n• Irregular heartbeat with symptoms\n\n**Important:** This app is for monitoring only and should never replace emergency medical care or professional diagnosis.`;
-      type = 'warning';
-    }
-    else if (message.includes('diet') || message.includes('food') || message.includes('nutrition') || message.includes('eat')) {
-      response = `🥗 **Heart-Healthy Nutrition:**\n\n**Recommended Foods:**\n${healthKnowledgeBase.lifestyle.diet}\n\n**Daily Guidelines:**\n• 5-9 servings fruits/vegetables\n• 2-3 servings fish per week\n• Limit sodium to 2,300mg daily\n• Choose whole grains over refined\n• Stay hydrated (8 glasses water)\n\n**Foods to Limit:**\n• Processed meats\n• Trans fats\n• Excess alcohol\n• High-sodium foods\n• Sugary beverages`;
-      type = 'info';
-    }
-    else if (message.includes('exercise') || message.includes('workout') || message.includes('fitness') || message.includes('activity')) {
-      response = `🏃‍♂️ **Exercise for Heart Health:**\n\n**Weekly Goals:**\n${healthKnowledgeBase.lifestyle.exercise}\n\n**Recommended Activities:**\n• Brisk walking\n• Swimming\n• Cycling\n• Dancing\n• Strength training 2x/week\n\n**Getting Started:**\n• Start slowly if inactive\n• Warm up and cool down\n• Monitor heart rate during exercise\n• Listen to your body\n• Stay consistent\n\n⚠️ Always consult your doctor before starting new exercise programs.`;
-      type = 'info';
-    }
-    else if (message.includes('stress') || message.includes('anxiety') || message.includes('mental')) {
-      if (userRecordings.length > 0) {
-        const avgStress = userRecordings.reduce((sum, r) => sum + (r.stress_level || 0), 0) / userRecordings.length;
-        response = `🧘‍♀️ **Your Stress Analysis:**\n\n**Current Status:**\n• Average Stress Level: ${avgStress.toFixed(1)}/10\n• Category: ${avgStress < 3 ? 'Low' : avgStress < 6 ? 'Moderate' : 'High'}\n\n**Stress Management:**\n• Deep breathing exercises\n• Regular meditation\n• Adequate sleep (7-9 hours)\n• Regular physical activity\n• Social connections\n• Professional support if needed\n\n${avgStress > 6 ? '⚠️ High stress levels detected. Consider stress management techniques.' : '✅ Stress levels appear manageable.'}`;
-        type = avgStress > 6 ? 'warning' : 'info';
-      } else {
-        response = "🧘‍♀️ **Stress & Heart Health:**\n\nChronic stress can impact cardiovascular health. Effective management includes:\n\n• Regular exercise\n• Meditation/mindfulness\n• Adequate sleep\n• Social support\n• Professional counseling\n• Relaxation techniques\n\nRecord your heart sounds to track how stress affects your cardiovascular metrics!";
-        type = 'info';
-      }
-    }
-    else if (message.includes('7 day') || message.includes('week') || message.includes('trend') || message.includes('analysis')) {
-      response = "📈 **7-Day Heart Health Analysis:**\n\n**Comprehensive Tracking:**\n• Heart rate variability trends\n• Risk assessment patterns\n• Stress level monitoring\n• Recovery indicators\n• Rhythm analysis\n• Progressive health scoring\n\n**Advanced Features:**\n• AI-powered pattern recognition\n• Predictive health insights\n• Personalized recommendations\n• Clinical-grade reporting\n• Trend visualization\n\n**Best Practices:**\n• Record daily at same time\n• Note activities/symptoms\n• Consistent environment\n• Track lifestyle factors";
-      type = 'info';
-    }
-    else if (message.includes('hello') || message.includes('hi') || message.includes('help') || message.includes('start')) {
-      const recordingCount = userRecordings.length;
-      response = `👋 **Hello! Welcome to your Health AI Assistant**\n\n**I can help you with:**\n• Analyzing your ${recordingCount} heart recordings\n• Explaining your personalized health metrics\n• Providing evidence-based health guidance\n• Understanding app features and analytics\n• Answering cardiovascular health questions\n\n**Quick Actions:**\n${recordingCount > 0 ? '• "Analyze my report" - Get detailed insights\n• "Show my trends" - View health patterns' : '• "How to record" - Get started with recordings'}\n• "Heart rate info" - Learn about BPM\n• "Risk factors" - Understand cardiovascular risks\n\nWhat would you like to explore?`;
-      type = 'info';
-    }
-    else {
-      response = "🤖 **I'm your personalized Health AI Assistant!**\n\n**I can analyze:**\n• Your specific heart recordings and data\n• Personal health trends and patterns\n• Risk assessments and recommendations\n• Cardiovascular health guidance\n\n**Try asking:**\n• \"Analyze my latest report\"\n• \"What's my heart rate trend?\"\n• \"Explain my risk level\"\n• \"Show me my stress patterns\"\n• \"How to improve my heart health?\"\n\n**General Topics:**\n• Symptoms and when to seek care\n• Diet and exercise recommendations\n• App features and functionality\n\nWhat specific aspect of your heart health interests you?";
-      type = 'info';
-    }
-
-    return {
-      id: Date.now().toString(),
-      content: response,
-      sender: 'bot',
-      timestamp: new Date(),
-      type
-    };
-  };
-
-  const sendMessage = () => {
-    if (!inputMessage.trim()) return;
+  const sendMessage = async () => {
+    if (!inputMessage.trim() || isTyping) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -191,15 +162,41 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputMessage;
     setInputMessage("");
     setIsTyping(true);
 
-    // Simulate bot typing delay
-    setTimeout(() => {
-      const botResponse = generateBotResponse(inputMessage);
-      setMessages(prev => [...prev, botResponse]);
+    try {
+      // Build conversation history for the AI
+      const chatHistory = messages
+        .filter(m => m.id !== '1') // skip welcome message
+        .map(m => ({
+          role: m.sender === 'user' ? 'user' : 'assistant',
+          content: m.content
+        }));
+      
+      chatHistory.push({ role: 'user', content: currentInput });
+
+      await streamChat(chatHistory);
+    } catch (error) {
+      console.error("Chat error:", error);
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        content: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.",
+        sender: 'bot',
+        timestamp: new Date(),
+        type: 'warning'
+      }]);
+    } finally {
       setIsTyping(false);
-    }, 1000 + Math.random() * 1000);
+    }
+  };
+
+  const handleQuickAction = (text: string) => {
+    setInputMessage(text);
+    setTimeout(() => {
+      sendMessage();
+    }, 100);
   };
 
   const quickActions = [
@@ -216,9 +213,9 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
       <CardHeader className="pb-3 px-4 md:px-6">
         <CardTitle className="flex items-center gap-2 text-sm md:text-base">
           <Bot className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-          Health AI Assistant
+          AI Health Assistant
           <Badge variant="outline" className="ml-auto text-xs">
-            {userRecordings.length > 0 ? `${userRecordings.length} Records` : '24/7 Available'}
+            Powered by Lovable AI
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -262,16 +259,16 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
               </div>
             ))}
             
-            {isTyping && (
+            {isTyping && !messages.some(m => m.id === 'streaming') && (
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <Bot className="h-4 w-4 text-primary" />
                 </div>
                 <div className="bg-secondary rounded-lg p-3">
                   <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </div>
               </div>
@@ -280,39 +277,41 @@ const HealthChatbot = ({ userRecordings = [] }: HealthChatbotProps) => {
         </ScrollArea>
 
         {/* Quick Actions */}
-        <div className="px-4 md:px-6 py-3 border-t bg-secondary/20">
-          <div className="grid grid-cols-2 md:flex md:flex-wrap gap-1 md:gap-2 mb-3">
-            {quickActions.map((action, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setInputMessage(action.text);
-                  setTimeout(sendMessage, 100);
-                }}
-                className="text-xs justify-start md:justify-center h-8 md:h-9 px-2 md:px-3"
-              >
-                <action.icon className="h-3 w-3 mr-1 flex-shrink-0" />
-                <span className="truncate">{action.text}</span>
-              </Button>
-            ))}
+        {messages.length <= 2 && (
+          <div className="px-4 md:px-6 py-2 border-t border-border">
+            <div className="flex flex-wrap gap-2">
+              {quickActions.map((action) => (
+                <Button
+                  key={action.text}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleQuickAction(action.text)}
+                  className="text-xs gap-1"
+                  disabled={isTyping}
+                >
+                  <action.icon className="h-3 w-3" />
+                  {action.text}
+                </Button>
+              ))}
+            </div>
           </div>
-          
-          {/* Message Input */}
+        )}
+
+        {/* Input */}
+        <div className="p-4 md:px-6 border-t border-border">
           <div className="flex gap-2">
             <Input
-              placeholder="Ask about your heart health or reports..."
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+              placeholder="Ask about your heart health..."
               className="flex-1 text-sm"
+              disabled={isTyping}
             />
             <Button 
               onClick={sendMessage} 
+              size="icon"
               disabled={!inputMessage.trim() || isTyping}
-              size="sm"
-              className="px-3"
             >
               <Send className="h-4 w-4" />
             </Button>
