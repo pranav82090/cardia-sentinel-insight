@@ -557,7 +557,7 @@ const Recording = () => {
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-success" />
                 Complete Heart Health Analysis
-                <Badge variant="default" className="ml-auto">96.5% Accuracy</Badge>
+                <Badge variant="default" className="ml-auto">{finalResults.accuracy}% AI Accuracy</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
