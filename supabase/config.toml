@@ -1,1 +1,7 @@
 project_id = "cdagzxypafjlyjeiuedx"
+
+[functions.advanced-heart-analysis]
+verify_jwt = false
+
+[functions.health-chat]
+verify_jwt = false
