@@ -621,24 +621,67 @@ const Recording = () => {
               </div>
               
               <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-lg bg-primary/5 border border-primary/20">
-                <h4 className="font-semibold text-foreground mb-3 text-sm sm:text-base">Analysis Summary</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">Heart Sound Analysis:</p>
-                    <p className="text-muted-foreground">Advanced noise cancellation applied</p>
-                    <p className="text-muted-foreground">S1/S2 sounds detected and analyzed</p>
+                <h4 className="font-semibold text-foreground mb-3 text-sm sm:text-base">🤖 AI Clinical Analysis</h4>
+                
+                {finalResults.clinical_summary && (
+                  <p className="text-sm text-muted-foreground mb-4">{finalResults.clinical_summary}</p>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
+                  <div className="space-y-2">
+                    <p className="font-medium text-foreground">Key Findings:</p>
+                    {finalResults.key_findings?.length > 0 ? (
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        {finalResults.key_findings.map((finding: string, i: number) => (
+                          <li key={i}>{finding}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="space-y-1 text-muted-foreground">
+                        <p>S1/S2 sounds detected and analyzed</p>
+                        <p>Advanced noise cancellation applied</p>
+                      </div>
+                    )}
                   </div>
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">PPG Monitoring:</p>
-                    <p className="text-muted-foreground">60-second continuous monitoring</p>
-                    <p className="text-muted-foreground">Flashlight-assisted measurement</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">HRV Analysis:</p>
-                    <p className="text-muted-foreground">RMSSD calculation completed</p>
-                    <p className="text-muted-foreground">Autonomic system assessment</p>
+                  <div className="space-y-2">
+                    <p className="font-medium text-foreground">Recommendations:</p>
+                    {finalResults.recommendations?.length > 0 ? (
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        {finalResults.recommendations.map((rec: string, i: number) => (
+                          <li key={i}>{rec}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="space-y-1 text-muted-foreground">
+                        <p>Continue regular monitoring</p>
+                        <p>Maintain healthy lifestyle</p>
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                {(finalResults.heart_rate_assessment || finalResults.rhythm_assessment) && (
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs sm:text-sm">
+                    {finalResults.heart_rate_assessment && (
+                      <div className="space-y-1">
+                        <p className="font-medium text-foreground">Heart Rate:</p>
+                        <p className="text-muted-foreground">{finalResults.heart_rate_assessment}</p>
+                      </div>
+                    )}
+                    {finalResults.rhythm_assessment && (
+                      <div className="space-y-1">
+                        <p className="font-medium text-foreground">Rhythm:</p>
+                        <p className="text-muted-foreground">{finalResults.rhythm_assessment}</p>
+                      </div>
+                    )}
+                    {finalResults.stress_assessment && (
+                      <div className="space-y-1">
+                        <p className="font-medium text-foreground">Stress:</p>
+                        <p className="text-muted-foreground">{finalResults.stress_assessment}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               
               <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center px-2">
