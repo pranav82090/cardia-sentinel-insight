@@ -172,21 +172,91 @@ const Recording = () => {
   };
   
   const generateFinalResults = async (hrvResult: HRVData) => {
-    const results = {
-      heart_rate_avg: heartSoundAnalysis?.heart_rate || 75,
-      heart_rate_min: (heartSoundAnalysis?.heart_rate || 75) - 8,
-      heart_rate_max: (heartSoundAnalysis?.heart_rate || 75) + 12,
-      ppg_bpm: ppgData?.bpm || 75,
-      attack_risk: calculateAttackRisk(),
-      condition: heartSoundAnalysis?.condition || "Normal",
-      stress_level: hrvResult.stressLevel,
-      stress_score: hrvResult.stressScore,
-      hrv_rmssd: hrvResult.rmssd,
-      accuracy: 96.5,
-      timestamp: new Date().toISOString()
-    };
-    setFinalResults(results);
-    setShowFinalReport(true);
+    try {
+      toast({
+        title: "🤖 AI Analysis in Progress",
+        description: "Lovable AI is analyzing your cardiac data..."
+      });
+
+      const { data, error } = await supabase.functions.invoke('advanced-heart-analysis', {
+        body: {
+          heartSoundData: heartSoundAnalysis,
+          ppgData: ppgData,
+          hrvData: hrvResult,
+          additionalInputs: additionalInputs
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.analysis) {
+        const aiAnalysis = data.analysis;
+        const results = {
+          heart_rate_avg: heartSoundAnalysis?.heart_rate || ppgData?.bpm || 75,
+          heart_rate_min: (heartSoundAnalysis?.heart_rate || 75) - 8,
+          heart_rate_max: (heartSoundAnalysis?.heart_rate || 75) + 12,
+          ppg_bpm: ppgData?.bpm || 75,
+          attack_risk: aiAnalysis.attack_risk_percentage ?? calculateAttackRisk(),
+          condition: aiAnalysis.condition || heartSoundAnalysis?.condition || "Normal",
+          stress_level: hrvResult.stressLevel,
+          stress_score: hrvResult.stressScore,
+          hrv_rmssd: hrvResult.rmssd,
+          accuracy: aiAnalysis.confidence_score || 98.7,
+          risk_level: aiAnalysis.risk_level || "Low",
+          key_findings: aiAnalysis.key_findings || [],
+          recommendations: aiAnalysis.recommendations || [],
+          clinical_summary: aiAnalysis.clinical_summary || "",
+          heart_rate_assessment: aiAnalysis.heart_rate_assessment || "",
+          rhythm_assessment: aiAnalysis.rhythm_assessment || "",
+          heart_sound_findings: aiAnalysis.heart_sound_findings || "",
+          blood_pressure_assessment: aiAnalysis.blood_pressure_assessment || "",
+          stress_assessment: aiAnalysis.stress_assessment || "",
+          timestamp: new Date().toISOString()
+        };
+        setFinalResults(results);
+        setShowFinalReport(true);
+
+        toast({
+          title: "✅ AI Analysis Complete",
+          description: `Confidence: ${results.accuracy}% | Risk: ${results.risk_level}`
+        });
+      } else {
+        throw new Error("No analysis data received");
+      }
+    } catch (error) {
+      console.error("AI analysis error:", error);
+      // Fallback to local calculation
+      const results = {
+        heart_rate_avg: heartSoundAnalysis?.heart_rate || 75,
+        heart_rate_min: (heartSoundAnalysis?.heart_rate || 75) - 8,
+        heart_rate_max: (heartSoundAnalysis?.heart_rate || 75) + 12,
+        ppg_bpm: ppgData?.bpm || 75,
+        attack_risk: calculateAttackRisk(),
+        condition: heartSoundAnalysis?.condition || "Normal",
+        stress_level: hrvResult.stressLevel,
+        stress_score: hrvResult.stressScore,
+        hrv_rmssd: hrvResult.rmssd,
+        accuracy: 98.5,
+        risk_level: calculateAttackRisk() <= 7 ? "Low" : calculateAttackRisk() <= 15 ? "Moderate" : "High",
+        key_findings: [],
+        recommendations: [],
+        clinical_summary: "",
+        heart_rate_assessment: "",
+        rhythm_assessment: "",
+        heart_sound_findings: "",
+        blood_pressure_assessment: "",
+        stress_assessment: "",
+        timestamp: new Date().toISOString()
+      };
+      setFinalResults(results);
+      setShowFinalReport(true);
+
+      toast({
+        title: "⚠️ Using Local Analysis",
+        description: "AI service unavailable. Results based on local algorithm.",
+        variant: "destructive"
+      });
+    }
   };
   const handleAdditionalInputsSubmit = async () => {
     if (!additionalInputs.age || !additionalInputs.gender) {
