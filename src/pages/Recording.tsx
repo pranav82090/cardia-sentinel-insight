@@ -361,14 +361,10 @@ const Recording = () => {
     <div className="min-h-[100dvh] bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-4xl">
-        <div className="mb-4 sm:mb-6 text-center">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-2">
-            Heart Analysis
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground px-2">
-            Complete 3-step cardiovascular assessment
-          </p>
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="mb-6 text-center">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-1">Heart Analysis</h1>
+          <p className="text-sm text-muted-foreground">3-step cardiovascular assessment</p>
         </div>
 
         <RecordingSteps
@@ -389,16 +385,16 @@ const Recording = () => {
           onAnalysisComplete={onAnalysisComplete}
         />
 
-        <div className="mt-6 sm:mt-8 flex justify-center px-4">
-          <Button onClick={resetRecording} variant="outline" className="gap-2 text-sm sm:text-base">
+        <div className="mt-6 flex justify-center">
+          <Button onClick={resetRecording} variant="outline" size="sm" className="gap-1.5 text-xs">
             Start Over
           </Button>
         </div>
 
         {/* Additional Inputs Form */}
-        {showAdditionalInputs && !showRiskCalculators && !showFinalReport && stepsCompleted.every(completed => completed) && (
-          <Card className="border-0 shadow-sm mt-6 sm:mt-8 mx-2 sm:mx-0">
-            <CardHeader className="pb-4">
+        {showAdditionalInputs && !showRiskCalculators && !showFinalReport && stepsCompleted.every(c => c) && (
+          <Card className="border border-border/50 mt-6">
+            <CardHeader className="pb-3">
               <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -552,7 +548,7 @@ const Recording = () => {
 
         {/* Final Results */}
         {showFinalReport && finalResults && (
-          <Card className="border-0 shadow-lg mt-8">
+          <Card className="border border-border/50 mt-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-success" />

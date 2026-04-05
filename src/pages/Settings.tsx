@@ -176,7 +176,7 @@ const Settings = () => {
         {/* Mobile-first single column layout */}
         <div className="space-y-4">
           {/* Account Overview - Mobile Card */}
-          <Card className="w-full border-border/50 shadow-sm">
+          <Card className="w-full border border-border/50">
             <CardContent className="p-4">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -220,7 +220,7 @@ const Settings = () => {
           </Card>
 
           {/* Danger Zone - Mobile Card */}
-          <Card className="w-full border-destructive/20 shadow-sm">
+          <Card className="w-full border border-destructive/20">
             <CardContent className="p-4">
               <div className="flex items-center gap-3 mb-4">
                 <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />

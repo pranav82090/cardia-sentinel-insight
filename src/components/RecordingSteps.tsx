@@ -617,46 +617,38 @@ export const RecordingSteps = ({
   return (
     <>
       {/* Progress Steps */}
-      <Card className="border-0 shadow-sm mb-6 sm:mb-8 mx-2 sm:mx-0">
-        <CardContent className="p-3 sm:p-4 lg:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-2 mb-4 sm:mb-6">
-            {[1, 2, 3].map((step, index) => (
-              <div key={step} className="flex items-center justify-center sm:justify-start">
-                <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 ${
-                  stepsCompleted[step - 1] 
-                    ? 'bg-success border-success text-success-foreground' 
-                    : currentStep === step 
-                    ? 'bg-primary border-primary text-primary-foreground' 
-                    : 'border-muted-foreground text-muted-foreground'
-                }`}>
-                  {stepsCompleted[step - 1] ? (
-                    <Check className="h-4 w-4 sm:h-5 sm:w-5" />
-                  ) : (
-                    <span className="text-xs sm:text-sm font-bold">{step}</span>
-                  )}
-                </div>
-                <div className="ml-2 sm:ml-3 flex-1 sm:flex-none">
-                  <p className={`text-xs sm:text-sm font-medium text-center sm:text-left ${
-                    currentStep === step ? 'text-foreground' : 'text-muted-foreground'
-                  }`}>
-                    {step === 1 && "Heart Sound"}
-                    {step === 2 && "PPG Analysis"}
-                    {step === 3 && "HRV Stress"}
-                  </p>
-                </div>
-                {step < 3 && <ChevronRight className="hidden sm:block h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground mx-2 lg:mx-4" />}
+      <div className="stat-card !p-4 mb-6">
+        <div className="flex items-center justify-between gap-2">
+          {[1, 2, 3].map((step) => (
+            <div key={step} className="flex items-center flex-1">
+              <div className={`flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                stepsCompleted[step - 1]
+                  ? 'bg-success text-success-foreground'
+                  : currentStep === step
+                  ? 'bg-primary text-primary-foreground pulse-ring'
+                  : 'bg-muted text-muted-foreground'
+              }`}>
+                {stepsCompleted[step - 1] ? <Check className="h-4 w-4" /> : step}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="ml-2 hidden sm:block">
+                <p className={`text-xs font-medium ${currentStep === step ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  {step === 1 && "Heart Sound"}
+                  {step === 2 && "PPG Scan"}
+                  {step === 3 && "HRV Stress"}
+                </p>
+              </div>
+              {step < 3 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 mx-2 shrink-0" />}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Step Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Step 1: Heart Sound Recording */}
         {currentStep === 1 && (
           <>
-            <Card className={`border-0 shadow-lg ${currentStep === 1 ? 'ring-2 ring-primary' : ''}`}>
+            <Card className="border border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Mic className="h-5 w-5 text-primary" />
@@ -773,7 +765,7 @@ export const RecordingSteps = ({
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg">
+            <Card className="border border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Zap className="h-5 w-5 text-warning" />
@@ -800,9 +792,9 @@ export const RecordingSteps = ({
                   </div>
                 </div>
                 
-                <div className="p-3 rounded-lg border border-warning/20 bg-gray-50">
-                  <p className="text-sm text-gray-950">
-                    <strong>Note:</strong> Advanced noise cancellation removes environment sounds and enhances S1/S2 heart sounds for medical-grade analysis.
+                <div className="p-3 rounded-lg border border-warning/20 bg-warning/5">
+                  <p className="text-xs text-muted-foreground">
+                    <strong className="text-foreground">Note:</strong> Advanced noise cancellation removes environment sounds and enhances S1/S2 heart sounds for medical-grade analysis.
                   </p>
                 </div>
               </CardContent>
@@ -813,7 +805,7 @@ export const RecordingSteps = ({
         {/* Step 2: PPG BPM Monitoring */}
         {currentStep === 2 && stepsCompleted[0] && (
           <>
-            <Card className={`border-0 shadow-lg ${currentStep === 2 ? 'ring-2 ring-primary' : ''}`}>
+            <Card className="border border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Camera className="h-5 w-5 text-primary" />
@@ -888,7 +880,7 @@ export const RecordingSteps = ({
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg">
+            <Card className="border border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Flashlight className="h-5 w-5 text-warning" />
@@ -928,7 +920,7 @@ export const RecordingSteps = ({
         {/* Step 3: HRV Stress Analysis */}
         {currentStep === 3 && stepsCompleted[1] && (
           <>
-            <Card className={`border-0 shadow-lg ${currentStep === 3 ? 'ring-2 ring-primary' : ''}`}>
+            <Card className="border border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Brain className="h-5 w-5 text-primary" />
@@ -1011,7 +1003,7 @@ export const RecordingSteps = ({
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg">
+            <Card className="border border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Activity className="h-5 w-5 text-warning" />
